@@ -519,7 +519,7 @@ public class DomainQL
                     .dataFetcher(new SvensonFetcher(jsonName))
                     .build();
 
-                log.debug("-- {}", fieldDef);
+                log.debug("-- {}: {}", fieldDef.getName(), fieldDef.getType().getName());
 
                 domainTypeBuilder.field(
                     fieldDef
