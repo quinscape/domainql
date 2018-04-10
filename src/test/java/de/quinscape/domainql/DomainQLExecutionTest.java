@@ -9,6 +9,9 @@ import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.GraphQLError;
+import graphql.Scalars;
+import graphql.schema.GraphQLArgument;
+import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLSchema;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -55,6 +58,32 @@ public class DomainQLExecutionTest
         .configureRelation(Keys.SOURCE_FIVE__FK_SOURCE_FIVE_TARGET_ID, SourceField.NONE, TargetField.ONE)
         .configureRelation(Keys.SOURCE_SIX__FK_SOURCE_SIX_TARGET_ID, SourceField.NONE, TargetField.MANY)
 
+        .additionalQueries(GraphQLFieldDefinition.newFieldDefinition()
+            .name("extraQuery")
+            .type(Scalars.GraphQLString)
+            .argument(
+                GraphQLArgument.newArgument()
+                    .name("value")
+                    .type(Scalars.GraphQLString)
+                    .build()
+            )
+            .dataFetcher( env -> "extra:" + env.getArgument("value"))
+            .build()
+        )
+
+        .additionalMutations(GraphQLFieldDefinition.newFieldDefinition()
+            .name("extraMutation")
+            .type(Scalars.GraphQLString)
+            .argument(
+                GraphQLArgument.newArgument()
+                    .name("value")
+                    .type(Scalars.GraphQLString)
+                    .build()
+            )
+            .dataFetcher( env -> "mutated:" + env.getArgument("value"))
+            .build()
+        )
+
         .buildGraphQLSchema();
 
 
@@ -89,13 +118,7 @@ public class DomainQLExecutionTest
         ExecutionResult executionResult = graphQL.execute(executionInput);
 
 
-        final List<GraphQLError> errors = executionResult.getErrors();
-        if (errors.size() > 0)
-        {
-            log.info("ERROR {}", errors);
-        }
-
-        assertThat(errors.size(), is(0));
+        assumeNoErrors(executionResult);
 
         assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"mutateString\":\"<<xxx>>\"}"));
     }
@@ -129,6 +152,13 @@ public class DomainQLExecutionTest
         ExecutionResult executionResult = graphQL.execute(executionInput);
 
 
+        assumeNoErrors(executionResult);
+        assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"walkBackOne\":{\"id\":\"target-id\",\"sourceFive\":{\"id\":\"src-id\"}}}"));
+    }
+
+
+    private void assumeNoErrors(ExecutionResult executionResult)
+    {
         final List<GraphQLError> errors = executionResult.getErrors();
         if (errors.size() > 0)
         {
@@ -153,5 +183,39 @@ public class DomainQLExecutionTest
 
         assertThat(executionResult.getErrors().size(), is(0));
         assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"walkBackMany\":[{\"id\":\"target-id\",\"sourceSixes\":[{\"id\":\"source-id\"},{\"id\":\"source-id2\"}]}]}"));
+    }
+
+
+    @Test
+    public void testAdditionalQueries()
+    {
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            .query("{ extraQuery(value: \"foo\") }")
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+        assumeNoErrors(executionResult);
+        assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"extraQuery\":\"extra:foo\"}"));
+    }
+
+    @Test
+    public void testAdditionalMutations()
+    {
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        final HashMap<String, Object> variables = new HashMap<>();
+        variables.put("value", "xxx");
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            .query("mutation testMutation($value: String!) { extraMutation(value: $value) }")
+            .variables(variables)
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+        assumeNoErrors(executionResult);
+        assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"extraMutation\":\"mutated:xxx\"}"));
     }
 }
