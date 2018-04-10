@@ -22,6 +22,11 @@
         <maven.compiler.parameters>true</maven.compiler.parameters>
     </properties>
 
+    <scm>
+        <connection>scm:git:ssh://git@bitbucket-vm:7999/xcd/domainql.git</connection>
+        <developerConnection>scm:git:ssh://git@bitbucket-vm:7999/xcd/domainql.git</developerConnection>
+        <url>https://intern.quinscape.de/bitbucket/projects/XCD/repos/domainql/browse</url>
+    </scm>
 
     <dependencies>
         <dependency>
