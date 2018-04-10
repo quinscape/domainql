@@ -1,19 +1,17 @@
 package de.quinscape.domainql.logic;
 
 import com.esotericsoftware.reflectasm.MethodAccess;
-import com.sun.corba.se.impl.orbutil.graph.GraphImpl;
 import de.quinscape.domainql.DomainQL;
 import de.quinscape.domainql.DomainQLException;
-import de.quinscape.domainql.param.ParameterProvider;
-import de.quinscape.domainql.param.ParameterProviderFactory;
 import de.quinscape.domainql.annotation.GraphQLInput;
 import de.quinscape.domainql.annotation.GraphQLMutation;
 import de.quinscape.domainql.annotation.GraphQLQuery;
+import de.quinscape.domainql.param.ParameterProvider;
+import de.quinscape.domainql.param.ParameterProviderFactory;
 import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLOutputType;
-import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLTypeReference;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.slf4j.Logger;
@@ -266,7 +264,7 @@ public class LogicBeanAnalyzer
                         boolean jpaRequired = notNullAnno != null;
 
 
-                        if (isRequired != jpaRequired)
+                        if (jpaRequired && !isRequired)
                         {
                             throw new DomainQLException(name +
                                 ": Required field disagreement between @NotNull and @GraphQLInput required value");

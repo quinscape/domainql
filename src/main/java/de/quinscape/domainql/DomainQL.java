@@ -433,7 +433,7 @@ public class DomainQL
 
                 final boolean jpaRequired = JSONUtil.findAnnotation(info, NotNull.class) != null;
 
-                if (inputFieldAnno != null && inputFieldAnno.required() != jpaRequired)
+                if (jpaRequired && inputFieldAnno != null && !inputFieldAnno.required())
                 {
                     throw new DomainQLException(type.getSimpleName() + "." + info.getJavaPropertyName() +
                         ": Required field disagreement between @NotNull and @GraphQLInput required value");
