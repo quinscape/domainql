@@ -16,6 +16,12 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <spring.core.version>5.0.4.RELEASE</spring.core.version>
+
+        <!--
+            So far we have no maven repo.
+            So we skip deployment for the release maven plugin and only do the repository updates
+        -->
+        <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
     <scm>
