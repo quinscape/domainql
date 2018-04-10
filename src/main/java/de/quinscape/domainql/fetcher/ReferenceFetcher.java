@@ -1,4 +1,4 @@
-package de.quinscape.domainql;
+package de.quinscape.domainql.fetcher;
 
 import de.quinscape.domainql.util.JSONUtil;
 import graphql.schema.DataFetcher;
@@ -7,6 +7,9 @@ import org.jooq.DSLContext;
 import org.jooq.Table;
 import org.jooq.TableField;
 
+/**
+ * Fetches embedded foreign key references.
+ */
 public class ReferenceFetcher
     implements DataFetcher<Object>
 {

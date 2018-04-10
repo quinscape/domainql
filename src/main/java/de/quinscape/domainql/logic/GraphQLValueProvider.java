@@ -1,15 +1,15 @@
 package de.quinscape.domainql.logic;
 
-import de.quinscape.domainql.DomainQL;
 import de.quinscape.domainql.param.ParameterProvider;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLInputType;
 
+/**
+ * Provides parameter for GraphQL input type parameters.
+ */
 public class GraphQLValueProvider
     implements ParameterProvider<Object>
 {
-    private final DomainQL domainQL;
-
     private final String argumentName;
 
     private final String description;
@@ -20,14 +20,12 @@ public class GraphQLValueProvider
 
 
     public GraphQLValueProvider(
-        DomainQL domainQL,
         String argumentName,
         String description,
         GraphQLInputType inputType,
         Object defaultValue
     )
     {
-        this.domainQL = domainQL;
         this.argumentName = argumentName;
         this.description = description;
         this.inputType = inputType;

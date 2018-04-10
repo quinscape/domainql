@@ -1,5 +1,8 @@
 package de.quinscape.domainql;
 
+/**
+ * Generic runtime exception for the DomainQL project.
+ */
 public class DomainQLException
     extends RuntimeException
 {

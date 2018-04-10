@@ -8,6 +8,9 @@ import graphql.schema.GraphQLOutputType;
 
 import java.util.List;
 
+/**
+ * Abstract base class for @{@link de.quinscape.domainql.annotation.GraphQLLogic} methods.
+ */
 public abstract class DomainQLMethod
     implements DataFetcher<Object>
 {

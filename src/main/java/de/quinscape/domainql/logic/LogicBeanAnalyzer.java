@@ -33,6 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Analyzes annotated LogicBeans and finds queries and mutations.
+ */
 public class LogicBeanAnalyzer
 {
     private final static Logger log = LoggerFactory.getLogger(LogicBeanAnalyzer.class);
@@ -287,7 +290,6 @@ public class LogicBeanAnalyzer
                         }
 
                         final GraphQLValueProvider graphQLValueProvider = new GraphQLValueProvider(
-                            domainQL,
                             parameterName,
                             description,
                             isRequired ? GraphQLNonNull.nonNull(inputType) : inputType,

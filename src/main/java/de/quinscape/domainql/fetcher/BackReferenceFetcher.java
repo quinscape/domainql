@@ -10,6 +10,9 @@ import org.jooq.SelectConditionStep;
 import org.jooq.Table;
 import org.jooq.TableField;
 
+/**
+ * Fetches single to multiple objects via a foreign key back-reference.
+ */
 public class BackReferenceFetcher
     implements DataFetcher<Object>
 {

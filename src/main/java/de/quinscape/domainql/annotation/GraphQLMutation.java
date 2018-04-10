@@ -17,9 +17,14 @@ public @interface GraphQLMutation
 {
     /**
      * Name of the graphql mutation. If left empty (the default), the method name is used.
-     * @return
+     * @return name or empty
      */
     String value() default "";
 
+    /**
+     * Description for this mutation.
+     *
+     * @return description
+     */
     String description() default "";
 }
