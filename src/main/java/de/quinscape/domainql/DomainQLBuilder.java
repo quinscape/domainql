@@ -244,7 +244,7 @@ public class DomainQLBuilder
      * If set to <code>true</code>, generate a mirror input types for the JOOQ types. For every domain type Foo there
      * will be an identical input type FooInput.
      * <p>
-     *     You can still redefine individual input types with {@link #inputTypes(Class[])}
+     *     You can still redefine individual input types with {@link #overrideInputTypes(Class[])}
      * </p>
      *
      * @param mirrorInputs  <code>true</code> to create mirror input types
@@ -266,7 +266,7 @@ public class DomainQLBuilder
      * @param classes       annotated POJO classes.
      * @return this builder
      */
-    public DomainQLBuilder inputTypes(Class<?>... classes)
+    public DomainQLBuilder overrideInputTypes(Class<?>... classes)
     {
         Collections.addAll(inputTypes, classes);
 
