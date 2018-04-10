@@ -149,6 +149,9 @@ public class DomainQLBuilder
      * @param foreignKey        foreign key
      * @param sourceField       source field configuration
      * @param targetField       target field configuration
+     * @param leftSideName      field name for the left-hand / source side
+     * @param rightSideName     field name for the right-hand / target side
+     *
      *
      * @return this builder
      */
@@ -175,7 +178,7 @@ public class DomainQLBuilder
 
     /**
      * Returns the current default relation configuration.
-     * @return
+     * @return default relation configuration
      */
     public RelationConfiguration getDefaultRelationConfiguration()
     {
@@ -198,34 +201,6 @@ public class DomainQLBuilder
         this.defaultRelationConfiguration = new RelationConfiguration(sourceField, targetField);
         return this;
     }
-
-    /**
-     * Configures the source and target field generation and field names to use as default.
-     * <p>
-     *     If one of the field configurations is NONE, the corresponding name will be ignored.
-     * </p>
-     *
-     * @param sourceField       source field configuration
-     * @param targetField       target field configuration
-     *
-     * @return this builder
-     */
-    public DomainQLBuilder defaultRelationConfiguration(
-        SourceField sourceField,
-        TargetField targetField,
-        String leftSideName,
-        String rightSideName
-    )
-    {
-        this.defaultRelationConfiguration = new RelationConfiguration(
-            sourceField,
-            targetField,
-            sourceField != SourceField.NONE ? leftSideName : null,
-            targetField != TargetField.NONE ? rightSideName : null
-        );
-        return this;
-    }
-
 
     /**
      * Configures the set of @{@link GraphQLLogic} annotated spring beans to check for query and mutation implementations.
@@ -283,7 +258,7 @@ public class DomainQLBuilder
      * are automatically registered.
      *
      * @param classes       annotated POJO classes.
-     * @return
+     * @return this builder
      */
     public DomainQLBuilder inputTypes(Class<?>... classes)
     {

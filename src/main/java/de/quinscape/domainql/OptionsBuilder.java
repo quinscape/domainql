@@ -35,7 +35,7 @@ public class OptionsBuilder
     /**
      * Set this to <code>true</code> to have exactly the same field names in database and GraphQL schema.
      *
-     * Default is using the lower camelcase property names created by JOOQ. ( "customer_id" => "customerId")
+     * Default is using the lower camelcase property names created by JOOQ. ( "customer_id" =&gt; "customerId")
      *
      * @param useDatabaseFieldNames <code>true</code> to use database field names as is.
      *
@@ -89,9 +89,6 @@ public class OptionsBuilder
         this.pluralizationFunction = pluralizationFunction;
         return this;
     }
-
-
-
 
     Options buildOptions()
     {

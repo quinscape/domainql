@@ -15,6 +15,7 @@ public interface ParameterProviderFactory
      * @param annotations       annotations
      *
      * @return Parameter provider or <code>null</code>
+     * @throws Exception if something goes wrong
      */
     ParameterProvider createIfApplicable(Class<?> parameterClass, Annotation[] annotations) throws Exception;
 }

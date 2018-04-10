@@ -14,6 +14,9 @@ import java.time.LocalDate;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * GraphQL Scalar implementation for java.sql.Date.
+ */
 public class GraphQLDateScalar
     extends GraphQLScalarType
 {

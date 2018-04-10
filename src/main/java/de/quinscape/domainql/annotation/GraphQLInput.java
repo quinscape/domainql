@@ -19,18 +19,28 @@ public @interface GraphQLInput
 {
     /**
      * Name of the input field. If left empty (the default), the property name of the method is used.
+     * @return name of the input field or empty to take the name of the underlying property or parameter
      */
     String value() default "";
 
     /**
      * Description for the field.
+     *
+     * @return description
      */
     String description() default "";
 
     /**
      * Default value for the field.
+     *
+     * @return default value
      */
     String defaultValue() default "";
 
+    /**
+     * if set to <code>true</code>, the input value will be configured as non-null.
+     *
+     * @return is required?
+     */
     boolean required() default false;
 }

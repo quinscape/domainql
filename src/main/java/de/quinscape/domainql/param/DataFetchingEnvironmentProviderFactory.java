@@ -4,6 +4,9 @@ import graphql.schema.DataFetchingEnvironment;
 
 import java.lang.annotation.Annotation;
 
+/**
+ * Factory for the DataFetchingEnvironmentProvider.
+ */
 public class DataFetchingEnvironmentProviderFactory
     implements ParameterProviderFactory
 {

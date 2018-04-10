@@ -6,6 +6,9 @@ import graphql.schema.GraphQLOutputType;
 
 import java.util.List;
 
+/**
+ * Internal configuration for a mutation type.
+ */
 public class Mutation
     extends DomainQLMethod
 {

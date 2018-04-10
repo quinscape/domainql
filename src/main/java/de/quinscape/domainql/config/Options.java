@@ -2,6 +2,9 @@ package de.quinscape.domainql.config;
 
 import java.util.function.Function;
 
+/**
+ * Miscellaneous options for DomainQL
+ */
 public class Options
 {
     private final boolean useDatabaseFieldNames;
@@ -23,18 +26,33 @@ public class Options
     }
 
 
+    /**
+     * If <code>true</code>, DomainQL will use data base field names instead of java property names for the GraphQL fields.
+     *
+     * @return  use database names?
+     */
     public boolean isUseDatabaseFieldNames()
     {
         return useDatabaseFieldNames;
     }
 
 
+    /**
+     * Returns the string function to use to pluralize words in names.
+     *
+     * @return  pluralization function
+     */
     public Function<String, String> getPluralizationFunction()
     {
         return pluralizationFunction;
     }
 
 
+    /**
+     * Suffix all foreign keys are supposed to have and which is cut off to form object/collection field names.
+     *
+     * @return  suffix
+     */
     public String getForeignKeySuffix()
     {
         return foreignKeySuffix;

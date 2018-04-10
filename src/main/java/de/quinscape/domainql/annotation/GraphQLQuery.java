@@ -17,9 +17,15 @@ public @interface GraphQLQuery
 {
     /**
      * Name of the graphql query. If left empty (the default), the method name is used.
-     * @return
+     *
+     * @return name or empty
      */
     String value() default "";
 
+    /**
+     * Description for this query.
+     *
+     * @return description
+     */
     String description() default "";
 }

@@ -1,5 +1,8 @@
 package de.quinscape.domainql.config;
 
+/**
+ * DomainQL configuration for a single relation / foreign key
+ */
 public class RelationConfiguration
 {
     private final SourceField sourceField;

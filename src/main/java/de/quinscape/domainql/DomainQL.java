@@ -6,6 +6,7 @@ import de.quinscape.domainql.config.RelationConfiguration;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.fetcher.BackReferenceFetcher;
+import de.quinscape.domainql.fetcher.ReferenceFetcher;
 import de.quinscape.domainql.fetcher.SvensonFetcher;
 import de.quinscape.domainql.logic.DomainQLMethod;
 import de.quinscape.domainql.logic.GraphQLValueProvider;

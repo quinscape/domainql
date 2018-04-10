@@ -12,6 +12,9 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.TimeZone;
 
+/**
+ * GraphQL Scalar implementation for java.sql.Timestamp.
+ */
 public class GraphQLTimestampScalar
     extends graphql.schema.GraphQLScalarType
 {
