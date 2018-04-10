@@ -4,12 +4,37 @@ import de.quinscape.domainql.annotation.GraphQLInput;
 import de.quinscape.domainql.annotation.GraphQLLogic;
 import de.quinscape.domainql.annotation.GraphQLMutation;
 import de.quinscape.domainql.annotation.GraphQLQuery;
+import de.quinscape.domainql.config.TargetField;
+import de.quinscape.domainql.testdomain.Tables;
+import de.quinscape.domainql.testdomain.tables.pojos.SourceThree;
+import de.quinscape.domainql.testdomain.tables.pojos.TargetFive;
+import de.quinscape.domainql.testdomain.tables.pojos.TargetSix;
+import org.jooq.DSLContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @GraphQLLogic
 public class TestLogic
 {
+    private final static Logger log = LoggerFactory.getLogger(TestLogic.class);
+
+    private final DSLContext dslContext;
+
+
+    public TestLogic()
+    {
+        this(null);
+    }
+    
+    public TestLogic(DSLContext dslContext)
+    {
+        this.dslContext = dslContext;
+    }
+
+
     @GraphQLQuery
     public boolean queryTruth()
     {
@@ -47,8 +72,40 @@ public class TestLogic
     }
 
     @GraphQLMutation
-    public boolean mutateString(String value)
+    public String mutateString(String value)
     {
-        return true;
+        return "<<" + value + ">>";
+    }
+
+    @GraphQLQuery
+    public List<SourceThree> walkForwardRef()
+    {
+        return dslContext.select()
+            .from(Tables.SOURCE_THREE)
+            .fetchInto(SourceThree.class);
+    }
+
+    @GraphQLQuery
+    public List<TargetSix> walkBackMany()
+    {
+        final List<TargetSix> targets = dslContext.select()
+            .from(Tables.TARGET_SIX)
+            .fetchInto(TargetSix.class);
+
+        log.info("targets: {}", targets);
+
+        return targets;
+    }
+
+    @GraphQLQuery
+    public TargetFive walkBackOne()
+    {
+        final TargetFive target = dslContext.select()
+            .from(Tables.TARGET_FIVE)
+            .fetchOneInto(TargetFive.class);
+
+        log.info("target: {}", target);
+
+        return target;
     }
 }
