@@ -324,7 +324,7 @@ public class DomainQLTest
             assertThat(mutateString, is(notNullValue()));
             assertThat(mutateString.getArguments().size(), is(1));
             assertThat(mutateString.getArgument("value").getType(), is(Scalars.GraphQLString));
-            assertThat(mutateString.getType(), is(Scalars.GraphQLBoolean));
+            assertThat(mutateString.getType(), is(Scalars.GraphQLString));
         }
     }
 }
