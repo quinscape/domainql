@@ -558,6 +558,16 @@ public class DomainQL
                 {
                     case SCALAR:
                     {
+                        final String scalarFieldName;
+                        if (relationConfiguration.getLeftSideName() != null)
+                        {
+                            scalarFieldName = relationConfiguration.getLeftSideName();
+                        }
+                        else
+                        {
+                            scalarFieldName = javaName;
+                        }
+
                         final GraphQLType graphQLType = getOutputType(foreignKeyField.getType());
                         if (graphQLType == null)
                         {
@@ -565,7 +575,7 @@ public class DomainQL
                         }
 
                         final GraphQLFieldDefinition fieldDef = GraphQLFieldDefinition.newFieldDefinition()
-                            .name(javaName)
+                            .name(scalarFieldName)
                             .description("DB foreign key column '" + foreignKeyField.getName() + "'")
                             .type(isRequired ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
                             .dataFetcher(new SvensonFetcher(findJsonName(classInfo, javaName)))
