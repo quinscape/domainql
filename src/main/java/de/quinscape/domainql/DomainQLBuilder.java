@@ -6,6 +6,7 @@ import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.param.DataFetchingEnvironmentProviderFactory;
 import de.quinscape.domainql.param.ParameterProviderFactory;
+import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLSchema;
 import org.jooq.DSLContext;
 import org.jooq.ForeignKey;
@@ -43,6 +44,9 @@ public class DomainQLBuilder
 
     private Set<Table<?>> jooqTables = new LinkedHashSet<>();
 
+    private Set<GraphQLFieldDefinition> additionalQueries  = new LinkedHashSet<>();
+    private Set<GraphQLFieldDefinition> additionalMutations = new LinkedHashSet<>();
+
 
     DomainQLBuilder(DSLContext dslContext)
     {
@@ -78,7 +82,9 @@ public class DomainQLBuilder
             Collections.unmodifiableMap(relationConfigurations),
             defaultRelationConfiguration,
             optionsBuilder.buildOptions(),
-            mirrorInputs
+            mirrorInputs,
+            Collections.unmodifiableSet(additionalQueries),
+            Collections.unmodifiableSet(additionalMutations)
         );
     }
 
@@ -277,6 +283,35 @@ public class DomainQLBuilder
     public DomainQLBuilder objectTypes(Table<?>... tables)
     {
         Collections.addAll(jooqTables, tables);
+        return this;
+    }
+
+
+    /**
+     * Adds additional query fields to DomainQL query type.
+     *
+     * @param additionalQueries additional queries
+     *
+     * @return this builder
+     */
+    public DomainQLBuilder additionalQueries(GraphQLFieldDefinition... additionalQueries)
+    {
+        Collections.addAll(this.additionalQueries, additionalQueries);
+
+        return this;
+    }
+
+    /**
+     * Adds additional mutation fields to DomainQL query type.
+     *
+     * @param additionalMutations additional mutations
+     *
+     * @return this builder
+     */
+    public DomainQLBuilder additionalMutations(GraphQLFieldDefinition... additionalMutations)
+    {
+        Collections.addAll(this.additionalMutations, additionalMutations);
+
         return this;
     }
 }

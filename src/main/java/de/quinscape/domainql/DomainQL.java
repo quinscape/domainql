@@ -119,6 +119,10 @@ public class DomainQL
 
     private final RelationConfiguration defaultRelationConfiguration;
 
+    private final Set<GraphQLFieldDefinition> additionalQueries;
+
+    private final Set<GraphQLFieldDefinition> additionalMutations;
+
 
     DomainQL(
         DSLContext dslContext,
@@ -129,7 +133,10 @@ public class DomainQL
         Map<ForeignKey<?, ?>, RelationConfiguration> relationConfigurations,
         RelationConfiguration defaultRelationConfiguration,
         Options options,
-        boolean mirrorInputs
+        boolean mirrorInputs,
+        Set<GraphQLFieldDefinition> additionalQueries,
+        Set<GraphQLFieldDefinition> additionalMutations
+
     )
     {
         this.dslContext = dslContext;
@@ -139,6 +146,8 @@ public class DomainQL
         this.inputTypes = inputTypes;
         this.relationConfigurations = relationConfigurations;
         this.defaultRelationConfiguration = defaultRelationConfiguration;
+        this.additionalQueries = additionalQueries;
+        this.additionalMutations = additionalMutations;
 
         registeredOutputTypes = new HashMap<>(JAVA_TYPE_TO_GRAPHQL);
         registeredInputTypes = new HashMap<>(JAVA_TYPE_TO_GRAPHQL);
@@ -283,11 +292,11 @@ public class DomainQL
         final Set<Mutation> mutations = analyzer.getMutations();
 
         final GraphQLObjectType.Builder queryTypeBuilder = GraphQLObjectType.newObject()
-            .name("DomainQueries")
+            .name("QueryType")
             .description("Auto-generated queries by the DomainQLHelper");
 
         final GraphQLObjectType.Builder mutationTypeBuilder = GraphQLObjectType.newObject()
-            .name("DomainMutations")
+            .name("MutationType")
             .description("Auto-generated mutations by the DomainQLHelper");
 
         this.queries.addAll(queries);
@@ -321,10 +330,12 @@ public class DomainQL
 
         }
 
+        additionalQueries.forEach(queryTypeBuilder::field);
+        additionalMutations.forEach(mutationTypeBuilder::field);
+
         builder.query(queryTypeBuilder);
         builder.mutation(mutationTypeBuilder);
     }
-
 
     private List<GraphQLArgument> getGraphQLArguments(DomainQLMethod query)
     {
