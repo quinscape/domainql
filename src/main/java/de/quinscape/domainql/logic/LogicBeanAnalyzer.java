@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.util.StringUtils;
 
 import javax.validation.constraints.NotNull;
 import java.lang.annotation.Annotation;
@@ -293,7 +294,8 @@ public class LogicBeanAnalyzer
                             defaultValue
                         );
 
-                        log.debug("-- value: {}", graphQLValueProvider);
+                        final String paramDesc = graphQLValueProvider.getDescription();
+                        log.debug("  {}", graphQLValueProvider.getArgumentName() + ": " + graphQLValueProvider.getInputType().getName() + (StringUtils.hasText(paramDesc) ? " # " + paramDesc : ""));
 
                         list.add(
                             graphQLValueProvider
