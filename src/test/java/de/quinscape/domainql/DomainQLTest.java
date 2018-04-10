@@ -4,7 +4,6 @@ package de.quinscape.domainql;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
-import de.quinscape.domainql.testdomain.Keys;
 import de.quinscape.domainql.testdomain.Public;
 import graphql.Scalars;
 import graphql.schema.GraphQLFieldDefinition;
@@ -22,6 +21,8 @@ import static graphql.schema.GraphQLNonNull.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
+import static de.quinscape.domainql.testdomain.Tables.*;
+
 public class DomainQLTest
 {
     private final static Logger log = LoggerFactory.getLogger(DomainQLTest.class);
@@ -33,13 +34,11 @@ public class DomainQLTest
         .logicBeans(Collections.singleton(logic))
 
         // source variants
-        .configureRelation(Keys.SOURCE_ONE__FK_SOURCE_ONE_TARGET_ID, SourceField.NONE, TargetField.NONE)
-        .configureRelation(Keys.SOURCE_TWO__FK_SOURCE_TWO_TARGET_ID, SourceField.SCALAR, TargetField.NONE)
-        .configureRelation(Keys.SOURCE_THREE__FK_SOURCE_THREE_TARGET_ID, SourceField.OBJECT, TargetField.NONE)
-
-        // target variants
-        .configureRelation(Keys.SOURCE_FIVE__FK_SOURCE_FIVE_TARGET_ID, SourceField.NONE, TargetField.ONE)
-        .configureRelation(Keys.SOURCE_SIX__FK_SOURCE_SIX_TARGET_ID, SourceField.NONE, TargetField.MANY)
+        .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.NONE, TargetField.NONE)
+        .configureRelation(   SOURCE_TWO.TARGET_ID, SourceField.SCALAR, TargetField.NONE)
+        .configureRelation( SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE)
+        .configureRelation(  SOURCE_FIVE.TARGET_ID, SourceField.NONE, TargetField.ONE)
+        .configureRelation(   SOURCE_SIX.TARGET_ID, SourceField.NONE, TargetField.MANY)
 
         .buildGraphQLSchema();
 
@@ -197,10 +196,11 @@ public class DomainQLTest
         final GraphQLSchema schema = DomainQL.newDomainQL(null)
             .objectTypes(Public.PUBLIC)
             .logicBeans(Collections.singleton(logic))
-            .configureRelation(Keys.SOURCE_TWO__FK_SOURCE_TWO_TARGET_ID, SourceField.SCALAR, TargetField.NONE, "scalarFieldId", null)
-            .configureRelation(Keys.SOURCE_THREE__FK_SOURCE_THREE_TARGET_ID, SourceField.OBJECT, TargetField.NONE, "objField", null)
-            .configureRelation(Keys.SOURCE_FIVE__FK_SOURCE_FIVE_TARGET_ID, SourceField.NONE, TargetField.ONE, null, "oneObj")
-            .configureRelation(Keys.SOURCE_SIX__FK_SOURCE_SIX_TARGET_ID, SourceField.NONE, TargetField.MANY, null, "manyObj")
+            
+            .configureRelation(   SOURCE_TWO.TARGET_ID, SourceField.SCALAR, TargetField.NONE, "scalarFieldId", null)
+            .configureRelation( SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE, "objField", null)
+            .configureRelation(  SOURCE_FIVE.TARGET_ID, SourceField.NONE, TargetField.ONE, null, "oneObj")
+            .configureRelation(   SOURCE_SIX.TARGET_ID, SourceField.NONE, TargetField.MANY, null, "manyObj")
             .createMirrorInputTypes(true)
             .buildGraphQLSchema();
 
@@ -258,13 +258,12 @@ public class DomainQLTest
             .logicBeans(Collections.singleton(logic))
             .createMirrorInputTypes(true)
             // test override
-            .inputTypes(SourceTwoInput.class)
-            .configureRelation(Keys.SOURCE_ONE__FK_SOURCE_ONE_TARGET_ID, SourceField.NONE, TargetField.NONE)
-            .configureRelation(Keys.SOURCE_TWO__FK_SOURCE_TWO_TARGET_ID, SourceField.SCALAR, TargetField.NONE)
-            .configureRelation(Keys.SOURCE_THREE__FK_SOURCE_THREE_TARGET_ID, SourceField.OBJECT, TargetField.NONE)
-            //.configureRelation(Keys.SOURCE_FOUR__FK_SOURCE_FOUR_TARGET_ID, SourceField.NONE, TargetField.NONE)
-            .configureRelation(Keys.SOURCE_FIVE__FK_SOURCE_FIVE_TARGET_ID, SourceField.NONE, TargetField.ONE)
-            .configureRelation(Keys.SOURCE_SIX__FK_SOURCE_SIX_TARGET_ID, SourceField.NONE, TargetField.MANY)
+            .overrideInputTypes(SourceTwoInput.class)
+            .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.NONE, TargetField.NONE)
+            .configureRelation(   SOURCE_TWO.TARGET_ID, SourceField.SCALAR, TargetField.NONE)
+            .configureRelation( SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE)
+            .configureRelation(  SOURCE_FIVE.TARGET_ID, SourceField.NONE, TargetField.ONE)
+            .configureRelation(   SOURCE_SIX.TARGET_ID, SourceField.NONE, TargetField.MANY)
             .buildGraphQLSchema();
 
 
@@ -297,8 +296,8 @@ public class DomainQLTest
         final GraphQLSchema schema = DomainQL.newDomainQL(null)
             .objectTypes(Public.PUBLIC)
             .logicBeans(Collections.singleton(logic))
-            .configureRelation(Keys.SOURCE_FOUR__FK_SOURCE_FOUR_TARGET_ID, SourceField.NONE, TargetField.ONE)
-            .configureRelation(Keys.SOURCE_FOUR__FK_SOURCE_FOUR_TARGET2_ID, SourceField.NONE, TargetField.ONE)
+            .configureRelation( SOURCE_FOUR.TARGET_ID, SourceField.NONE, TargetField.ONE)
+            .configureRelation(SOURCE_FOUR.TARGET2_ID, SourceField.NONE, TargetField.ONE)
             .buildGraphQLSchema();
 
     }
@@ -309,8 +308,8 @@ public class DomainQLTest
         final GraphQLSchema schema = DomainQL.newDomainQL(null)
             .objectTypes(Public.PUBLIC)
             .logicBeans(Collections.singleton(logic))
-            .configureRelation(Keys.SOURCE_FOUR__FK_SOURCE_FOUR_TARGET_ID, SourceField.NONE, TargetField.ONE)
-            .configureRelation(Keys.SOURCE_FOUR__FK_SOURCE_FOUR_TARGET2_ID, SourceField.NONE, TargetField.ONE, null, "source2")
+            .configureRelation(  SOURCE_FOUR.TARGET_ID, SourceField.NONE, TargetField.ONE)
+            .configureRelation( SOURCE_FOUR.TARGET2_ID, SourceField.NONE, TargetField.ONE, null, "source2")
             .buildGraphQLSchema();
 
     }

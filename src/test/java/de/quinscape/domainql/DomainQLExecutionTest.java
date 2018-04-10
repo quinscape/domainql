@@ -30,6 +30,8 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
+import static de.quinscape.domainql.testdomain.Tables.*;
+
 /**
  * Execution with the test schema against a mock connection
  */
@@ -50,13 +52,11 @@ public class DomainQLExecutionTest
         .logicBeans(Collections.singleton(logic))
 
         // source variants
-        .configureRelation(Keys.SOURCE_ONE__FK_SOURCE_ONE_TARGET_ID, SourceField.NONE, TargetField.NONE)
-        .configureRelation(Keys.SOURCE_TWO__FK_SOURCE_TWO_TARGET_ID, SourceField.SCALAR, TargetField.NONE)
-        .configureRelation(Keys.SOURCE_THREE__FK_SOURCE_THREE_TARGET_ID, SourceField.OBJECT, TargetField.NONE)
-
-        // target variants
-        .configureRelation(Keys.SOURCE_FIVE__FK_SOURCE_FIVE_TARGET_ID, SourceField.NONE, TargetField.ONE)
-        .configureRelation(Keys.SOURCE_SIX__FK_SOURCE_SIX_TARGET_ID, SourceField.NONE, TargetField.MANY)
+        .configureRelation(    SOURCE_ONE.TARGET_ID, SourceField.NONE, TargetField.NONE)
+        .configureRelation(    SOURCE_TWO.TARGET_ID, SourceField.SCALAR, TargetField.NONE)
+        .configureRelation(  SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE)
+        .configureRelation(   SOURCE_FIVE.TARGET_ID, SourceField.NONE, TargetField.ONE)
+        .configureRelation(    SOURCE_SIX.TARGET_ID, SourceField.NONE, TargetField.MANY)
 
         .additionalQueries(GraphQLFieldDefinition.newFieldDefinition()
             .name("extraQuery")
@@ -164,10 +164,9 @@ public class DomainQLExecutionTest
         {
             log.info("ERROR {}", errors);
         }
-
         assertThat(errors.size(), is(0));
-        assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"walkBackOne\":{\"id\":\"target-id\",\"sourceFive\":{\"id\":\"src-id\"}}}"));
     }
+
 
     @Test
     public void testManyBackReferenceTraversal()

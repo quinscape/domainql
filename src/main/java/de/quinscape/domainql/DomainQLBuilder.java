@@ -12,13 +12,16 @@ import org.jooq.DSLContext;
 import org.jooq.ForeignKey;
 import org.jooq.Schema;
 import org.jooq.Table;
+import org.jooq.TableField;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Mutable builder / configurator for {@link DomainQL}.
@@ -33,10 +36,10 @@ public class DomainQLBuilder
 
     private Set<Object> logicBeans = new LinkedHashSet<>();
 
-    private Map<ForeignKey<?, ?>, RelationConfiguration> relationConfigurations = new HashMap<>();
+    private Map<TableField<?, ?>, RelationConfiguration> relationConfigurations = new HashMap<>();
 
     private RelationConfiguration defaultRelationConfiguration = new RelationConfiguration(
-        SourceField.NONE, TargetField.NONE);
+        SourceField.SCALAR, TargetField.NONE);
 
     private boolean mirrorInputs;
 
@@ -79,13 +82,50 @@ public class DomainQLBuilder
             Collections.unmodifiableSet(jooqTables),
             Collections.unmodifiableSet(inputTypes),
             Collections.unmodifiableCollection(parameterProviderFactories),
-            Collections.unmodifiableMap(relationConfigurations),
+            Collections.unmodifiableMap( resolveFields( relationConfigurations)),
             defaultRelationConfiguration,
             optionsBuilder.buildOptions(),
             mirrorInputs,
             Collections.unmodifiableSet(additionalQueries),
             Collections.unmodifiableSet(additionalMutations)
         );
+    }
+
+
+    private Map<ForeignKey<?, ?>, RelationConfiguration> resolveFields(Map<TableField<?, ?>, RelationConfiguration> relationConfigurations)
+    {
+        Map<ForeignKey<?, ?>, RelationConfiguration> map = new HashMap<>(relationConfigurations.size());
+
+        for (Map.Entry<TableField<?, ?>, RelationConfiguration> e :
+            relationConfigurations
+                .entrySet())
+        {
+            final TableField<?, ?> field = e.getKey();
+            final RelationConfiguration config = e.getValue();
+
+            final ForeignKey<?, ?> foreignKey = resolveField(field);
+            map.put(foreignKey,config);
+        }
+        return map;
+    }
+
+
+    private ForeignKey<?, ?> resolveField(TableField<?, ?> field)
+    {
+        final Table<?> tableOfField = field.getTable();
+        for (ForeignKey<?, ?> foreignKey : tableOfField.getReferences())
+        {
+            if (foreignKey.getFields().indexOf(field) >= 0)
+            {
+                return foreignKey;
+            }
+        }
+
+        final String javaTableName = tableOfField.getName().toUpperCase();
+        final String javaFieldName = javaTableName + "." + field.getName().toUpperCase();
+
+
+        throw new DomainQLBuilderException("Field " + javaFieldName + " is not part of any foreign key in " + javaTableName);
     }
 
 
@@ -121,7 +161,7 @@ public class DomainQLBuilder
      *
      * @return this builder
      */
-    public Map<ForeignKey<?, ?>, RelationConfiguration> getRelationConfigurations()
+    public Map<TableField<?, ?>, RelationConfiguration> getRelationConfigurations()
     {
         return relationConfigurations;
     }
@@ -130,17 +170,17 @@ public class DomainQLBuilder
     /**
      * Configures the source and target field generation to use for the given JOOQ foreign key.
      *
-     * @param foreignKey        foreign key
+     * @param fkField           field contained in a foreign key
      * @param sourceField       source field configuration
      * @param targetField       target field configuration
      *
      * @return this builder
      */
     public DomainQLBuilder configureRelation(
-        ForeignKey<?, ?> foreignKey, SourceField sourceField, TargetField targetField
+        TableField<?, ?> fkField, SourceField sourceField, TargetField targetField
     )
     {
-        relationConfigurations.put(foreignKey, new RelationConfiguration(sourceField, targetField));
+        relationConfigurations.put(fkField, new RelationConfiguration(sourceField, targetField));
         return this;
     }
 
@@ -152,7 +192,7 @@ public class DomainQLBuilder
      *     If one of the field configurations is NONE, the corresponding name will be ignored.
      * </p>
      *
-     * @param foreignKey        foreign key
+     * @param fkField           field contained in a foreign key
      * @param sourceField       source field configuration
      * @param targetField       target field configuration
      * @param leftSideName      field name for the left-hand / source side
@@ -162,7 +202,7 @@ public class DomainQLBuilder
      * @return this builder
      */
     public DomainQLBuilder configureRelation(
-        ForeignKey<?, ?> foreignKey,
+        TableField<?, ?> fkField,
         SourceField sourceField,
         TargetField targetField,
         String leftSideName,
@@ -170,7 +210,7 @@ public class DomainQLBuilder
     )
     {
         relationConfigurations.put(
-            foreignKey,
+            fkField,
             new RelationConfiguration(
                 sourceField,
                 targetField,
