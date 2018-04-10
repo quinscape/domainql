@@ -19,6 +19,7 @@ import org.apache.commons.beanutils.ConvertUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.AopProxyUtils;
 
 import javax.validation.constraints.NotNull;
 import java.lang.annotation.Annotation;
@@ -89,9 +90,9 @@ public class LogicBeanAnalyzer
             }
         }
 
-        log.debug("Analyzing logic bean {}", logicBean);
+        final Class<?> cls = AopProxyUtils.ultimateTargetClass(logicBean);
+        log.debug("Analyzing logic bean {}", cls.getName());
 
-        final Class<?> cls = logicBean.getClass();
         final MethodAccess methodAccess = MethodAccess.get(cls);
 
 
