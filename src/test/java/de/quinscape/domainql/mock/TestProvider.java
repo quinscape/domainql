@@ -1,4 +1,4 @@
-package de.quinscape.domainql;
+package de.quinscape.domainql.mock;
 
 import de.quinscape.domainql.testdomain.tables.records.SourceFiveRecord;
 import de.quinscape.domainql.testdomain.tables.records.SourceOneRecord;
@@ -7,13 +7,10 @@ import de.quinscape.domainql.testdomain.tables.records.TargetFiveRecord;
 import de.quinscape.domainql.testdomain.tables.records.TargetSixRecord;
 import de.quinscape.domainql.testdomain.tables.records.TargetThreeRecord;
 import org.jooq.Record;
-import org.jooq.Record2;
 import org.jooq.Result;
-import org.jooq.tools.jdbc.Mock;
 import org.jooq.tools.jdbc.MockDataProvider;
 import org.jooq.tools.jdbc.MockExecuteContext;
 import org.jooq.tools.jdbc.MockResult;
-import org.junit.runners.JUnit4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

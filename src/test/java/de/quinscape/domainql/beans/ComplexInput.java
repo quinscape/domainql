@@ -1,4 +1,4 @@
-package de.quinscape.domainql;
+package de.quinscape.domainql.beans;
 
 import de.quinscape.domainql.annotation.GraphQLInput;
 

@@ -37,7 +37,7 @@ Technologies involved:
    
                         Note: Only the Open Source Edition is hosted on Maven Central.
                               Import the others manually from your distribution -->
-                   <groupId>org.jooq</groupId>
+                  <groupId>org.jooq</groupId>
                    <artifactId>jooq-codegen-maven</artifactId>
                    <version>3.10.6</version>
    
@@ -106,8 +106,8 @@ Technologies involved:
  
  3. Implement Queries and Mutators
  
-    With the basic GraphQL types being generared from the JOOQ POJO classes, we just
-    need Queries and Mutators for the GraphQL. 
+    With the basic GraphQL types being generared from the JOOQ POJO classes, we just need Queries and Mutators 
+    for the GraphQL. 
     
     Here we see a simple JOOQ-based query that provides a paged list of all Customer POJOs.
     
@@ -130,10 +130,10 @@ Technologies involved:
     }
     ```
     
-    Query methods are annotated with @GraphQLQuery, mutations with @GraphQLMutations. You
-    can use @GraphQLInput annotations on the method parameters to (re)define name, description
-    or not-null status. If the Java compiler provided method parameter names (-parameters switch on Javac)
-    the method parameter names will be automatically used from the Java parameters.
+    Query methods are annotated with @GraphQLQuery, mutations with @GraphQLMutations. You can use @GraphQLInput 
+    annotations on the method parameters to (re)define name, description or not-null status. If the Java compiler 
+    provided method parameter names (-parameters switch on Javac) the method parameter names will be automatically used 
+    from the Java parameters.
   
  4. Use DomainQL on generated Schema
  
@@ -174,8 +174,8 @@ Technologies involved:
 The generated JOOQ schema contains information about the foreign key columns in the database. DomainQL can optionally
 create embedded objects and collections based on the foreign keys, it just needs to be told what to do.
 
-The configureRelation() method of the DomainQL builder can be used to configure additional fields for the JOOQ foreign key 
-definitions.
+The configureRelation() method of the DomainQL builder can be used to configure additional fields for the JOOQ foreign 
+key definitions.
 
 You will find all of them in the generated "Keys" class in your JOOQ codegen target directory.
 
@@ -186,8 +186,8 @@ You will find all of them in the generated "Keys" class in your JOOQ codegen tar
 
 Let's take a look at the SourceField/TargetField configuration variants.
 
-Imagine we have a relationship between two entities "Foo" and "Bar". "Foo" has a foreign
-key column "bar_id" that references the primary key "id" of "Bar".
+Imagine we have a relationship between two entities "Foo" and "Bar". "Foo" has a foreign key column "bar_id" that 
+references the primary key "id" of "Bar".
 
 ![Relationship diagram](relation.png)
 
@@ -201,31 +201,35 @@ There is no special handling of the relation ship. Foo will only receive a plain
 
 ### SourceField.OBJECT
 
-The target of the relation will be embedded as GraphQL object. By default, the 
-algorithm will name the embedded object like the underlying foreign key stripped of the
-foreign key suffix ("_id" by default).
+The target of the relation will be embedded as GraphQL object. By default, the algorithm will name the embedded object 
+like the underlying foreign key stripped of the foreign key suffix ("_id" by default).
 
 Foo will receive a bull "bar" object field.
 
+### SourceField.OBJECT_AND_SCALAR
+
+Both the foreign key field itself and the embedded target object will be created. This is useful in situtations where 
+you want the embedded object in some cases, but in others you can save some querying because all you need is the target 
+id. 
+
 ### SourceField.NONE
 
-The relationship is ignored and does not appear in the GraphQL schema.
+The relationship is ignored and does not appear in the GraphQL schema. 
 
 
 ## Target Field Configuration
 
-The TargetField enum controls the field generating on the right / target side of the foreign
-key relation. 
+The TargetField enum controls the field generating on the right / target side of the foreign key relation. 
 
 ### TargetField.ONE
 
-TargetField.ONE interprets the foreign key relation as a one-to-one relation and adds
-a single "foo" field to the "Bar" type. 
+TargetField.ONE interprets the foreign key relation as a one-to-one relation and adds a single "foo" field to the "Bar" 
+type. 
 
 ### TargetField.MANY
 
-TargetField.ONE interprets the foreign key relation as a one-to-one relation and adds
-a list field called "foos" field to the "Bar" type.
+TargetField.ONE interprets the foreign key relation as a one-to-one relation and adds a list field called "foos" field 
+to the "Bar" type.
 
 By default the plural is formed with the evo-inflector library. 
 
@@ -236,9 +240,9 @@ No field is added on the right-hand / target side.
   
 ## Foreign key field names
 
-The default rules for forming embedded object field names out of the foreign key should
-work reasonably well. You can however fine-control the generated field names by using
-the `.configureRelation(SourceField,TargetField,String,String)` method of the builder.
+The default rules for forming embedded object field names out of the foreign key should work reasonably well. You can 
+however fine-control the generated field names by using the `.configureRelation(SourceField,TargetField,String,String)` 
+method of the builder.
 
 This will be necessary to prevent the embedded objects of the same type from multiple foreign keys 
 from conflicting with each other    

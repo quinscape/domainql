@@ -1,9 +1,10 @@
 package de.quinscape.domainql;
 
 
+import de.quinscape.domainql.beans.TestLogic;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
-import de.quinscape.domainql.testdomain.Keys;
+import de.quinscape.domainql.mock.TestProvider;
 import de.quinscape.domainql.testdomain.Public;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;

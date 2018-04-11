@@ -1,11 +1,18 @@
 package de.quinscape.domainql;
 
 
+import de.quinscape.domainql.beans.LogicWithWrongInjection;
+import de.quinscape.domainql.beans.LogicWithWrongInjection2;
+import de.quinscape.domainql.beans.TestLogic;
+import de.quinscape.domainql.beans.TestLogic2;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
+import de.quinscape.domainql.beans.SourceTwoInput;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.domainql.testdomain.Public;
+import de.quinscape.domainql.testdomain.tables.SourceOne;
 import graphql.Scalars;
+import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLList;
@@ -15,6 +22,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import static graphql.schema.GraphQLNonNull.*;
@@ -28,6 +36,7 @@ public class DomainQLTest
     private final static Logger log = LoggerFactory.getLogger(DomainQLTest.class);
 
     final TestLogic logic = new TestLogic();
+    final TestLogic2 logic2 = new TestLogic2();
 
     final GraphQLSchema schema = DomainQL.newDomainQL(null)
         .objectTypes(Public.PUBLIC)
@@ -255,7 +264,7 @@ public class DomainQLTest
 
         final GraphQLSchema schema = DomainQL.newDomainQL(null)
             .objectTypes(Public.PUBLIC)
-            .logicBeans(Collections.singleton(logic))
+            .logicBeans(Arrays.asList(logic, logic2))
             .createMirrorInputTypes(true)
             // test override
             .overrideInputTypes(SourceTwoInput.class)
@@ -287,6 +296,17 @@ public class DomainQLTest
             assertThat(sourceOneInput.getField("targetId").getType(),is(nonNull(Scalars.GraphQLString)));
             assertThat(sourceOneInput.getField("foo").getType(),is(Scalars.GraphQLString));
         }
+
+
+        {
+            final GraphQLObjectType queryType = (GraphQLObjectType) schema.getType("QueryType");
+            final GraphQLFieldDefinition fieldDef = queryType.getFieldDefinition("queryWithMirrorInput");
+
+            final GraphQLArgument arg = fieldDef.getArgument("inputOne");
+            assertThat(arg, is(notNullValue()));
+            assertThat(arg.getType().getName(), is("SourceOneInput"));
+        }
+
     }
 
 
@@ -325,5 +345,71 @@ public class DomainQLTest
             assertThat(mutateString.getArgument("value").getType(), is(Scalars.GraphQLString));
             assertThat(mutateString.getType(), is(Scalars.GraphQLString));
         }
+    }
+
+
+    @Test
+    public void testObjectAndScalarScourceFields()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(logic))
+
+            // source variants
+            .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.OBJECT_AND_SCALAR, TargetField.NONE)
+            .buildGraphQLSchema();
+
+        // SourceField.OBJECT_AND_SCALAR / TargetField.NONE
+        {
+            // just the id fields
+            final GraphQLObjectType sourceOne = (GraphQLObjectType) schema.getType("SourceOne");
+            assertThat(sourceOne,is(notNullValue()));
+            assertThat(sourceOne.getFieldDefinitions().size(),is(3));
+            assertThat(sourceOne.getFieldDefinitions().get(0).getName(),is("id"));
+            assertThat(sourceOne.getFieldDefinitions().get(0).getType(),is(nonNull(Scalars.GraphQLString)));
+            assertThat(sourceOne.getFieldDefinitions().get(1).getName(),is("targetId"));
+            assertThat(sourceOne.getFieldDefinitions().get(1).getType(),is(nonNull(Scalars.GraphQLString)));
+            assertThat(sourceOne.getFieldDefinitions().get(2).getName(),is("target"));
+            assertThat(sourceOne.getFieldDefinitions().get(2).getType(),is(nonNull(schema.getType("TargetOne"))));
+
+        }
+    }
+
+
+    @Test(expected =  DomainQLTypeException.class)
+    public void testWrongType()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(logic))
+            .overrideInputTypes(SourceOne.class)
+
+            // source variants
+            .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.OBJECT_AND_SCALAR, TargetField.NONE)
+            .buildGraphQLSchema();
+    }
+
+    @Test(expected =  DomainQLTypeException.class)
+    public void testWrongTypeAsQueryInput()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new LogicWithWrongInjection()))
+
+            // source variants
+            .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.OBJECT_AND_SCALAR, TargetField.NONE)
+            .buildGraphQLSchema();
+    }
+
+    @Test(expected =  DomainQLTypeException.class)
+    public void testRecordAsQueryInput()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new LogicWithWrongInjection2()))
+
+            // source variants
+            .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.OBJECT_AND_SCALAR, TargetField.NONE)
+            .buildGraphQLSchema();
     }
 }

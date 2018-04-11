@@ -1,10 +1,9 @@
-package de.quinscape.domainql;
+package de.quinscape.domainql.beans;
 
 import de.quinscape.domainql.annotation.GraphQLInput;
 import de.quinscape.domainql.annotation.GraphQLLogic;
 import de.quinscape.domainql.annotation.GraphQLMutation;
 import de.quinscape.domainql.annotation.GraphQLQuery;
-import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.testdomain.Tables;
 import de.quinscape.domainql.testdomain.tables.pojos.SourceThree;
 import de.quinscape.domainql.testdomain.tables.pojos.TargetFive;
