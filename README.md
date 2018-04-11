@@ -3,10 +3,13 @@ DomainQL
 
 Annotation-based convention over configuration GraphQL schema generator.
 
+![DB + JOOQ + DomainQL = GraphQL](./visual.png)
+
 Technologies involved:
  * Java 8 / Spring
  * [graphql-java](https://github.com/graphql-java/graphql-java)
  * [jooq](https://www.jooq.org/) 
+
 
 # Usage
 
