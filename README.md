@@ -30,78 +30,48 @@ Technologies involved:
    ## JOOQ codegen example
    
    ```xml
-               <plugin>
-   
-                   <!-- Specify the maven code generator plugin -->
-                   <!-- Use org.jooq            for the Open Source Edition
-                            org.jooq.pro        for commercial editions,
-                            org.jooq.pro-java-6 for commercial editions with Java 6 support,
-                            org.jooq.trial      for the free trial edition
-   
-                        Note: Only the Open Source Edition is hosted on Maven Central.
-                              Import the others manually from your distribution -->
-                  <groupId>org.jooq</groupId>
-                   <artifactId>jooq-codegen-maven</artifactId>
-                   <version>3.10.6</version>
-   
-                   <!-- The plugin should hook into the generate goal -->
-                   <executions>
-                       <execution>
-                           <goals>
-                               <goal>generate</goal>
-                           </goals>
-                       </execution>
-                   </executions>
-   
-                   <!-- Manage the plugin's dependency. In this example, we'll use a PostgreSQL database -->
-                   <dependencies>
-                       <dependency>
-                           <groupId>org.postgresql</groupId>
-                           <artifactId>postgresql</artifactId>
-                           <version>42.1.4</version>
-                       </dependency>
-                   </dependencies>
-   
-                   <!-- Specify the plugin configuration.
-                        The configuration format is the same as for the standalone code generator -->
-                   <configuration>
-   
-                       <!-- JDBC connection parameters -->
-                       <jdbc>
-                           <driver>org.postgresql.Driver</driver>
-                           <url>jdbc:postgresql://localhost/eamodern</url>
-                           <user>eamodern</user>
-                           <password>eamodern</password>
-                       </jdbc>
-   
-                       <!-- Generator parameters -->
-                       <generator>
-                           <database>
-                               <name>org.jooq.util.postgres.PostgresDatabase</name>
-                               <includes>.*</includes>
-                               <excludes></excludes>
-                               <!-- In case your database supports catalogs, e.g. SQL Server:
-                               <inputCatalog>public</inputCatalog>
-                                 -->
-                               <inputSchema>public</inputSchema>
-                           </database>
-                           <target>
-                               <packageName>YOUR_PACKAGE</packageName>
-                               <directory>src/main/java</directory>
-                           </target>
-                           <generate>
-                               <daos>true</daos>
-                               <pojos>true</pojos>
-                               <records>true</records>
-                               <generatedAnnotation>true</generatedAnnotation>
-                               <validationAnnotations>true</validationAnnotations>
-                               <jpaAnnotations>true</jpaAnnotations>
-                               <springAnnotations>true</springAnnotations>
-                           </generate>
-                       </generator>
-                   </configuration>
-               </plugin>
-
+    <plugin>
+    
+       <groupId>org.jooq</groupId>
+        <artifactId>jooq-codegen-maven</artifactId>
+        <version>3.10.6</version>
+        
+        <!-- Specify the plugin configuration.
+             The configuration format is the same as for the standalone code generator -->
+        <configuration>
+    
+            <!-- JDBC connection parameters -->
+            <jdbc>
+                <driver>org.postgresql.Driver</driver>
+                <url>jdbc:postgresql://localhost/${YOUR_DATABASE}</url>
+                <user>${YOUR_USER}</user>
+                <password>${YOUR_USER}</password>
+            </jdbc>
+    
+            <!-- Generator parameters -->
+            <generator>
+                <database>
+                    <name>org.jooq.util.postgres.PostgresDatabase</name>
+                    <includes>.*</includes>
+                    <excludes></excludes>
+                    <inputSchema>public</inputSchema>
+                </database>
+                <target>
+                    <packageName>${YOUR_DOMAIN_PACKAGE}</packageName>
+                    <directory>src/main/java</directory>
+                </target>
+                <generate>
+                    <pojos>true</pojos>
+                    <records>true</records>
+                    <generatedAnnotation>true</generatedAnnotation>
+                    <validationAnnotations>true</validationAnnotations>
+                    <jpaAnnotations>true</jpaAnnotations>
+                    <springAnnotations>true</springAnnotations>
+                </generate>
+            </generator>
+        </configuration>
+    </plugin>
+    
    ```
    
    Note the `<jpaAnnotations>true</jpaAnnotations>` configuration. The POJOs *must* be
