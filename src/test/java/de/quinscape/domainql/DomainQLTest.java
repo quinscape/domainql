@@ -4,7 +4,7 @@ package de.quinscape.domainql;
 import de.quinscape.domainql.beans.LogicWithWrongInjection;
 import de.quinscape.domainql.beans.LogicWithWrongInjection2;
 import de.quinscape.domainql.beans.TestLogic;
-import de.quinscape.domainql.beans.TestLogic2;
+import de.quinscape.domainql.beans.LogicWithMirrorInput;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.beans.SourceTwoInput;
@@ -36,7 +36,7 @@ public class DomainQLTest
     private final static Logger log = LoggerFactory.getLogger(DomainQLTest.class);
 
     final TestLogic logic = new TestLogic();
-    final TestLogic2 logic2 = new TestLogic2();
+    final LogicWithMirrorInput logic2 = new LogicWithMirrorInput();
 
     final GraphQLSchema schema = DomainQL.newDomainQL(null)
         .objectTypes(Public.PUBLIC)

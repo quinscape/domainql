@@ -8,19 +8,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @GraphQLLogic
-public class TestLogic2
+public class LogicWithMirrorInput
 {
-    private final static Logger log = LoggerFactory.getLogger(TestLogic2.class);
+    private final static Logger log = LoggerFactory.getLogger(LogicWithMirrorInput.class);
 
     private final DSLContext dslContext;
 
 
-    public TestLogic2()
+    public LogicWithMirrorInput()
     {
         this(null);
     }
 
-    public TestLogic2(DSLContext dslContext)
+    public LogicWithMirrorInput(DSLContext dslContext)
     {
         this.dslContext = dslContext;
     }
