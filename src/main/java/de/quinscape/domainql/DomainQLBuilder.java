@@ -261,6 +261,19 @@ public class DomainQLBuilder
         return this;
     }
 
+    /**
+     * Configures the given @{@link GraphQLLogic} annotated spring beans to check for query and mutation implementations.
+     *
+     * @param logicBeans   beans var args annotated with @{@link GraphQLLogic}.
+     *
+     * @return this builder
+     */
+    public DomainQLBuilder logicBeans(Object... logicBeans)
+    {
+        Collections.addAll(this.logicBeans, logicBeans);
+        return this;
+    }
+
 
     /**
      * Directly build a GraphQL schema from a DomainQL definition.

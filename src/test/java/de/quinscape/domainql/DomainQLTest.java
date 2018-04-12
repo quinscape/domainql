@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static graphql.schema.GraphQLNonNull.*;
 import static org.hamcrest.MatcherAssert.*;
@@ -48,6 +49,7 @@ public class DomainQLTest
         .configureRelation( SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE)
         .configureRelation(  SOURCE_FIVE.TARGET_ID, SourceField.NONE, TargetField.ONE)
         .configureRelation(   SOURCE_SIX.TARGET_ID, SourceField.NONE, TargetField.MANY)
+        .configureRelation(    SOURCE_SEVEN.TARGET, SourceField.OBJECT, TargetField.NONE)
 
         .buildGraphQLSchema();
 
@@ -172,8 +174,7 @@ public class DomainQLTest
             final GraphQLObjectType sourceThree = (GraphQLObjectType) schema.getType("SourceThree");
             assertThat(sourceThree,is(notNullValue()));
             assertThat(sourceThree.getFieldDefinitions().size(),is(2));
-            assertThat(sourceThree.getFieldDefinitions().get(1).getName(),is("target"));
-            assertThat(sourceThree.getFieldDefinitions().get(1).getType(),is(nonNull(schema.getType("TargetThree"))));
+            assertThat(sourceThree.getFieldDefinition("target").getType(),is(nonNull(schema.getType("TargetThree"))));
         }
 
         // TargetField.ONE
@@ -182,8 +183,7 @@ public class DomainQLTest
             final GraphQLObjectType targetFive = (GraphQLObjectType) schema.getType("TargetFive");
             assertThat(targetFive,is(notNullValue()));
             assertThat(targetFive.getFieldDefinitions().size(),is(2));
-            assertThat(targetFive.getFieldDefinitions().get(1).getName(),is("sourceFive"));
-            assertThat(targetFive.getFieldDefinitions().get(1).getType(),is(nonNull(schema.getType("SourceFive"))));
+            assertThat(targetFive.getFieldDefinition("sourceFive").getType(),is(nonNull(schema.getType("SourceFive"))));
         }
 
         // TargetField.MANY
@@ -192,8 +192,26 @@ public class DomainQLTest
             final GraphQLObjectType targetSix = (GraphQLObjectType) schema.getType("TargetSix");
             assertThat(targetSix,is(notNullValue()));
             assertThat(targetSix.getFieldDefinitions().size(),is(2));
-            assertThat(targetSix.getFieldDefinitions().get(1).getName(),is("sourceSixes"));
-            assertThat(targetSix.getFieldDefinitions().get(1).getType(),is(nonNull(new GraphQLList(schema.getType("SourceSix")))));
+            assertThat(targetSix.getFieldDefinition("sourceSixes").getType(),is(nonNull(new GraphQLList(schema.getType("SourceSix")))));
+        }
+
+        // NON-PK TARGET
+        {
+            // just the id fields
+            final GraphQLObjectType targetSeven = (GraphQLObjectType) schema.getType("TargetSeven");
+            assertThat(targetSeven,is(notNullValue()));
+            final List<GraphQLFieldDefinition> fieldDefs = targetSeven.getFieldDefinitions();
+
+            log.info("fieldDefs = {}", fieldDefs);
+
+            assertThat(fieldDefs.size(),is(2));
+            assertThat(targetSeven.getFieldDefinition("name").getType(), is(nonNull(Scalars.GraphQLString)));
+
+
+            final GraphQLObjectType sourceSeven = (GraphQLObjectType) schema.getType("SourceSeven");
+            assertThat(sourceSeven.getFieldDefinitions().size(), is(2));
+            assertThat(sourceSeven.getFieldDefinition("target").getType(), is(nonNull(schema.getType("TargetSeven"))));
+
         }
     }
 

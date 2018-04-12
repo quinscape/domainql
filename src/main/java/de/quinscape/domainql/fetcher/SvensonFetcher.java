@@ -3,6 +3,8 @@ package de.quinscape.domainql.fetcher;
 import de.quinscape.domainql.util.JSONUtil;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.svenson.JSONProperty;
 
 /**
@@ -14,6 +16,9 @@ import org.svenson.JSONProperty;
 public class SvensonFetcher
     implements DataFetcher<Object>
 {
+    private final static Logger log = LoggerFactory.getLogger(SvensonFetcher.class);
+
+
     private final String name;
 
 
@@ -26,6 +31,14 @@ public class SvensonFetcher
     @Override
     public Object get(DataFetchingEnvironment environment)
     {
-        return JSONUtil.DEFAULT_UTIL.getProperty(environment.getSource(), name);
+        try
+        {
+            return JSONUtil.DEFAULT_UTIL.getProperty(environment.getSource(), name);
+        }
+        catch(Exception e)
+        {
+            log.error("Error in SvensonFetcher", e);
+            return null;
+        }
     }
 }

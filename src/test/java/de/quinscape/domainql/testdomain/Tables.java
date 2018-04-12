@@ -7,12 +7,14 @@ package de.quinscape.domainql.testdomain;
 import de.quinscape.domainql.testdomain.tables.SourceFive;
 import de.quinscape.domainql.testdomain.tables.SourceFour;
 import de.quinscape.domainql.testdomain.tables.SourceOne;
+import de.quinscape.domainql.testdomain.tables.SourceSeven;
 import de.quinscape.domainql.testdomain.tables.SourceSix;
 import de.quinscape.domainql.testdomain.tables.SourceThree;
 import de.quinscape.domainql.testdomain.tables.SourceTwo;
 import de.quinscape.domainql.testdomain.tables.TargetFive;
 import de.quinscape.domainql.testdomain.tables.TargetFour;
 import de.quinscape.domainql.testdomain.tables.TargetOne;
+import de.quinscape.domainql.testdomain.tables.TargetSeven;
 import de.quinscape.domainql.testdomain.tables.TargetSix;
 import de.quinscape.domainql.testdomain.tables.TargetThree;
 import de.quinscape.domainql.testdomain.tables.TargetTwo;
@@ -49,6 +51,11 @@ public class Tables {
     public static final SourceOne SOURCE_ONE = de.quinscape.domainql.testdomain.tables.SourceOne.SOURCE_ONE;
 
     /**
+     * The table <code>public.source_seven</code>.
+     */
+    public static final SourceSeven SOURCE_SEVEN = de.quinscape.domainql.testdomain.tables.SourceSeven.SOURCE_SEVEN;
+
+    /**
      * The table <code>public.source_six</code>.
      */
     public static final SourceSix SOURCE_SIX = de.quinscape.domainql.testdomain.tables.SourceSix.SOURCE_SIX;
@@ -77,6 +84,11 @@ public class Tables {
      * The table <code>public.target_one</code>.
      */
     public static final TargetOne TARGET_ONE = de.quinscape.domainql.testdomain.tables.TargetOne.TARGET_ONE;
+
+    /**
+     * The table <code>public.target_seven</code>.
+     */
+    public static final TargetSeven TARGET_SEVEN = de.quinscape.domainql.testdomain.tables.TargetSeven.TARGET_SEVEN;
 
     /**
      * The table <code>public.target_six</code>.

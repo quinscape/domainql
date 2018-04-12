@@ -12,6 +12,7 @@ import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLOutputType;
+import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLTypeReference;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.slf4j.Logger;
@@ -32,13 +33,16 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Analyzes annotated LogicBeans and finds queries and mutations.
  */
 public class LogicBeanAnalyzer
 {
+
     private final static Logger log = LoggerFactory.getLogger(LogicBeanAnalyzer.class);
+
 
 
     private final Set<Query> queries = new LinkedHashSet<>();
@@ -51,17 +55,25 @@ public class LogicBeanAnalyzer
 
     private final Map<Class<?>, String> inputTypes;
 
+    private final Map<Class<?>, GraphQLOutputType> registeredOutputTypes;
+
+    private final Consumer<Class<?>> registerOutputType;
+
 
     public LogicBeanAnalyzer(
         DomainQL domainQL,
         Collection<ParameterProviderFactory> parameterProviderFactories,
         Collection<Object> logicBeans,
-        Map<Class<?>, String> inputTypes
+        Map<Class<?>, String> inputTypes,
+        Map<Class<?>, GraphQLOutputType> registeredOutputTypes,
+        Consumer<Class<?>> registerOutputType
     )
     {
         this.domainQL = domainQL;
         this.parameterProviderFactories = parameterProviderFactories;
         this.inputTypes = inputTypes;
+        this.registeredOutputTypes = registeredOutputTypes;
+        this.registerOutputType = registerOutputType;
         logicBeans.forEach(this::discover);
     }
 
@@ -80,18 +92,6 @@ public class LogicBeanAnalyzer
 
     public void discover(Object logicBean)
     {
-        if (logicBean instanceof TargetSource)
-        {
-            try
-            {
-                logicBean = ((TargetSource) logicBean).getTarget();
-            }
-            catch (Exception e)
-            {
-                throw new DomainQLException("Error accessing spring target source", e);
-            }
-        }
-
         final Class<?> cls = AopProxyUtils.ultimateTargetClass(logicBean);
         log.debug("Analyzing logic bean {}", cls.getName());
 
@@ -173,10 +173,16 @@ public class LogicBeanAnalyzer
         final GraphQLOutputType resultType;
         if (returnType == null || returnType.equals(Void.TYPE))
         {
-            resultType = null;
+            throw new DomainQLException(locationInfo + ": Logic methods must return an output type");
         }
         else
         {
+            final GraphQLScalarType scalarType = DomainQL.getGraphQLScalarFor(returnType);
+            if (scalarType != null)
+            {
+                return scalarType;
+            }
+
             if (List.class.isAssignableFrom(returnType))
             {
                 final Type genericReturnType = method.getGenericReturnType();
@@ -187,21 +193,30 @@ public class LogicBeanAnalyzer
 
                 final Class<?> elementClass = (Class<?>) ((ParameterizedType) genericReturnType).getActualTypeArguments()[0];
 
-                final GraphQLOutputType elementType = domainQL.getOutputType(elementClass);
-                if (elementType == null)
+//                final GraphQLOutputType elementType = domainQL.getOutputType(elementClass);
+//                if (elementType == null)
+//                {
+//                    throw new IllegalStateException(locationInfo + ": Cannot resolve GraphQL output type for element type " + elementClass.getName());
+//                }
+
+                final GraphQLOutputType outputType = registeredOutputTypes.get(elementClass);
+                if (outputType == null)
                 {
-                    throw new IllegalStateException(locationInfo + ": Cannot resolve GraphQL output type for element type " + elementClass.getName());
+                    registerOutputType.accept(elementClass);
                 }
 
-                resultType = new GraphQLList(elementType);
+                resultType = new GraphQLList(new GraphQLTypeReference(elementClass.getSimpleName()));
             }
             else
             {
-                resultType = domainQL.getOutputType(returnType);
-                if (resultType == null)
+                final GraphQLOutputType outputType = registeredOutputTypes.get(returnType);
+                if (outputType == null)
                 {
-                    throw new IllegalStateException(locationInfo + ": Cannot resolve GraphQL output type for " + returnType.getName());
+
+                    registerOutputType.accept(returnType);
                 }
+
+                resultType = new GraphQLTypeReference(returnType.getSimpleName());
             }
 
         }
@@ -256,7 +271,8 @@ public class LogicBeanAnalyzer
                             }
                             else
                             {
-                                final String newInputName = parameterType.getSimpleName();
+                                final String newInputName = DomainQL.getInputTypeName(parameterType);
+
                                 inputTypes.put(parameterType, newInputName);
                                 inputType = new GraphQLTypeReference(newInputName);
                             }
