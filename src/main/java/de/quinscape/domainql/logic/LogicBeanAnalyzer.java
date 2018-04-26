@@ -3,7 +3,7 @@ package de.quinscape.domainql.logic;
 import com.esotericsoftware.reflectasm.MethodAccess;
 import de.quinscape.domainql.DomainQL;
 import de.quinscape.domainql.DomainQLException;
-import de.quinscape.domainql.annotation.GraphQLInput;
+import de.quinscape.domainql.annotation.GraphQLField;
 import de.quinscape.domainql.annotation.GraphQLMutation;
 import de.quinscape.domainql.annotation.GraphQLQuery;
 import de.quinscape.domainql.param.ParameterProvider;
@@ -17,7 +17,6 @@ import graphql.schema.GraphQLTypeReference;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.util.StringUtils;
 
@@ -177,7 +176,14 @@ public class LogicBeanAnalyzer
         }
         else
         {
-            final GraphQLScalarType scalarType = DomainQL.getGraphQLScalarFor(returnType);
+            final GraphQLField fieldAnno = method.getAnnotation(GraphQLField.class);
+
+            if (fieldAnno != null && fieldAnno.value().length() > 0)
+            {
+                throw new DomainQLException(locationInfo + ": Return values can't have names");
+            }
+
+            final GraphQLScalarType scalarType = DomainQL.getGraphQLScalarFor(returnType,fieldAnno);
             if (scalarType != null)
             {
                 return scalarType;
@@ -237,14 +243,14 @@ public class LogicBeanAnalyzer
                 Class<?> parameterType = parameter.getType();
                 final Annotation[] parameterAnnotations = parameter.getDeclaredAnnotations();
 
-                final GraphQLInput argAnno = parameter.getDeclaredAnnotation(GraphQLInput.class);
+                final GraphQLField argAnno = parameter.getDeclaredAnnotation(GraphQLField.class);
 
                 if ((argAnno == null || argAnno.value().length() == 0) && !parameter.isNamePresent())
                 {
                     throw new IllegalStateException(name +
                         ": Cannot determine Method parameter name due to metadata not provided by Java compiler and " +
-                        "no @GraphQLArgument annotation being defined. " +
-                        "Either you need to define @GraphQLArgument annotations for all logic parameters or you need " +
+                        "no @GraphQLField annotation being defined. " +
+                        "Either you need to define @GraphQLField annotations for all logic parameters or you need " +
                         "to enable parameter metadata in your java compiler. " +
                         "For maven this is the property maven.compiler.parameters=true, for the javac command line " +
                         "compiler it is the -parameters option.");
@@ -261,7 +267,7 @@ public class LogicBeanAnalyzer
                     }
                     else
                     {
-                        GraphQLInputType inputType = DomainQL.getGraphQLScalarFor(parameterType);
+                        GraphQLInputType inputType = DomainQL.getGraphQLScalarFor(parameterType, argAnno);
                         if (inputType == null)
                         {
                             final String nameFromConfig = inputTypes.get(parameterType);
@@ -287,7 +293,7 @@ public class LogicBeanAnalyzer
                         if (jpaRequired && !isRequired)
                         {
                             throw new DomainQLException(name +
-                                ": Required field disagreement between @NotNull and @GraphQLInput required value");
+                                ": Required field disagreement between @NotNull and @GraphQLField required value");
                         }
 
 

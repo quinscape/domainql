@@ -1,6 +1,7 @@
 package de.quinscape.domainql;
 
 
+import de.quinscape.domainql.beans.LogicWithAnnotated;
 import de.quinscape.domainql.beans.LogicWithWrongInjection;
 import de.quinscape.domainql.beans.LogicWithWrongInjection2;
 import de.quinscape.domainql.beans.TestLogic;
@@ -17,7 +18,9 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.GraphQLType;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -430,4 +433,24 @@ public class DomainQLTest
             .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.OBJECT_AND_SCALAR, TargetField.NONE)
             .buildGraphQLSchema();
     }
+
+    @Test
+    public void testAnnotatedFields()
+    {
+        final DomainQLBuilder builder = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new LogicWithAnnotated()));
+
+        final GraphQLSchema schema = builder.buildGraphQLSchema();
+
+        final GraphQLObjectType outputType = (GraphQLObjectType) schema.getType("AnnotatedBean");
+        assertThat(outputType, is(notNullValue()));
+        assertThat(outputType.getFieldDefinition("value").getType().getName(), is("Currency"));
+
+        final GraphQLInputObjectType inputType = (GraphQLInputObjectType) schema.getType("AnnotatedBeanInput");
+        assertThat(inputType, is(notNullValue()));
+        assertThat(outputType.getFieldDefinition("value").getType().getName(), is("Currency"));
+    }
+
+
 }

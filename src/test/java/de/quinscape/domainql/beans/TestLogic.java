@@ -1,6 +1,6 @@
 package de.quinscape.domainql.beans;
 
-import de.quinscape.domainql.annotation.GraphQLInput;
+import de.quinscape.domainql.annotation.GraphQLField;
 import de.quinscape.domainql.annotation.GraphQLLogic;
 import de.quinscape.domainql.annotation.GraphQLMutation;
 import de.quinscape.domainql.annotation.GraphQLQuery;
@@ -47,7 +47,7 @@ public class TestLogic
     }
 
     @GraphQLQuery
-    public String queryString2(@GraphQLInput(required = true) String value, @GraphQLInput(required = true) String second)
+    public String queryString2(@GraphQLField(required = true) String value, @GraphQLField(required = true) String second)
     {
         return value + ":" + second;
     }

@@ -54,7 +54,7 @@ public class GraphQLDateScalar
             {
                 if (!(input instanceof String))
                 {
-                    throw new CoercingParseValueException("Cannot coerce " + input + " to Timestamp");
+                    throw new CoercingParseValueException("Cannot coerce " + input + " to Date");
                 }
 
                 final String isoString = (String) input;
@@ -67,7 +67,7 @@ public class GraphQLDateScalar
             {
                 if (!(input instanceof StringValue))
                 {
-                    throw new CoercingParseValueException("Cannot coerce " + input + " to Timestamp");
+                    throw new CoercingParseValueException("Cannot coerce " + input + " to Date");
                 }
                 return convert(((StringValue) input).getValue());
             }

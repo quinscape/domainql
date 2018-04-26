@@ -1,13 +1,13 @@
 package de.quinscape.domainql.beans;
 
-import de.quinscape.domainql.annotation.GraphQLInput;
+import de.quinscape.domainql.annotation.GraphQLField;
 
 public class ComplexInput
 {
     private String value;
     private int num;
 
-    @GraphQLInput(required = true)
+    @GraphQLField(required = true)
     public String getValue()
     {
         return value;
