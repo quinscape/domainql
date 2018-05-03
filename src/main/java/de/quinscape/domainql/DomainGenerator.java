@@ -5,7 +5,7 @@ import de.quinscape.domainql.model.DomainField;
 import de.quinscape.domainql.model.DomainType;
 import de.quinscape.domainql.model.FieldType;
 import de.quinscape.domainql.model.ForeignKey;
-import de.quinscape.domainql.util.JSONUtil;
+import de.quinscape.spring.jsview.util.JSONUtil;
 import org.jooq.Field;
 import org.jooq.Schema;
 import org.jooq.Table;

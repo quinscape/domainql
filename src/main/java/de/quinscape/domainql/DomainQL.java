@@ -18,7 +18,7 @@ import de.quinscape.domainql.param.ParameterProviderFactory;
 import de.quinscape.domainql.scalar.GraphQLCurrencyScalar;
 import de.quinscape.domainql.scalar.GraphQLDateScalar;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
-import de.quinscape.domainql.util.JSONUtil;
+import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.Scalars;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLEnumType;

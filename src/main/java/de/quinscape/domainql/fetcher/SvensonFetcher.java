@@ -1,6 +1,6 @@
 package de.quinscape.domainql.fetcher;
 
-import de.quinscape.domainql.util.JSONUtil;
+import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.slf4j.Logger;
