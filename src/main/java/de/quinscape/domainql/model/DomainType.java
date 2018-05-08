@@ -4,6 +4,7 @@ import org.svenson.JSONParameter;
 import org.svenson.JSONProperty;
 import org.svenson.JSONTypeHint;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -75,6 +76,7 @@ public class DomainType
 
 
     @JSONProperty(priority = 100)
+    @NotNull
     public String getName()
     {
         return name;
@@ -87,6 +89,7 @@ public class DomainType
     }
 
     @JSONProperty(priority = 80, ignoreIfNull = true)
+    @NotNull
     public List<DomainField> getFields()
     {
         return fields;
@@ -94,6 +97,7 @@ public class DomainType
 
 
     @JSONProperty(priority = 70, ignoreIfNull = true)
+    @NotNull
     public UniqueConstraint getPrimaryKey()
     {
         return primaryKey;
@@ -101,6 +105,7 @@ public class DomainType
 
 
     @JSONProperty(priority = 60, ignoreIfNull = true)
+    @NotNull
     public List<ForeignKey> getForeignKeys()
     {
         return foreignKeys;
@@ -108,6 +113,7 @@ public class DomainType
 
 
     @JSONProperty(priority = 50, ignoreIfNull = true)
+    @NotNull
     public List<UniqueConstraint> getUniqueConstraints()
     {
         return uniqueConstraints;
@@ -118,9 +124,6 @@ public class DomainType
     {
         return new Builder();
     }
-
-
-
 
     @Override
     public boolean equals(Object o)

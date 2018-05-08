@@ -3,6 +3,7 @@ package de.quinscape.domainql.model;
 import org.svenson.JSONParameter;
 import org.svenson.JSONProperty;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,13 +44,14 @@ public class ForeignKey
     }
 
 
-
+    @NotNull
     public List<String> getFields()
     {
         return fields;
     }
 
 
+    @NotNull
     public String getTargetType()
     {
         return targetType;

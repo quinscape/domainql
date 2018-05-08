@@ -1,7 +1,9 @@
 package de.quinscape.domainql.model;
 
 import org.svenson.JSONParameter;
+import org.svenson.JSONProperty;
 
+import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
 
@@ -40,12 +42,15 @@ public class EnumType
     }
 
 
+    @NotNull
+    @JSONProperty(priority = 100)
     public String getName()
     {
         return name;
     }
 
-
+    @NotNull
+    @JSONProperty(priority = 90)
     public List<String> getValues()
     {
         return values;

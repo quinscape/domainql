@@ -4,6 +4,7 @@ import org.svenson.JSONParameter;
 import org.svenson.JSONProperty;
 import org.svenson.JSONTypeHint;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +60,7 @@ public class DomainField
     }
 
     @JSONProperty(priority = 100)
+    @NotNull
     public String getName()
     {
         return name;
@@ -72,6 +74,7 @@ public class DomainField
 
 
     @JSONProperty(priority = 80)
+    @NotNull
     public FieldType getType()
     {
         return type;
@@ -79,6 +82,7 @@ public class DomainField
 
 
     @JSONProperty(priority = 70)
+    @NotNull
     public boolean isRequired()
     {
         return required;
@@ -86,6 +90,7 @@ public class DomainField
 
 
     @JSONProperty(priority = 60)
+    @NotNull
     public int getMaxLength()
     {
         return maxLength;
