@@ -189,6 +189,12 @@ public final class DomainQL
     }
 
 
+    public Set<GraphQLDirective> getAdditionalDirectives()
+    {
+        return additionalDirectives;
+    }
+
+
     /**
      * Returns the GraphQL type associated with the given java type.
      * <p>
@@ -604,13 +610,9 @@ public final class DomainQL
 
         defineInputTypes(builder, map);
 
-        builder.additionalDirective(
-            Directives.IncludeDirective
+        builder.additionalDirectives(
+            additionalDirectives
         );
-        builder.additionalDirective(
-            Directives.SkipDirective
-        );
-
     }
 
 
