@@ -6,6 +6,8 @@ import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.param.DataFetchingEnvironmentProviderFactory;
 import de.quinscape.domainql.param.ParameterProviderFactory;
+import graphql.Directives;
+import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLSchema;
 import org.jooq.DSLContext;
@@ -18,16 +20,26 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Mutable builder / configurator for {@link DomainQL}.
  */
 public class DomainQLBuilder
 {
+    /**
+     * Standard GraphQL directives. Are registered by default, unless {@link #withoutStandardDirectives()} is called.
+     */
+    private final static Set<GraphQLDirective> STANDARD_DIRECTIVES;
+    static
+    {
+        Set<GraphQLDirective> map = new LinkedHashSet<>();
+        map.add(Directives.IncludeDirective);
+        map.add(Directives.SkipDirective);
+        STANDARD_DIRECTIVES = map;
+    }
+
     private final DSLContext dslContext;
 
     private final OptionsBuilder optionsBuilder = new OptionsBuilder(this);
@@ -49,6 +61,8 @@ public class DomainQLBuilder
 
     private Set<GraphQLFieldDefinition> additionalQueries  = new LinkedHashSet<>();
     private Set<GraphQLFieldDefinition> additionalMutations = new LinkedHashSet<>();
+
+    private Set<GraphQLDirective> additionalDirectives = new LinkedHashSet<>(STANDARD_DIRECTIVES);
 
 
     DomainQLBuilder(DSLContext dslContext)
@@ -87,9 +101,12 @@ public class DomainQLBuilder
             optionsBuilder.buildOptions(),
             mirrorInputs,
             Collections.unmodifiableSet(additionalQueries),
-            Collections.unmodifiableSet(additionalMutations)
+            Collections.unmodifiableSet(additionalMutations),
+            Collections.unmodifiableSet(additionalDirectives)
         );
     }
+
+
 
 
     private Map<ForeignKey<?, ?>, RelationConfiguration> resolveFields(Map<TableField<?, ?>, RelationConfiguration> relationConfigurations)
@@ -367,4 +384,41 @@ public class DomainQLBuilder
 
         return this;
     }
+
+
+    /**
+     * Add additional directives for the GraphQL schema.
+     *
+     * @param additionalDirectives     directives
+     * @return  this builder
+     */
+    public DomainQLBuilder withDirectives(GraphQLDirective... additionalDirectives)
+    {
+        Collections.addAll(this.additionalDirectives, additionalDirectives);
+        return this;
+    }
+
+    /**
+     * Add additional directives for the GraphQL schema.
+     *
+     * @param additionalDirectives     directives
+     * @return  this builder
+     */
+    public DomainQLBuilder withDirective(GraphQLDirective additionalDirectives)
+    {
+        this.additionalDirectives.add( additionalDirectives);
+        return this;
+    }
+
+    /**
+     * Removes the registeration for the standard directives.
+     *
+     * @return  this builder
+     */
+    public DomainQLBuilder withoutStandardDirectives()
+    {
+        additionalDirectives.removeAll(STANDARD_DIRECTIVES);
+        return this;
+    }
 }
+

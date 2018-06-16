@@ -19,8 +19,10 @@ import de.quinscape.domainql.scalar.GraphQLCurrencyScalar;
 import de.quinscape.domainql.scalar.GraphQLDateScalar;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.spring.jsview.util.JSONUtil;
+import graphql.Directives;
 import graphql.Scalars;
 import graphql.schema.GraphQLArgument;
+import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectField;
@@ -149,6 +151,8 @@ public final class DomainQL
 
     private final Set<GraphQLFieldDefinition> additionalMutations;
 
+    private final Set<GraphQLDirective> additionalDirectives;
+
 
     DomainQL(
         DSLContext dslContext,
@@ -161,8 +165,9 @@ public final class DomainQL
         Options options,
         boolean mirrorInputs,
         Set<GraphQLFieldDefinition> additionalQueries,
-        Set<GraphQLFieldDefinition> additionalMutations
+        Set<GraphQLFieldDefinition> additionalMutations,
 
+        Set<GraphQLDirective> additionalDirectives
     )
     {
         this.dslContext = dslContext;
@@ -174,6 +179,7 @@ public final class DomainQL
         this.defaultRelationConfiguration = defaultRelationConfiguration;
         this.additionalQueries = additionalQueries;
         this.additionalMutations = additionalMutations;
+        this.additionalDirectives = additionalDirectives;
 
         registeredOutputTypes = new HashMap<>(JAVA_TYPE_TO_GRAPHQL);
         registeredInputTypes = new HashMap<>(JAVA_TYPE_TO_GRAPHQL);
@@ -589,6 +595,13 @@ public final class DomainQL
         registerLogic(builder, logicBeans, map);
 
         defineInputTypes(builder, map);
+
+        builder.additionalDirective(
+            Directives.IncludeDirective
+        );
+        builder.additionalDirective(
+            Directives.SkipDirective
+        );
 
     }
 
