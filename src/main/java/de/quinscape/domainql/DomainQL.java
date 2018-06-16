@@ -452,6 +452,12 @@ public final class DomainQL
         GraphQLSchema.Builder builder, Class<?> outputType, Set<Class<?>> extraOutputTypes
     )
     {
+        if (registeredOutputTypes.containsKey(outputType))
+        {
+            // already registered
+            return;
+        }
+
         extraOutputTypes.add(outputType);
 
         final JSONClassInfo classInfo = JSONUtil.getClassInfo(outputType);
@@ -577,6 +583,8 @@ public final class DomainQL
     protected void register(GraphQLSchema.Builder builder)
     {
         final Set<Class<?>> jooqInputTypes = new LinkedHashSet<>();
+
+        // define types for the JOOQ Tables
         jooqTables.forEach(table -> defineTypeForTable(builder, table, jooqTables, jooqInputTypes));
 
         final Map<Class<?>, String> map = new HashMap<>();

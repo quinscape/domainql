@@ -6,6 +6,7 @@ import de.quinscape.domainql.beans.LogicWithWrongInjection;
 import de.quinscape.domainql.beans.LogicWithWrongInjection2;
 import de.quinscape.domainql.beans.TestLogic;
 import de.quinscape.domainql.beans.LogicWithMirrorInput;
+import de.quinscape.domainql.beans.TypeRepeatLogic;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.beans.SourceTwoInput;
@@ -453,4 +454,24 @@ public class DomainQLTest
     }
 
 
+    @Test
+    public void testTypeRepeat()
+    {
+
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new TypeRepeatLogic()))
+
+            // source variants
+            .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.NONE, TargetField.NONE)
+            .configureRelation(   SOURCE_TWO.TARGET_ID, SourceField.SCALAR, TargetField.NONE)
+            .configureRelation( SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE)
+            .configureRelation(  SOURCE_FIVE.TARGET_ID, SourceField.NONE, TargetField.ONE)
+            .configureRelation(   SOURCE_SIX.TARGET_ID, SourceField.NONE, TargetField.MANY)
+            .configureRelation(    SOURCE_SEVEN.TARGET, SourceField.OBJECT, TargetField.NONE)
+
+            .buildGraphQLSchema();
+
+        
+    }
 }
