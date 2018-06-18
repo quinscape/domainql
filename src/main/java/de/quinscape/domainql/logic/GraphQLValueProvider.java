@@ -5,12 +5,8 @@ import de.quinscape.domainql.param.ParameterProvider;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLInputObjectType;
-import graphql.schema.GraphQLInputType;
-import graphql.schema.GraphQLModifiedType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
-import graphql.schema.GraphQLTypeReference;
-import graphql.schema.GraphQLUnmodifiedType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.svenson.info.JSONClassInfo;
@@ -60,22 +56,6 @@ public class GraphQLValueProvider
     {
         return isRequired;
     }
-
-
-    public GraphQLUnmodifiedType getUnmodifiedType(GraphQLType graphQLType) {
-
-        if (graphQLType instanceof GraphQLTypeReference)
-        {
-
-            graphQLType.getName();
-        }
-
-        if (graphQLType instanceof GraphQLModifiedType) {
-            return getUnmodifiedType(((GraphQLModifiedType) graphQLType).getWrappedType());
-        }
-        return (GraphQLUnmodifiedType) graphQLType;
-    }
-
 
     @Override
     public Object provide(DataFetchingEnvironment environment)

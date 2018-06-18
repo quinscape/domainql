@@ -4,7 +4,6 @@ package de.quinscape.domainql;
 import com.google.common.collect.ImmutableMap;
 import de.quinscape.domainql.beans.TestLogic;
 import de.quinscape.domainql.beans.TypeConversionLogic;
-import de.quinscape.domainql.beans.TypeRepeatLogic;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.mock.TestProvider;
@@ -34,10 +33,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import static de.quinscape.domainql.testdomain.Tables.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
-
-import static de.quinscape.domainql.testdomain.Tables.*;
 
 /**
  * Execution with the test schema against a mock connection

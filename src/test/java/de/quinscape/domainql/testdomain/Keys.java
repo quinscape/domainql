@@ -32,12 +32,11 @@ import de.quinscape.domainql.testdomain.tables.records.TargetSevenRecord;
 import de.quinscape.domainql.testdomain.tables.records.TargetSixRecord;
 import de.quinscape.domainql.testdomain.tables.records.TargetThreeRecord;
 import de.quinscape.domainql.testdomain.tables.records.TargetTwoRecord;
-
-import javax.annotation.Generated;
-
 import org.jooq.ForeignKey;
 import org.jooq.UniqueKey;
 import org.jooq.impl.Internal;
+
+import javax.annotation.Generated;
 
 
 /**

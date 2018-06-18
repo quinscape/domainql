@@ -2,14 +2,14 @@ package de.quinscape.domainql;
 
 
 import de.quinscape.domainql.beans.LogicWithAnnotated;
+import de.quinscape.domainql.beans.LogicWithMirrorInput;
 import de.quinscape.domainql.beans.LogicWithWrongInjection;
 import de.quinscape.domainql.beans.LogicWithWrongInjection2;
+import de.quinscape.domainql.beans.SourceTwoInput;
 import de.quinscape.domainql.beans.TestLogic;
-import de.quinscape.domainql.beans.LogicWithMirrorInput;
 import de.quinscape.domainql.beans.TypeRepeatLogic;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
-import de.quinscape.domainql.beans.SourceTwoInput;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.domainql.testdomain.Public;
 import de.quinscape.domainql.testdomain.tables.SourceOne;
@@ -19,7 +19,6 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import org.junit.Test;
@@ -30,11 +29,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static de.quinscape.domainql.testdomain.Tables.*;
 import static graphql.schema.GraphQLNonNull.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
-
-import static de.quinscape.domainql.testdomain.Tables.*;
 
 public class DomainQLTest
 {

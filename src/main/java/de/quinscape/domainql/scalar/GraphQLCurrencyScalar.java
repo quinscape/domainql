@@ -1,7 +1,6 @@
 package de.quinscape.domainql.scalar;
 
 import graphql.language.IntValue;
-import graphql.language.StringValue;
 import graphql.schema.Coercing;
 import graphql.schema.CoercingParseLiteralException;
 import graphql.schema.CoercingParseValueException;

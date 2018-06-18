@@ -2,8 +2,9 @@ package de.quinscape.domainql.beans;
 
 import de.quinscape.domainql.annotation.GraphQLLogic;
 import de.quinscape.domainql.annotation.GraphQLQuery;
+import de.quinscape.domainql.testdomain.tables.SourceOne;
 
-/* BOOM */ import de.quinscape.domainql.testdomain.tables.SourceOne; /* BOOM */
+/* BOOM */
 
 @GraphQLLogic
 public class LogicWithWrongInjection

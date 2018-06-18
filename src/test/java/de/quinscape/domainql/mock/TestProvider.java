@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 
-import static org.jooq.impl.DSL.using;
+import static org.jooq.impl.DSL.*;
 
 public class TestProvider
     implements MockDataProvider

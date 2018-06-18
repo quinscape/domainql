@@ -21,7 +21,6 @@ import de.quinscape.domainql.scalar.GraphQLCurrencyScalar;
 import de.quinscape.domainql.scalar.GraphQLDateScalar;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.spring.jsview.util.JSONUtil;
-import graphql.Directives;
 import graphql.Scalars;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLDirective;
@@ -73,7 +72,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static graphql.schema.GraphQLNonNull.nonNull;
+import static graphql.schema.GraphQLNonNull.*;
 
 /**
  * Annotation-based convention-over-configuration GraphQL Schema helper.
