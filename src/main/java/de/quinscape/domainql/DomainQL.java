@@ -1,5 +1,7 @@
 package de.quinscape.domainql;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import de.quinscape.domainql.annotation.GraphQLField;
 import de.quinscape.domainql.config.Options;
 import de.quinscape.domainql.config.RelationConfiguration;
@@ -359,7 +361,7 @@ public final class DomainQL
 
 
     private void registerLogic(
-        GraphQLSchema.Builder builder, Collection<Object> logicBeans, Map<Class<?>, String> inputTypes
+        GraphQLSchema.Builder builder, Collection<Object> logicBeans, BiMap<Class<?>, String> inputTypes
     )
     {
         log.debug("registerLogic {}", logicBeans);
@@ -420,6 +422,7 @@ public final class DomainQL
 
         for (Query query : queries)
         {
+
             List<GraphQLArgument> arguments = getGraphQLArguments(query);
 
             queryTypeBuilder.field(GraphQLFieldDefinition.newFieldDefinition()
@@ -560,12 +563,15 @@ public final class DomainQL
             if (provider instanceof GraphQLValueProvider)
             {
                 final GraphQLValueProvider graphQLValueProvider = (GraphQLValueProvider) provider;
+                final GraphQLTypeReference typeRef = GraphQLTypeReference.typeRef(graphQLValueProvider.getInputType());
                 arguments.add(
                     GraphQLArgument.newArgument()
                         .name(graphQLValueProvider.getArgumentName())
                         .description(graphQLValueProvider.getDescription())
                         .defaultValue(graphQLValueProvider.getDefaultValue())
-                        .type(graphQLValueProvider.getInputType())
+                        .type(
+                            graphQLValueProvider.isRequired() ? GraphQLNonNull.nonNull(typeRef) : typeRef
+                        )
                         .build()
                 );
             }
@@ -588,13 +594,13 @@ public final class DomainQL
 
     protected void register(GraphQLSchema.Builder builder)
     {
+
         final Set<Class<?>> jooqInputTypes = new LinkedHashSet<>();
 
         // define types for the JOOQ Tables
         jooqTables.forEach(table -> defineTypeForTable(builder, table, jooqTables, jooqInputTypes));
 
-        final Map<Class<?>, String> map = new HashMap<>();
-
+        final BiMap<Class<?>, String> map = HashBiMap.create(jooqInputTypes.size() * 3 / 2);
 
         jooqInputTypes.forEach( cls -> map.put(cls, cls.getSimpleName() + "Input"));
         inputTypes.forEach( cls -> {

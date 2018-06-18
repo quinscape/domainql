@@ -1,10 +1,14 @@
 package de.quinscape.domainql;
 
 
+import com.google.common.collect.ImmutableMap;
 import de.quinscape.domainql.beans.TestLogic;
+import de.quinscape.domainql.beans.TypeConversionLogic;
+import de.quinscape.domainql.beans.TypeRepeatLogic;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.mock.TestProvider;
+import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.domainql.testdomain.Public;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
@@ -24,6 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.svenson.JSON;
 
+import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +56,8 @@ public class DomainQLExecutionTest
 
     final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
         .objectTypes(Public.PUBLIC)
-        .logicBeans(Collections.singleton(logic))
+        .logicBeans(Arrays.asList(logic, new TypeConversionLogic()))
+        .createMirrorInputTypes(true)
 
         // source variants
         .configureRelation(    SOURCE_ONE.TARGET_ID, SourceField.NONE, TargetField.NONE)
@@ -219,4 +226,30 @@ public class DomainQLExecutionTest
         assumeNoErrors(executionResult);
         assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"extraMutation\":\"mutated:xxx\"}"));
     }
+
+    @Test
+    public void testTypeConvertingMutation()
+    {
+
+        final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
+            .logicBeans(Collections.singletonList(new TypeConversionLogic()))
+            .createMirrorInputTypes(true)
+            .buildGraphQLSchema();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        final HashMap<String, Object> variables = new HashMap<>();
+
+
+        variables.put("target", ImmutableMap.of("name", "qwertz", "created", GraphQLTimestampScalar.toISO8601(new Timestamp(3600))));
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            .query("mutation mutateConverted($target: ConversionTargetInput!) { mutateConverted(target: $target) }")
+            .variables(variables)
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+        assumeNoErrors(executionResult);
+        assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"mutateConverted\":\"qwertz:1970-01-01 01:00:03.0\"}"));
+    }
+
 }

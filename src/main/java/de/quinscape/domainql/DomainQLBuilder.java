@@ -4,11 +4,14 @@ import de.quinscape.domainql.annotation.GraphQLLogic;
 import de.quinscape.domainql.config.RelationConfiguration;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
+import de.quinscape.domainql.logic.DomainQLMethod;
 import de.quinscape.domainql.param.DataFetchingEnvironmentProviderFactory;
 import de.quinscape.domainql.param.ParameterProviderFactory;
 import graphql.Directives;
+import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import org.jooq.DSLContext;
 import org.jooq.ForeignKey;
@@ -306,9 +309,10 @@ public class DomainQLBuilder
         final DomainQL domainQL = this.build();
         final GraphQLSchema.Builder builder = GraphQLSchema.newSchema();
         domainQL.register(builder);
-        return builder.build();
-    }
+        final GraphQLSchema schema = builder.build();
 
+        return schema;
+    }
 
     /**
      * If set to <code>true</code>, generate a mirror input types for the JOOQ types. For every domain type Foo there

@@ -28,11 +28,7 @@ public class GraphQLTimestampScalar
                 {
                     try
                     {
-                        TimeZone tz = TimeZone.getTimeZone("UTC");
-                        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-                        df.setTimeZone(tz);
-
-                        return df.format(dataFetcherResult);
+                        return toISO8601((Timestamp) dataFetcherResult);
                     }
                     catch (RuntimeException e)
                     {
@@ -71,6 +67,16 @@ public class GraphQLTimestampScalar
                 return convert(((StringValue) input).getValue());
             }
         });
+    }
+
+
+    public static String toISO8601(Timestamp dataFetcherResult)
+    {
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        df.setTimeZone(tz);
+
+        return df.format(dataFetcherResult);
     }
 
 

@@ -112,6 +112,13 @@ public class DomainQLTest
             assertThat(queryWithComplexInput.getArguments().size(), is(1));
             assertThat(queryWithComplexInput.getArgument("complexInput").getType().getName(), is("ComplexInput"));
             assertThat(queryWithComplexInput.getType(), is(Scalars.GraphQLBoolean));
+
+            final GraphQLType complexInput = schema.getType("ComplexInput");
+
+            log.info("ComplexInput = {}", complexInput);
+
+            assertThat(complexInput, is(notNullValue()));
+
         }
     }
 

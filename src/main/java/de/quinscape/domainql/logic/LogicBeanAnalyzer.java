@@ -1,6 +1,7 @@
 package de.quinscape.domainql.logic;
 
 import com.esotericsoftware.reflectasm.MethodAccess;
+import com.google.common.collect.BiMap;
 import de.quinscape.domainql.DomainQL;
 import de.quinscape.domainql.DomainQLException;
 import de.quinscape.domainql.annotation.GraphQLField;
@@ -28,6 +29,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -52,18 +54,17 @@ public class LogicBeanAnalyzer
 
     private final Collection<ParameterProviderFactory> parameterProviderFactories;
 
-    private final Map<Class<?>, String> inputTypes;
+    private final BiMap<Class<?>, String> inputTypes;
 
     private final Map<Class<?>, GraphQLOutputType> registeredOutputTypes;
 
     private final Consumer<Class<?>> registerOutputType;
 
-
     public LogicBeanAnalyzer(
         DomainQL domainQL,
         Collection<ParameterProviderFactory> parameterProviderFactories,
         Collection<Object> logicBeans,
-        Map<Class<?>, String> inputTypes,
+        BiMap<Class<?>, String> inputTypes,
         Map<Class<?>, GraphQLOutputType> registeredOutputTypes,
         Consumer<Class<?>> registerOutputType
     )
@@ -74,6 +75,18 @@ public class LogicBeanAnalyzer
         this.registeredOutputTypes = registeredOutputTypes;
         this.registerOutputType = registerOutputType;
         logicBeans.forEach(this::discover);
+    }
+
+
+
+    private Map<String, Class<?>> invert(Map<Class<?>, String> inputTypes)
+    {
+        Map<String, Class<?>> map = new HashMap<>();
+        for (Map.Entry<Class<?>, String> e : inputTypes.entrySet())
+        {
+            map.put(e.getValue(), e.getKey());
+        }
+        return map;
     }
 
 
@@ -268,12 +281,14 @@ public class LogicBeanAnalyzer
                     else
                     {
                         GraphQLInputType inputType = DomainQL.getGraphQLScalarFor(parameterType, argAnno);
+                        final String inputTypeName;
                         if (inputType == null)
                         {
                             final String nameFromConfig = inputTypes.get(parameterType);
                             if (nameFromConfig != null)
                             {
                                 inputType = new GraphQLTypeReference(nameFromConfig);
+                                inputTypeName = nameFromConfig;
                             }
                             else
                             {
@@ -281,8 +296,13 @@ public class LogicBeanAnalyzer
 
                                 inputTypes.put(parameterType, newInputName);
                                 inputType = new GraphQLTypeReference(newInputName);
+                                inputTypeName = newInputName;
                             }
 
+                        }
+                        else
+                        {
+                            inputTypeName = inputType.getName();
                         }
 
                         boolean isRequired = argAnno != null && argAnno.required();
@@ -314,12 +334,14 @@ public class LogicBeanAnalyzer
                         final GraphQLValueProvider graphQLValueProvider = new GraphQLValueProvider(
                             parameterName,
                             description,
-                            isRequired ? GraphQLNonNull.nonNull(inputType) : inputType,
-                            defaultValue
+                            isRequired,
+                            inputTypeName,
+                            defaultValue,
+                            inputTypes
                         );
 
                         final String paramDesc = graphQLValueProvider.getDescription();
-                        log.debug("  {}", graphQLValueProvider.getArgumentName() + ": " + graphQLValueProvider.getInputType().getName() + (StringUtils.hasText(paramDesc) ? " # " + paramDesc : ""));
+                        log.debug("  {}", graphQLValueProvider.getArgumentName() + ": " + graphQLValueProvider.getInputType() + (StringUtils.hasText(paramDesc) ? " # " + paramDesc : ""));
 
                         list.add(
                             graphQLValueProvider

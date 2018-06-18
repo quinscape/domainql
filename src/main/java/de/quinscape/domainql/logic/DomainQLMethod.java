@@ -24,9 +24,9 @@ public abstract class DomainQLMethod
 
     protected final int methodIndex;
 
-    protected final List<ParameterProvider> parameterProviders;
-
     protected final GraphQLOutputType resultType;
+
+    protected final List<ParameterProvider> parameterProviders;
 
 
     public DomainQLMethod(
@@ -80,7 +80,12 @@ public abstract class DomainQLMethod
         for (int i = 0; i < parameterProviders.size(); i++)
         {
             ParameterProvider parameterProvider = parameterProviders.get(i);
-            paramValues[i] = parameterProvider.provide(environment);
+
+            final Object value = parameterProvider.provide(environment);
+
+
+
+            paramValues[i] = value;
         }
         return methodAccess.invoke(logicBean, methodIndex, paramValues);
     }
