@@ -1,6 +1,7 @@
 package de.quinscape.domainql.model;
 
 import de.quinscape.domainql.DomainQLException;
+import de.quinscape.domainql.annotation.GraphQLField;
 import org.svenson.JSONParameter;
 import org.svenson.JSONProperty;
 import org.svenson.JSONTypeHint;
@@ -20,10 +21,13 @@ public class Domain
     private final List<EnumType> enumTypes;
     private final String layoutData;
 
+    public final static String TYPE = "domainQL.Domain";
+
     @JSONProperty(priority = 1000, readOnly = true)
-    public String getDomainType()
+    @GraphQLField( defaultValue = TYPE )
+    public String getType()
     {
-        return "domainQL.Domain";
+        return TYPE;
     }
 
     public Domain(
