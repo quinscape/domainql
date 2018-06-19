@@ -5,6 +5,7 @@ import de.quinscape.spring.jsview.JsViewContext;
 import de.quinscape.spring.jsview.JsViewProvider;
 import de.quinscape.spring.jsview.loader.ResourceHandle;
 import de.quinscape.spring.jsview.loader.ResourceLoader;
+import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
@@ -20,7 +21,7 @@ import java.util.Map;
 /**
  * A js view data provider that executes graphql queries for Javascript entry points.
  */
-public class PreloadedGraphQLQueryProvider
+public final class PreloadedGraphQLQueryProvider
     implements JsViewProvider
 {
     private final static Logger log = LoggerFactory.getLogger(PreloadedGraphQLQueryProvider.class);
@@ -83,14 +84,15 @@ public class PreloadedGraphQLQueryProvider
         // are correct and up-to-date ..
         if (errors.size() > 0)
         {
-            final String message = "Error executing initial query " + query + ": ";
-            log.error(message+ " {}", errors);
-            throw new DomainQLException(message + errors);
+            final String message =
+                "Error executing initial query:\n" +
+                "QUERY = " + query + "\n" +
+                "ERRORS = " + JSONUtil.DEFAULT_GENERATOR.forValue(errors);
+            log.error(message + " {}", errors);
+            throw new PreloadedQueryException(message + errors);
         }
 
         // .. and since we're not having errors, we just return the pure data.
         return executionResult.getData();
     }
-
-
 }

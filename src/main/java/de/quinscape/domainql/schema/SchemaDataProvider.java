@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Js view data provider that provides the current graphql input types
  */
-public class SchemaDataProvider
+public final class SchemaDataProvider
     implements JsViewProvider
 {
     private static final String DEFAULT_VIEW_DATA_NAME = "schema";
