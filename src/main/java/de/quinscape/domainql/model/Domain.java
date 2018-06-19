@@ -19,7 +19,6 @@ public class Domain
     private final String description;
     private final List<DomainType> domainTypes;
     private final List<EnumType> enumTypes;
-    private final String layoutData;
 
     public final static String TYPE = "domainQL.Domain";
 
@@ -41,10 +40,7 @@ public class Domain
 
         @JSONParameter("enumTypes")
         @JSONTypeHint(EnumType.class)
-        List<EnumType> enumTypes,
-
-        @JSONParameter("layoutData")
-        String layoutData
+        List<EnumType> enumTypes
     )
     {
         if (domainTypes == null)
@@ -60,7 +56,6 @@ public class Domain
         this.description = description;
         this.domainTypes = domainTypes;
         this.enumTypes = enumTypes;
-        this.layoutData = layoutData;
     }
 
 
@@ -82,14 +77,6 @@ public class Domain
     {
         return enumTypes;
     }
-
-
-    @JSONProperty(priority = 60)
-    public String getLayoutData()
-    {
-        return layoutData;
-    }
-
 
     public static Builder newDomain()
     {
@@ -157,13 +144,8 @@ public class Domain
         {
             return false;
         }
-        if (!enumTypes.equals(domain.enumTypes))
-        {
-            return false;
-        }
-        return layoutData != null ? layoutData.equals(domain.layoutData) : domain.layoutData == null;
+        return enumTypes.equals(domain.enumTypes);
     }
-
 
 
     @Override
@@ -171,10 +153,8 @@ public class Domain
     {
         int result = domainTypes.hashCode();
         result = 31 * result + enumTypes.hashCode();
-        result = 31 * result + (layoutData != null ? layoutData.hashCode() : 0);
         return result;
     }
-
 
 
     public static void ensureUniqueness(List<? extends Model> domainTypes)
@@ -221,8 +201,6 @@ public class Domain
     {
         private List<DomainType> domainTypes = new ArrayList<>();
 
-        private String layoutData = "{}";
-
         private List<EnumType> enumTypes = new ArrayList<>();
 
         private String description;
@@ -235,8 +213,7 @@ public class Domain
             return new Domain(
                 description,
                 Collections.unmodifiableList(domainTypes),
-                Collections.unmodifiableList(enumTypes),
-                layoutData
+                Collections.unmodifiableList(enumTypes)
             );
         }
 
@@ -277,21 +254,7 @@ public class Domain
             this.enumTypes.addAll(enumTypes);
             return this;
         }
-
-
-        public String getLayoutData()
-        {
-            return layoutData;
-        }
-
-
-        public Builder withLayoutData(String layoutData)
-        {
-            this.layoutData = layoutData;
-            return this;
-        }
-
-
+        
         public String getDescription()
         {
             return description;

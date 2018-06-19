@@ -25,6 +25,8 @@ public class DomainType
 
     private final List<UniqueConstraint> uniqueConstraints;
 
+    private final DTLayout layout;
+
     public DomainType(
         @JSONParameter("name")
         String name,
@@ -43,11 +45,14 @@ public class DomainType
         List<ForeignKey> foreignKeys,
 
         @JSONParameter("uniqueConstraints")
-        List<UniqueConstraint> uniqueConstraints
+        List<UniqueConstraint> uniqueConstraints,
+        @JSONParameter("_")
+        DTLayout layout
     )
     {
         this.description = description;
         this.uniqueConstraints = uniqueConstraints;
+        this.layout = layout;
         if (name == null)
         {
             throw new IllegalArgumentException("name can't be null");
@@ -124,6 +129,14 @@ public class DomainType
     {
         return new Builder();
     }
+
+
+    @JSONProperty("_")
+    public DTLayout getLayout()
+    {
+        return layout;
+    }
+
 
     @Override
     public boolean equals(Object o)
@@ -210,6 +223,8 @@ public class DomainType
 
         private List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
 
+        private DTLayout layout;
+
 
         public DomainType build()
         {
@@ -219,7 +234,8 @@ public class DomainType
                 primaryKey,
                 fields.size() == 0 ? DEFAULT_FIELDS : Collections.unmodifiableList(fields),
                 Collections.unmodifiableList(foreignKeys),
-                uniqueConstraints
+                uniqueConstraints,
+                layout
             );
         }
 
@@ -319,6 +335,18 @@ public class DomainType
             return this;
         }
 
+
+        public Builder withLayout(float x, float y)
+        {
+            this.layout = new DTLayout(x,y, null);
+            return this;
+        }
+
+        public Builder withLayout(float x, float y, String color)
+        {
+            this.layout = new DTLayout(x,y, color);
+            return this;
+        }
     }
 
 

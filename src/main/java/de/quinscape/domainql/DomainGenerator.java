@@ -158,7 +158,8 @@ public final class DomainGenerator
                         null,
                         fieldNames(ref.getFields()),
                         StringUtils.toCamelCase(key.getTable().getName()),
-                        fieldNames(key.getFields())
+                        fieldNames(key.getFields()),
+                        null
                     );
                 }
             )

@@ -14,20 +14,25 @@ public class ForeignKey
     private final String targetType;
     private final List<String> targetFields;
 
+    private final FKLayout layout;
+
 
     public ForeignKey(
         @JSONParameter("description")
-        String description,
+            String description,
         @JSONParameter("fields")
-        List<String> fields,
+            List<String> fields,
         @JSONParameter("targetType")
-        String targetType,
+            String targetType,
         @JSONParameter("targetFields")
-        List<String> targetFields
+            List<String> targetFields,
+        @JSONParameter("_")
+        FKLayout layout
     )
     {
         this.description = description;
         this.targetFields = targetFields;
+        this.layout = layout;
 
         if (fields == null)
         {
@@ -98,6 +103,12 @@ public class ForeignKey
         return targetFields;
     }
 
+    @JSONProperty("_")
+    public FKLayout getLayout()
+    {
+        return layout;
+    }
+
 
     @Override
     public int hashCode()
@@ -118,13 +129,16 @@ public class ForeignKey
 
         private List<String> targetFields = new ArrayList<>();
 
+        private FKLayout layout;
+
 
         public ForeignKey build()
         {
             return new ForeignKey(
                 description, fields,
                 targetType,
-                targetFields
+                targetFields,
+                layout
             );
         }
 
@@ -185,6 +199,13 @@ public class ForeignKey
         public Builder withTargetFields(List<String> targetFields)
         {
             this.targetFields = targetFields;
+            return this;
+        }
+
+
+        public Builder setLayout(float x, float y)
+        {
+            this.layout = new FKLayout(x,y);
             return this;
         }
     }
