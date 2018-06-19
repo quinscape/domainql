@@ -4,15 +4,15 @@ import org.svenson.JSONParameter;
 
 public class DTLayout
 {
-    private final float x, y;
+    private final double x, y;
     private final String color;
 
 
     public DTLayout(
         @JSONParameter("x")
-        float x,
+        double x,
         @JSONParameter("y")
-        float y,
+        double y,
         @JSONParameter("color")
         String color
     )
@@ -23,13 +23,13 @@ public class DTLayout
     }
 
 
-    public float getX()
+    public double getX()
     {
         return x;
     }
 
 
-    public float getY()
+    public double getY()
     {
         return y;
     }

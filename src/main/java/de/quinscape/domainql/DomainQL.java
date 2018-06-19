@@ -98,6 +98,8 @@ public final class DomainQL
         map.put(Short.TYPE, Scalars.GraphQLShort);
         map.put(Integer.class, Scalars.GraphQLInt);
         map.put(Integer.TYPE, Scalars.GraphQLInt);
+        map.put(Double.class, Scalars.GraphQLFloat);
+        map.put(Double.TYPE, Scalars.GraphQLFloat);
         map.put(Long.class, Scalars.GraphQLLong);
         map.put(Long.TYPE, Scalars.GraphQLLong);
         map.put(String.class, Scalars.GraphQLString);

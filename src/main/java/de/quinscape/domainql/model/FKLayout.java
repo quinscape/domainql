@@ -4,13 +4,13 @@ import org.svenson.JSONParameter;
 
 public class FKLayout
 {
-    private final float x, y;
+    private final double x, y;
 
     public FKLayout(
         @JSONParameter("x")
-        float x,
+        double x,
         @JSONParameter("y")
-        float y
+        double y
     )
     {
         this.x = x;
@@ -18,13 +18,13 @@ public class FKLayout
     }
 
 
-    public float getX()
+    public double getX()
     {
         return x;
     }
 
 
-    public float getY()
+    public double getY()
     {
         return y;
     }
