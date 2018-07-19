@@ -1,5 +1,6 @@
 package de.quinscape.domainql.schema;
 
+import de.quinscape.domainql.util.JSONHolder;
 import de.quinscape.spring.jsview.JsViewContext;
 import de.quinscape.spring.jsview.JsViewProvider;
 import graphql.ExecutionInput;
@@ -17,7 +18,7 @@ public final class SchemaDataProvider
 {
     private static final String DEFAULT_VIEW_DATA_NAME = "schema";
 
-    private final Object schemaData;
+    private final JSONHolder schemaData;
 
     private final String viewDataName;
 
@@ -120,13 +121,13 @@ public final class SchemaDataProvider
         ExecutionResult executionResult = graphQL.execute(executionInput);
         Map<String,Object> result = executionResult.getData();
 
-        this.schemaData = result.get("__schema");
+        this.schemaData = new JSONHolder(result.get("__schema"));
         this.viewDataName = viewDataName;
     }
 
 
     @Override
-    public void provide(JsViewContext context) throws Exception
+    public void provide(JsViewContext context)
     {
         context.provideViewData(viewDataName, schemaData);
     }

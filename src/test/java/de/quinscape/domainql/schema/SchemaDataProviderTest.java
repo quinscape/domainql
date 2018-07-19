@@ -9,6 +9,8 @@ import graphql.schema.GraphQLSchema;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.svenson.JSON;
+import org.svenson.JSONParser;
 import org.svenson.util.JSONBeanUtil;
 import org.svenson.util.JSONPathUtil;
 
@@ -41,7 +43,14 @@ public class SchemaDataProviderTest
         final TestJsViewContext ctx = new TestJsViewContext();
         provider.provide(ctx);
 
-        final Map<String,Object> schemaData = (Map<String, Object>) ctx.getViewData().get("schema");
+        final JSON gen = JSONUtil.DEFAULT_GENERATOR;
+        final JSONParser parser = JSONUtil.DEFAULT_PARSER;
+        final Map<String, Object> schemaData =
+            parser.parse(
+                Map.class,
+                gen.forValue(ctx.getViewData().get("schema")
+                )
+            );
 
         List<Object> types = (List<Object>) pathUtil.getPropertyPath(schemaData, "types");
 
