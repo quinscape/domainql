@@ -5,6 +5,7 @@ import de.quinscape.domainql.beans.LogicWithAnnotated;
 import de.quinscape.domainql.beans.LogicWithMirrorInput;
 import de.quinscape.domainql.beans.LogicWithWrongInjection;
 import de.quinscape.domainql.beans.LogicWithWrongInjection2;
+import de.quinscape.domainql.beans.NoMirroLogic;
 import de.quinscape.domainql.beans.SourceTwoInput;
 import de.quinscape.domainql.beans.TestLogic;
 import de.quinscape.domainql.beans.TypeRepeatLogic;
@@ -291,7 +292,7 @@ public class DomainQLTest
 
         final GraphQLSchema schema = DomainQL.newDomainQL(null)
             .objectTypes(Public.PUBLIC)
-            .logicBeans(Arrays.asList(logic, logic2))
+            .logicBeans(Arrays.asList(logic, logic2, new NoMirroLogic()))
             .createMirrorInputTypes(true)
             // test override
             .overrideInputTypes(SourceTwoInput.class)
@@ -332,6 +333,11 @@ public class DomainQLTest
             final GraphQLArgument arg = fieldDef.getArgument("inputOne");
             assertThat(arg, is(notNullValue()));
             assertThat(arg.getType().getName(), is("SourceOneInput"));
+        }
+
+        {
+            final GraphQLObjectType queryType = (GraphQLObjectType) schema.getType("NoMirrorInput");
+            assertThat(queryType, is(nullValue()));
         }
 
     }

@@ -3,6 +3,7 @@ package de.quinscape.domainql;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import de.quinscape.domainql.annotation.GraphQLField;
+import de.quinscape.domainql.annotation.GraphQLObject;
 import de.quinscape.domainql.config.Options;
 import de.quinscape.domainql.config.RelationConfiguration;
 import de.quinscape.domainql.config.SourceField;
@@ -399,7 +400,9 @@ public final class DomainQL
             final GraphQLObjectType newObjectType = domainTypeBuilder.build();
             builder.additionalType(newObjectType);
 
-            if (mirrorInputs)
+
+            final GraphQLObject objectAnno = outputType.getAnnotation(GraphQLObject.class);
+            if (mirrorInputs && (objectAnno == null || objectAnno.createMirror()))
             {
                 inputTypes.put(outputType, outputType.getSimpleName() + INPUT_SUFFIX);
             }
