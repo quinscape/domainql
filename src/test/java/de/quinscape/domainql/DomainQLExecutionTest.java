@@ -3,6 +3,7 @@ package de.quinscape.domainql;
 
 import com.google.common.collect.ImmutableMap;
 import de.quinscape.domainql.beans.CustomFetcherLogic;
+import de.quinscape.domainql.beans.GetterArgLogic;
 import de.quinscape.domainql.beans.TestLogic;
 import de.quinscape.domainql.beans.TypeConversionLogic;
 import de.quinscape.domainql.config.SourceField;
@@ -17,6 +18,7 @@ import graphql.GraphQLError;
 import graphql.Scalars;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -271,4 +273,69 @@ public class DomainQLExecutionTest
         assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"beanWithFetcher\":{\"value\":\"test:Value From Logic\"}}"));
     }
 
+
+    @Test
+    public void testGetterArguments()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
+            .logicBeans(Collections.singletonList(new GetterArgLogic()))
+            .createMirrorInputTypes(true)
+            .buildGraphQLSchema();
+
+        log.info(((GraphQLObjectType)schema.getType("GetterArgBean")).getFieldDefinition("modifiedValue").toString());
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        {
+
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                .query("query getterArgQuery($arg: String)\n" +
+                    "{ \n" +
+                    "    getterArgBean { \n" +
+                    "        modifiedValue(arg: $arg)" +
+                    "    } \n" +
+                    "}")
+                .variables(ImmutableMap.of("arg", "aaa"))
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+            assumeNoErrors(executionResult);
+            assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"getterArgBean\":{\"modifiedValue\":\"Value From GetterArgLogic:aaa:12\"}}"));
+        }
+
+        {
+
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                .query("query getterArgQuery($arg: String, $num: Int)\n" +
+                    "{ \n" +
+                    "    getterArgBean { \n" +
+                    "        modifiedValue(arg: $arg, num: $num)" +
+                    "    } \n" +
+                    "}")
+                .variables(ImmutableMap.of("arg", "bbb", "num", "1111"))
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+            assumeNoErrors(executionResult);
+            assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"getterArgBean\":{\"modifiedValue\":\"Value From GetterArgLogic:bbb:1111\"}}"));
+        }
+
+        {
+
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                .query("query getterArgQuery($arg: String)\n" +
+                    "{ \n" +
+                    "    getterArgBean { \n" +
+                    "        introduced(arg: $arg){ name }" +
+                    "    } \n" +
+                    "}")
+                .variables(ImmutableMap.of("arg", "ccc"))
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+            assumeNoErrors(executionResult);
+            assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"getterArgBean\":{\"introduced\":{\"name\":\"ccc\"}}}"));
+        }
+
+    }
 }

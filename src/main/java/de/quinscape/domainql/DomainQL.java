@@ -1,5 +1,6 @@
 package de.quinscape.domainql;
 
+import com.esotericsoftware.reflectasm.MethodAccess;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import de.quinscape.domainql.annotation.GraphQLFetcher;
@@ -10,6 +11,7 @@ import de.quinscape.domainql.config.RelationConfiguration;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.fetcher.BackReferenceFetcher;
+import de.quinscape.domainql.fetcher.MethodFetcher;
 import de.quinscape.domainql.fetcher.ReferenceFetcher;
 import de.quinscape.domainql.fetcher.SvensonFetcher;
 import de.quinscape.domainql.logic.DomainQLMethod;
@@ -49,6 +51,7 @@ import org.jooq.TableField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
+import org.svenson.JSONProperty;
 import org.svenson.info.JSONClassInfo;
 import org.svenson.info.JSONPropertyInfo;
 import org.svenson.info.JavaObjectPropertyInfo;
@@ -56,9 +59,11 @@ import org.svenson.info.JavaObjectPropertyInfo;
 import javax.persistence.Column;
 import javax.validation.constraints.NotNull;
 import java.beans.Introspector;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -398,7 +403,7 @@ public final class DomainQL
 
             log.debug("DECLARE TYPE {}", outputType.getSimpleName());
 
-            buildFields(domainTypeBuilder, JSONUtil.getClassInfo(outputType), Collections.emptySet(), extraOutputTypes);
+            buildFields(domainTypeBuilder, outputType, Collections.emptySet(), extraOutputTypes);
 
             final GraphQLObjectType newObjectType = domainTypeBuilder.build();
             builder.additionalType(newObjectType);
@@ -534,6 +539,17 @@ public final class DomainQL
                 addOutputTypesForFields(builder, nextType, extraOutputTypes);
             }
         }
+
+        for (Method method : outputType.getMethods())
+        {
+            final Class<?>[] parameterTypes = method.getParameterTypes();
+            final GraphQLField annotation = method.getAnnotation(GraphQLField.class);
+            if (parameterTypes.length > 0 && annotation != null)
+            {
+                addOutputTypesForFields(builder, method.getReturnType(), extraOutputTypes);
+            }
+        }
+
     }
 
     private List<String> getEnumValues(Class<?> type)
@@ -763,11 +779,20 @@ public final class DomainQL
     {
         GraphQLType inputType;
         final Method getterMethod = ((JavaObjectPropertyInfo) info).getGetterMethod();
+        final String propertyName = info.getJavaPropertyName();
 
+        return getListType(type, getterMethod, propertyName, isOutputType);
+    }
+
+
+    private GraphQLType getListType(Class<?> type, Method getterMethod, String propertyName, boolean isOutputType)
+    {
+        GraphQLType inputType;
         final Type genericReturnType = getterMethod.getGenericReturnType();
         if (!(genericReturnType instanceof ParameterizedType))
         {
-            throw new DomainQLException(type.getName() + "." + info.getJavaPropertyName() + ": Property getter type must be parametrized.");
+            throw new DomainQLException(type.getName() + "." + propertyName +
+                ": Property getter type must be parametrized.");
         }
 
         final Class<?> elementClass = (Class<?>) ((ParameterizedType) genericReturnType).getActualTypeArguments()[0];
@@ -800,7 +825,7 @@ public final class DomainQL
 
             final Set<String> foreignKeyFields = findForeignKeyFields(table);
 
-            buildFields(domainTypeBuilder, classInfo, foreignKeyFields, null);
+            buildFields(domainTypeBuilder, pojoType, foreignKeyFields, null);
 
             buildForeignKeyFields(domainTypeBuilder, pojoType, classInfo, table);
 
@@ -1036,11 +1061,13 @@ public final class DomainQL
      */
     private void buildFields(
         GraphQLObjectType.Builder domainTypeBuilder,
-        JSONClassInfo classInfo,
+        Class<?> outputType,
         Set<String> foreignKeyFields,
         Set<Class<?>> extraOutputTypes
     )
     {
+        final JSONClassInfo classInfo = JSONUtil.getClassInfo(outputType);
+
         for (JSONPropertyInfo info : classInfo.getPropertyInfos())
         {
             final Class<Object> type = info.getType();
@@ -1111,7 +1138,164 @@ public final class DomainQL
                 fieldDef
             );
         }
+
+        MethodAccess methodAccess = null;
+
+
+        for (Method m : outputType.getMethods())
+        {
+            Class<?>[] parameterTypes = m.getParameterTypes();
+            final GraphQLField fieldAnno = m.getAnnotation(GraphQLField.class);
+            if (fieldAnno != null && parameterTypes.length > 0)
+            {
+                if (methodAccess == null)
+                {
+                    methodAccess = MethodAccess.get(outputType);
+                }
+
+                final int methodIndex = methodAccess.getIndex(m.getName(), parameterTypes);
+
+                final String propertyName = getPropertyName(m);
+                final StringBuilder paramDesc = new StringBuilder();
+                for (int i = 0; i < parameterTypes.length; i++)
+                {
+                    Class<?> parameterType = parameterTypes[i];
+                    if (i > 0)
+                    {
+                        paramDesc.append(",");
+                    }
+                    paramDesc.append(parameterType.getSimpleName());
+                }
+
+                final boolean isRequired = m.getAnnotation(NotNull.class) != null;
+
+                final Class<?> returnType = m.getReturnType();
+
+                GraphQLType graphQLType;
+                if (extraOutputTypes != null &&  List.class.isAssignableFrom(returnType))
+                {
+                    graphQLType = getListType((Class<?>) returnType, m, propertyName, true);
+                }
+                else
+                {
+                    final GraphQLScalarType scalarType = DomainQL.getGraphQLScalarFor(returnType, fieldAnno);
+                    if (scalarType != null)
+                    {
+                        graphQLType = scalarType;
+                    }
+                    else
+                    {
+                        graphQLType = outputTypeRef(returnType);
+                    }
+                }
+
+                List<String> parameterNames = new ArrayList<>();
+                for (Parameter parameter : m.getParameters())
+                {
+                    if (!parameter.isNamePresent())
+                    {
+                        throw new IllegalStateException("No method parameter names provided by compiler");
+                    }
+                    parameterNames.add(
+                        parameter.getName()
+                    );
+                }
+
+
+                final GraphQLFieldDefinition.Builder fieldBuilder = GraphQLFieldDefinition.newFieldDefinition()
+                    .name(fieldAnno.value().length() > 0 ? fieldAnno.value() : propertyName)
+                    .description(
+                        fieldAnno.description().length() > 0 ?
+                            fieldAnno.description() :
+                            outputType.getSimpleName() + "." + m.getName() + "(" + paramDesc.toString() + ")"
+                    )
+                    .type(isRequired ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
+                    .dataFetcher(new MethodFetcher(methodAccess, methodIndex, parameterNames, parameterTypes));
+
+                for (Parameter parameter : m.getParameters())
+                {
+                    final Class<?> parameterType = parameter.getType();
+                    final GraphQLField paramFieldAnno = parameter.getAnnotation(GraphQLField.class);
+
+                    GraphQLInputType paramGQLType;
+                    if (extraOutputTypes != null &&  List.class.isAssignableFrom(parameterType))
+                    {
+
+                        GraphQLType inputType;
+                        final Type genericParamType = parameter.getParameterizedType();
+                        if (!(genericParamType instanceof ParameterizedType))
+                        {
+                            throw new DomainQLException(parameterType.getName() + "." + propertyName +
+                                ": Property getter type must be parametrized.");
+                        }
+
+                        final Class<?> elementClass = (Class<?>) ((ParameterizedType) genericParamType).getActualTypeArguments()[0];
+
+                        paramGQLType = new GraphQLList(inputTypeRef(elementClass));
+                    }
+                    else
+                    {
+                        final GraphQLScalarType scalarType = DomainQL.getGraphQLScalarFor(parameterType, paramFieldAnno);
+                        if (scalarType != null)
+                        {
+                            paramGQLType = scalarType;
+                        }
+                        else
+                        {
+                            paramGQLType = inputTypeRef(parameterType);
+                        }
+                    }
+
+                    final GraphQLArgument.Builder arg = GraphQLArgument.newArgument()
+                        .name(parameter.getName())
+                        .defaultValue(paramFieldAnno != null ? paramFieldAnno.defaultValue() : null)
+                        .type(
+                            paramFieldAnno != null && paramFieldAnno.required() ? GraphQLNonNull
+                                .nonNull(paramGQLType) : paramGQLType
+                        )
+                        ;
+
+                    log.info("Method Argument {}: {}", parameter.getName(), paramGQLType);
+
+                    fieldBuilder.argument(
+                        arg.build()
+                    );
+
+                }
+
+
+                final GraphQLFieldDefinition fieldDef = fieldBuilder
+                    .build();
+
+                log.debug("-- {}: {}", fieldDef.getName(), fieldDef.getType().getName());
+
+                domainTypeBuilder.field(
+                    fieldDef
+                );
+
+            }
+        }
     }
+
+
+    private static String getPropertyName(Method m)
+    {
+        final JSONProperty annotation = m.getAnnotation(JSONProperty.class);
+        if (annotation != null && annotation.value().length() > 0)
+        {
+            return annotation.value();
+        }
+
+        final boolean isGetter = m.getName().startsWith("get");
+        final boolean isIsser = m.getName().startsWith("is");
+        if (!isGetter && !isIsser)
+        {
+            throw new IllegalStateException("Parametrized getter name must start with 'get' or 'is'");
+        }
+
+        return Introspector.decapitalize(m.getName().substring(isGetter ? 3 : 2));
+    }
+
 
     private DataFetcher<?> createFetcher(Class<? extends DataFetcher> cls, String data, String jsonName)
     {
