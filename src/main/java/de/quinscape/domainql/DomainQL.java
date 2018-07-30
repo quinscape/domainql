@@ -2,6 +2,7 @@ package de.quinscape.domainql;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import de.quinscape.domainql.annotation.GraphQLFetcher;
 import de.quinscape.domainql.annotation.GraphQLField;
 import de.quinscape.domainql.annotation.GraphQLObject;
 import de.quinscape.domainql.config.Options;
@@ -23,6 +24,7 @@ import de.quinscape.domainql.scalar.GraphQLDateScalar;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.Scalars;
+import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLEnumType;
@@ -54,6 +56,7 @@ import org.svenson.info.JavaObjectPropertyInfo;
 import javax.persistence.Column;
 import javax.validation.constraints.NotNull;
 import java.beans.Introspector;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -1043,6 +1046,7 @@ public final class DomainQL
             final Class<Object> type = info.getType();
             final Column jpaColumnAnno = JSONUtil.findAnnotation(info, Column.class);
             final GraphQLField fieldAnno = JSONUtil.findAnnotation(info, GraphQLField.class);
+            final GraphQLFetcher fetcherAnno = JSONUtil.findAnnotation(info, GraphQLFetcher.class);
 
             if (options.isUseDatabaseFieldNames() && jpaColumnAnno == null)
             {
@@ -1098,7 +1102,7 @@ public final class DomainQL
                             type.getSimpleName() + "." + jsonName
                 )
                 .type(isRequired ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
-                .dataFetcher(new SvensonFetcher(jsonName))
+                .dataFetcher(fetcherAnno == null ? new SvensonFetcher(jsonName) : createFetcher(fetcherAnno.value(), fetcherAnno.data(), jsonName))
                 .build();
 
             log.debug("-- {}: {}", fieldDef.getName(), fieldDef.getType().getName());
@@ -1108,4 +1112,36 @@ public final class DomainQL
             );
         }
     }
+
+    private DataFetcher<?> createFetcher(Class<? extends DataFetcher> cls, String data, String jsonName)
+    {
+
+        final String className = cls.getName();
+        try
+        {
+            final Constructor<?> constructor = cls.getConstructor(String.class, String.class);
+            if (!DataFetcher.class.isAssignableFrom(cls))
+            {
+                throw new DomainQLException(cls + " does not implement" + DataFetcher.class.getName());
+            }
+            return (DataFetcher<?>)constructor.newInstance(jsonName, data);
+        }
+        catch (NoSuchMethodException e)
+        {
+            throw new DomainQLException("Cannot create instance of " + cls, e);
+        }
+        catch (IllegalAccessException e)
+        {
+            throw new DomainQLException("Cannot access contructor" + className + "(String,String).", e);
+        }
+        catch (InstantiationException e)
+        {
+            throw new DomainQLException("Cannot instantiate " + className , e);
+        }
+        catch (InvocationTargetException e)
+        {
+            throw new DomainQLException("Error instantiating " + className , e.getTargetException());
+        }
+    }
+
 }

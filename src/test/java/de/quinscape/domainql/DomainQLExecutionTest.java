@@ -2,6 +2,7 @@ package de.quinscape.domainql;
 
 
 import com.google.common.collect.ImmutableMap;
+import de.quinscape.domainql.beans.CustomFetcherLogic;
 import de.quinscape.domainql.beans.TestLogic;
 import de.quinscape.domainql.beans.TypeConversionLogic;
 import de.quinscape.domainql.config.SourceField;
@@ -248,6 +249,26 @@ public class DomainQLExecutionTest
         ExecutionResult executionResult = graphQL.execute(executionInput);
         assumeNoErrors(executionResult);
         assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"mutateConverted\":\"qwertz:1970-01-01 01:00:03.0\"}"));
+    }
+
+    @Test
+    public void testCustomFetcher()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
+            .logicBeans(Collections.singletonList(new CustomFetcherLogic()))
+            .createMirrorInputTypes(true)
+            .buildGraphQLSchema();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            .query("query customFetcher { beanWithFetcher { value } }")
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+        assumeNoErrors(executionResult);
+        assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"beanWithFetcher\":{\"value\":\"test:Value From Logic\"}}"));
     }
 
 }
