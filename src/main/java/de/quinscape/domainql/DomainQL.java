@@ -1300,19 +1300,48 @@ public final class DomainQL
     private DataFetcher<?> createFetcher(Class<? extends DataFetcher> cls, String data, String jsonName)
     {
 
+        if (!DataFetcher.class.isAssignableFrom(cls))
+        {
+            throw new DomainQLException(cls + " does not implement" + DataFetcher.class.getName());
+        }
+
         final String className = cls.getName();
         try
         {
-            final Constructor<?> constructor = cls.getConstructor(String.class, String.class);
-            if (!DataFetcher.class.isAssignableFrom(cls))
+            final Constructor<?>[] constructors = cls.getConstructors();
+
+            if (constructors.length > 1)
             {
-                throw new DomainQLException(cls + " does not implement" + DataFetcher.class.getName());
+                throw new DomainQLException("Fetcher can only have one constructor");
             }
-            return (DataFetcher<?>)constructor.newInstance(jsonName, data);
-        }
-        catch (NoSuchMethodException e)
-        {
-            throw new DomainQLException("Cannot create instance of " + cls, e);
+
+            final Constructor<?> ctor = constructors[0];
+
+            final Class<?>[] parameterTypes = ctor.getParameterTypes();
+            if (parameterTypes.length > 2)
+            {
+                throw new DomainQLException("Fetcher constructor can take 2 most two parmeters");
+            }
+            for (Class<?> type : parameterTypes)
+            {
+                if (!type.equals(String.class))
+                {
+                    throw new DomainQLException("Fetcher constructor can take only String args: (name) or (name,data)");
+                }
+            }
+
+            if (parameterTypes.length == 0)
+            {
+                return (DataFetcher<?>)ctor.newInstance();
+            }
+            else if (parameterTypes.length == 1)
+            {
+                return (DataFetcher<?>)ctor.newInstance(jsonName);
+            }
+            else
+            {
+                return (DataFetcher<?>)ctor.newInstance(jsonName, data);
+            }
         }
         catch (IllegalAccessException e)
         {
