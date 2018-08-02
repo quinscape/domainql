@@ -44,7 +44,6 @@ public class LogicBeanAnalyzer
     private final static Logger log = LoggerFactory.getLogger(LogicBeanAnalyzer.class);
 
 
-
     private final Set<Query> queries = new LinkedHashSet<>();
 
     private final Set<Mutation> mutations = new LinkedHashSet<>();
@@ -58,6 +57,7 @@ public class LogicBeanAnalyzer
     private final Map<Class<?>, GraphQLOutputType> registeredOutputTypes;
 
     private final Consumer<Class<?>> registerOutputType;
+
 
     public LogicBeanAnalyzer(
         DomainQL domainQL,
@@ -75,7 +75,6 @@ public class LogicBeanAnalyzer
         this.registerOutputType = registerOutputType;
         logicBeans.forEach(this::discover);
     }
-
 
 
     private Map<String, Class<?>> invert(Map<Class<?>, String> inputTypes)
@@ -195,7 +194,7 @@ public class LogicBeanAnalyzer
                 throw new DomainQLException(locationInfo + ": Return values can't have names");
             }
 
-            final GraphQLScalarType scalarType = DomainQL.getGraphQLScalarFor(returnType,fieldAnno);
+            final GraphQLScalarType scalarType = DomainQL.getGraphQLScalarFor(returnType, fieldAnno);
             if (scalarType != null)
             {
                 return scalarType;
@@ -209,12 +208,14 @@ public class LogicBeanAnalyzer
                     throw new DomainQLException(locationInfo + ": List return type must be parametrized.");
                 }
 
-                final Class<?> elementClass = (Class<?>) ((ParameterizedType) genericReturnType).getActualTypeArguments()[0];
+                final Class<?> elementClass = (Class<?>) ((ParameterizedType) genericReturnType)
+                    .getActualTypeArguments()[0];
 
 //                final GraphQLOutputType elementType = domainQL.getOutputType(elementClass);
 //                if (elementType == null)
 //                {
-//                    throw new IllegalStateException(locationInfo + ": Cannot resolve GraphQL output type for element type " + elementClass.getName());
+//                    throw new IllegalStateException(locationInfo + ": Cannot resolve GraphQL output type for
+// element type " + elementClass.getName());
 //                }
 
                 final GraphQLOutputType outputType = registeredOutputTypes.get(elementClass);
@@ -268,92 +269,91 @@ public class LogicBeanAnalyzer
                         "compiler it is the -parameters option.");
                 }
 
+                ParameterProvider provider = null;
                 for (ParameterProviderFactory factory : parameterProviderFactories)
                 {
-                    final ParameterProvider provider;
                     provider = factory.createIfApplicable(parameterType, parameterAnnotations);
                     if (provider != null)
                     {
-                        list.add(provider);
-                        log.debug("-- {}", provider);
+                        break;
+                    }
+                }
+
+                if (provider != null)
+                {
+                    list.add(provider);
+                    log.debug("-- {}", provider);
+                }
+                else
+                {
+                    GraphQLInputType inputType = DomainQL.getGraphQLScalarFor(parameterType, argAnno);
+                    final String inputTypeName;
+                    if (inputType == null)
+                    {
+                        final String nameFromConfig = inputTypes.get(parameterType);
+                        if (nameFromConfig != null)
+                        {
+                            inputType = new GraphQLTypeReference(nameFromConfig);
+                            inputTypeName = nameFromConfig;
+                        }
+                        else
+                        {
+                            final String newInputName = DomainQL.getInputTypeName(parameterType);
+
+                            inputTypes.put(parameterType, newInputName);
+                            inputType = new GraphQLTypeReference(newInputName);
+                            inputTypeName = newInputName;
+                        }
+
                     }
                     else
                     {
-                        GraphQLInputType inputType = DomainQL.getGraphQLScalarFor(parameterType, argAnno);
-                        final String inputTypeName;
-                        if (inputType == null)
-                        {
-                            final String nameFromConfig = inputTypes.get(parameterType);
-                            if (nameFromConfig != null)
-                            {
-                                inputType = new GraphQLTypeReference(nameFromConfig);
-                                inputTypeName = nameFromConfig;
-                            }
-                            else
-                            {
-                                final String newInputName = DomainQL.getInputTypeName(parameterType);
-
-                                inputTypes.put(parameterType, newInputName);
-                                inputType = new GraphQLTypeReference(newInputName);
-                                inputTypeName = newInputName;
-                            }
-
-                        }
-                        else
-                        {
-                            inputTypeName = inputType.getName();
-                        }
-
-                        boolean isRequired = argAnno != null && argAnno.required();
-                        final NotNull notNullAnno = parameter.getAnnotation(NotNull.class);
-                        boolean jpaRequired = notNullAnno != null;
-
-
-                        if (jpaRequired && !isRequired)
-                        {
-                            throw new DomainQLException(name +
-                                ": Required field disagreement between @NotNull and @GraphQLField required value");
-                        }
-
-
-                        final String parameterName = argAnno != null && argAnno.value().length() > 0 ? argAnno.value() : parameter.getName();
-                        final String description = argAnno != null ? argAnno.description() : null;
-                        final Object defaultValue;
-
-                        final Object defaultValueFromAnno = argAnno != null ? argAnno.defaultValue() : null;
-                        if (String.class.isAssignableFrom(parameterType))
-                        {
-                            defaultValue = defaultValueFromAnno;
-                        }
-                        else
-                        {
-                            defaultValue = ConvertUtils.convert(defaultValueFromAnno, parameterType);
-                        }
-
-                        final GraphQLValueProvider graphQLValueProvider = new GraphQLValueProvider(
-                            parameterName,
-                            description,
-                            isRequired,
-                            inputTypeName,
-                            defaultValue,
-                            inputTypes
-                        );
-
-                        final String paramDesc = graphQLValueProvider.getDescription();
-                        log.debug("  {}", graphQLValueProvider.getArgumentName() + ": " + graphQLValueProvider.getInputType() + (StringUtils.hasText(paramDesc) ? " # " + paramDesc : ""));
-
-                        list.add(
-                            graphQLValueProvider
-                        );
+                        inputTypeName = inputType.getName();
                     }
-//                        else
-//                        {
-//                            throw new IllegalStateException(
-//                                name + ": Cannot provide value for parameter type " + parameterType.getClass()
-//                                    .getName() + ". No ParameterProviderFactory was able to create a " +
-//                                    "ParameterProvider and no GraphGLType was defined for that class.");
-//                        }
-//                    }
+
+                    boolean isRequired = argAnno != null && argAnno.required();
+                    final NotNull notNullAnno = parameter.getAnnotation(NotNull.class);
+                    boolean jpaRequired = notNullAnno != null;
+
+
+                    if (jpaRequired && !isRequired)
+                    {
+                        throw new DomainQLException(name +
+                            ": Required field disagreement between @NotNull and @GraphQLField required value");
+                    }
+
+
+                    final String parameterName = argAnno != null && argAnno.value().length() > 0 ? argAnno
+                        .value() : parameter.getName();
+                    final String description = argAnno != null ? argAnno.description() : null;
+                    final Object defaultValue;
+
+                    final Object defaultValueFromAnno = argAnno != null ? argAnno.defaultValue() : null;
+                    if (String.class.isAssignableFrom(parameterType))
+                    {
+                        defaultValue = defaultValueFromAnno;
+                    }
+                    else
+                    {
+                        defaultValue = ConvertUtils.convert(defaultValueFromAnno, parameterType);
+                    }
+
+                    final GraphQLValueProvider graphQLValueProvider = new GraphQLValueProvider(
+                        parameterName,
+                        description,
+                        isRequired,
+                        inputTypeName,
+                        defaultValue,
+                        inputTypes
+                    );
+
+                    final String paramDesc = graphQLValueProvider.getDescription();
+                    log.debug("  {}", graphQLValueProvider.getArgumentName() + ": " + graphQLValueProvider
+                        .getInputType() + (StringUtils.hasText(paramDesc) ? " # " + paramDesc : ""));
+
+                    list.add(
+                        graphQLValueProvider
+                    );
                 }
             }
             return list;

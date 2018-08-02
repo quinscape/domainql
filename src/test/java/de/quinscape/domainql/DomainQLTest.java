@@ -1,6 +1,7 @@
 package de.quinscape.domainql;
 
 
+import de.quinscape.domainql.beans.CustomParameterProviderLogic;
 import de.quinscape.domainql.beans.LogicWithAnnotated;
 import de.quinscape.domainql.beans.LogicWithMirrorInput;
 import de.quinscape.domainql.beans.LogicWithWrongInjection;
@@ -483,6 +484,22 @@ public class DomainQLTest
 
             .buildGraphQLSchema();
 
+        
+    }
+
+
+    @Test
+    public void testCustomParameterProvider()
+    {
+
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .parameterProvider(new TestParameterProviderFactory())
+            .logicBeans(Collections.singleton(new CustomParameterProviderLogic()))
+            .buildGraphQLSchema();
+
+
+        assertThat(schema.getType("DependencyBeanInput"), is(nullValue()));
         
     }
 }

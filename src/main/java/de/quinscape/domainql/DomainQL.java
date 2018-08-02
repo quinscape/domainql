@@ -470,7 +470,9 @@ public final class DomainQL
 
 
     private void addOutputTypesForFields(
-        GraphQLSchema.Builder builder, Class<?> outputType, Set<Class<?>> extraOutputTypes
+        GraphQLSchema.Builder builder,
+        Class<?> outputType,
+        Set<Class<?>> extraOutputTypes
     )
     {
         if (registeredOutputTypes.containsKey(outputType))
