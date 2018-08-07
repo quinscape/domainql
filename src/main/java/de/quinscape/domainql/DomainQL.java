@@ -145,7 +145,7 @@ public final class DomainQL
 
     private final Map<Class<?>, GraphQLInputType> registeredInputTypes;
 
-    private final Map<Class<?>, GraphQLEnumType> registeredEnumTypes;
+    private final Map<Class<? extends Enum>, GraphQLEnumType> registeredEnumTypes;
 
     private final DSLContext dslContext;
 
@@ -530,7 +530,7 @@ public final class DomainQL
                 final GraphQLEnumType enumType = buildEnumType(nextType);
                 builder.additionalType(enumType);
 
-                registeredEnumTypes.put(nextType, enumType);
+                registeredEnumTypes.put((Class<? extends Enum>) nextType, enumType);
             }
             else if (DomainQL.getGraphQLScalarFor(nextType, graphQLFieldAnno) == null && !extraOutputTypes.contains(nextType) && !nextType.equals(Object.class))
             {
@@ -680,7 +680,7 @@ public final class DomainQL
                 {
                     final GraphQLEnumType enumType = buildEnumType(type);
                     builder.additionalType(enumType);
-                    registeredEnumTypes.put(type, enumType);
+                    registeredEnumTypes.put((Class<? extends Enum>) type, enumType);
                 }
             }
             else
@@ -698,7 +698,7 @@ public final class DomainQL
                 for (JSONPropertyInfo info : classInfo.getPropertyInfos())
                 {
                     final GraphQLField inputFieldAnno = JSONUtil.findAnnotation(info, GraphQLField.class);
-                    final Class<Object> propertyType = info.getType();
+                    final Class<?> propertyType = info.getType();
                     GraphQLInputType inputType = getGraphQLScalarFor(propertyType, inputFieldAnno);
                     if (inputType == null)
                     {
@@ -715,7 +715,7 @@ public final class DomainQL
                                 final GraphQLEnumType enumType = buildEnumType(propertyType);
 
                                 builder.additionalType(enumType);
-                                registeredEnumTypes.put(propertyType, enumType);
+                                registeredEnumTypes.put((Class<? extends Enum>) propertyType, enumType);
 
                                 inputType = enumType;
                             }

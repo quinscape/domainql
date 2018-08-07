@@ -2,8 +2,13 @@ package de.quinscape.domainql;
 
 
 import com.google.common.collect.ImmutableMap;
+import de.quinscape.domainql.beans.AnotherEnum;
+import de.quinscape.domainql.beans.BeanWithEnum;
 import de.quinscape.domainql.beans.CustomFetcherLogic;
 import de.quinscape.domainql.beans.GetterArgLogic;
+import de.quinscape.domainql.beans.LogicWithEnums;
+import de.quinscape.domainql.beans.LogicWithEnums2;
+import de.quinscape.domainql.beans.MyEnum;
 import de.quinscape.domainql.beans.TestLogic;
 import de.quinscape.domainql.beans.TypeConversionLogic;
 import de.quinscape.domainql.config.SourceField;
@@ -104,6 +109,7 @@ public class DomainQLExecutionTest
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
             .query("{ queryTruth }")
             .build();
 
@@ -121,6 +127,7 @@ public class DomainQLExecutionTest
         final HashMap<String, Object> variables = new HashMap<>();
         variables.put("value", "xxx");
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
             .query("mutation testMutation($value: String!) { mutateString(value: $value) }")
             .variables(variables)
             .build();
@@ -140,6 +147,7 @@ public class DomainQLExecutionTest
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
             .query("{ walkForwardRef { id target { id } } }")
             .build();
 
@@ -156,6 +164,7 @@ public class DomainQLExecutionTest
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
             .query("{ walkBackOne { id sourceFive { id } } }")
             .build();
 
@@ -185,6 +194,7 @@ public class DomainQLExecutionTest
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
             .query("{ walkBackMany { id sourceSixes { id } } }")
             .build();
 
@@ -202,6 +212,7 @@ public class DomainQLExecutionTest
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
             .query("{ extraQuery(value: \"foo\") }")
             .build();
 
@@ -219,6 +230,7 @@ public class DomainQLExecutionTest
         final HashMap<String, Object> variables = new HashMap<>();
         variables.put("value", "xxx");
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
             .query("mutation testMutation($value: String!) { extraMutation(value: $value) }")
             .variables(variables)
             .build();
@@ -244,6 +256,7 @@ public class DomainQLExecutionTest
 
         variables.put("target", ImmutableMap.of("name", "qwertz", "created", GraphQLTimestampScalar.toISO8601(new Timestamp(3600))));
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
             .query("mutation mutateConverted($target: ConversionTargetInput!) { mutateConverted(target: $target) }")
             .variables(variables)
             .build();
@@ -265,6 +278,7 @@ public class DomainQLExecutionTest
 
 
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
             .query("query customFetcher { beanWithFetcher { value } }")
             .build();
 
@@ -289,6 +303,7 @@ public class DomainQLExecutionTest
         {
 
             ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
                 .query("query getterArgQuery($arg: String)\n" +
                     "{ \n" +
                     "    getterArgBean { \n" +
@@ -306,6 +321,7 @@ public class DomainQLExecutionTest
         {
 
             ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
                 .query("query getterArgQuery($arg: String, $num: Int)\n" +
                     "{ \n" +
                     "    getterArgBean { \n" +
@@ -323,6 +339,7 @@ public class DomainQLExecutionTest
         {
 
             ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
                 .query("query getterArgQuery($arg: String)\n" +
                     "{ \n" +
                     "    getterArgBean { \n" +
@@ -337,5 +354,95 @@ public class DomainQLExecutionTest
             assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"getterArgBean\":{\"introduced\":{\"name\":\"ccc\"}}}"));
         }
 
+    }
+
+
+    @Test
+    public void testEnumOperations()
+    {
+        {
+            final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
+                .logicBeans(Arrays.asList(new LogicWithEnums(), new LogicWithEnums2()))
+                .createMirrorInputTypes(true)
+                .buildGraphQLSchema();
+
+            GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+
+            {
+
+                ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+
+                    // language=GraphQL
+                    .query("query queryWithEnumArg($myEnum: MyEnum)\n" +
+                        "{ \n" +
+                        "    queryWithEnumArg(myEnum: $myEnum)\n" +
+                        "}")
+                    .variables(ImmutableMap.of("myEnum", MyEnum.C))
+                    .build();
+
+                ExecutionResult executionResult = graphQL.execute(executionInput);
+                assumeNoErrors(executionResult);
+                assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"queryWithEnumArg\":\"(C)\"}"));
+            }
+
+
+
+            {
+
+                ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+
+                    // language=GraphQL
+                    .query("\n" +
+                        "query queryWithObjectArgWithEnum($bean: BeanWithEnumInput)\n" +
+                        "{ \n" +
+                        "    queryWithObjectArgWithEnum(beanWithEnum: $bean)\n" +
+                        "}")
+                    .variables(ImmutableMap.of("bean", ImmutableMap.of("anotherEnum", "X")))
+                    .build();
+
+                ExecutionResult executionResult = graphQL.execute(executionInput);
+                assumeNoErrors(executionResult);
+                assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"queryWithObjectArgWithEnum\":\"BeanWithEnum: anotherEnum = X\"}"));
+            }
+
+
+            {
+
+                ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+
+                    // language=GraphQL
+                    .query("\n" +
+                        "mutation enumMutation\n" +
+                        "{ \n" +
+                        "    enumMutation\n" +
+                        "}")
+                    .build();
+
+                ExecutionResult executionResult = graphQL.execute(executionInput);
+                assumeNoErrors(executionResult);
+                assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"enumMutation\":\"B\"}"));
+            }
+
+            {
+
+                ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+
+                    // language=GraphQL
+                    .query("\n" +
+                            "mutation objectWithEnumMutation\n" +
+                            "{\n" +
+                            "    objectWithEnumMutation{\n" +
+                            "        anotherEnum\n" +
+                            "    }\n" +
+                            "}"
+                    )
+                    .build();
+
+                ExecutionResult executionResult = graphQL.execute(executionInput);
+                assumeNoErrors(executionResult);
+                assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"objectWithEnumMutation\":{\"anotherEnum\":\"Z\"}}"    ));
+            }
+        }
     }
 }

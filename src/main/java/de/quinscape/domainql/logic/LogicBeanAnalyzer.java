@@ -57,7 +57,7 @@ public class LogicBeanAnalyzer
 
     private final Map<Class<?>, GraphQLOutputType> registeredOutputTypes;
 
-    private final Map<Class<?>, GraphQLEnumType> registeredEnumTypes;
+    private final Map<Class<? extends Enum>, GraphQLEnumType> registeredEnumTypes;
 
     private final Consumer<Class<?>> registerOutputType;
 
@@ -68,7 +68,7 @@ public class LogicBeanAnalyzer
         Collection<Object> logicBeans,
         BiMap<Class<?>, String> inputTypes,
         Map<Class<?>, GraphQLOutputType> registeredOutputTypes,
-        Map<Class<?>, GraphQLEnumType> registeredEnumTypes,
+        Map<Class<? extends Enum>, GraphQLEnumType> registeredEnumTypes,
         Consumer<Class<?>> registerOutputType
     )
     {
@@ -239,7 +239,7 @@ public class LogicBeanAnalyzer
                 if (enumType == null)
                 {
                     enumType = DomainQL.buildEnumType(returnType);
-                    registeredEnumTypes.put(returnType, enumType);
+                    registeredEnumTypes.put((Class<? extends Enum>) returnType, enumType);
 
                 }
                 resultType = enumType;
@@ -382,7 +382,8 @@ public class LogicBeanAnalyzer
                         isRequired,
                         inputType,
                         defaultValue,
-                        inputTypes
+                        inputTypes,
+                        registeredEnumTypes
                     );
 
                     final String paramDesc = graphQLValueProvider.getDescription();

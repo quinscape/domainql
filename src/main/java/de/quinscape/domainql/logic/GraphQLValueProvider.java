@@ -1,9 +1,12 @@
 package de.quinscape.domainql.logic;
 
 import com.google.common.collect.BiMap;
+import de.quinscape.domainql.DomainQLException;
 import de.quinscape.domainql.param.ParameterProvider;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.schema.DataFetchingEnvironment;
+import graphql.schema.GraphQLEnumType;
+import graphql.schema.GraphQLEnumValueDefinition;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLSchema;
@@ -35,13 +38,17 @@ public class GraphQLValueProvider
 
     private final BiMap<Class<?>, String> inputTypes;
 
+    private final Map<Class<? extends Enum>, GraphQLEnumType> registeredEnumTypes;
+
+
     public GraphQLValueProvider(
         String argumentName,
         String description,
         boolean isRequired,
         GraphQLInputType inputType,
         Object defaultValue,
-        BiMap<Class<?>, String> inputTypes
+        BiMap<Class<?>, String> inputTypes,
+        Map<Class<? extends Enum>, GraphQLEnumType> registeredEnumTypes
     )
     {
         this.argumentName = argumentName;
@@ -50,6 +57,7 @@ public class GraphQLValueProvider
         this.inputType = inputType;
         this.defaultValue = defaultValue;
         this.inputTypes = inputTypes;
+        this.registeredEnumTypes = registeredEnumTypes;
     }
 
 
@@ -57,6 +65,7 @@ public class GraphQLValueProvider
     {
         return isRequired;
     }
+
 
     @Override
     public Object provide(DataFetchingEnvironment environment)
@@ -78,7 +87,29 @@ public class GraphQLValueProvider
 
             value = convert(pojoClass, (Map<String, Object>) value);
         }
+        else if (type instanceof GraphQLEnumType && value instanceof String)
+        {
+
+            Class<? extends Enum> enumType = findPojoTypeForEnum((GraphQLEnumType) type);
+
+            return Enum.valueOf(enumType, (String) value);
+        }
+
         return value;
+    }
+
+
+    private Class<? extends Enum> findPojoTypeForEnum(GraphQLEnumType type)
+    {
+        for (Map.Entry<Class<? extends Enum>, GraphQLEnumType> e : registeredEnumTypes.entrySet())
+        {
+            if (e.getValue().equals(type))
+            {
+                return e.getKey();
+            }
+        }
+
+        throw new IllegalStateException("No enum type registered for type: " + type);
     }
 
 
@@ -89,7 +120,7 @@ public class GraphQLValueProvider
         {
             if (pojoClass.isInstance(value))
             {
-                return  value;
+                return value;
             }
 
             final Object pojoInstance = pojoClass.newInstance();
@@ -105,7 +136,7 @@ public class GraphQLValueProvider
                 final Object orig = value.get(name);
 
                 final Object converted;
-                if ( inputTypes.get(propertyType) != null)
+                if (inputTypes.get(propertyType) != null)
                 {
                     converted = convert(propertyType, (Map<String, Object>) orig);
                     JSONUtil.DEFAULT_UTIL.setProperty(pojoInstance, name, converted);
@@ -125,10 +156,12 @@ public class GraphQLValueProvider
         }
     }
 
+
     public String getArgumentName()
     {
         return argumentName;
     }
+
 
     public String getDescription()
     {

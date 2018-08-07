@@ -4,6 +4,17 @@ public class BeanWithEnum
 {
     private AnotherEnum anotherEnum;
 
+    public BeanWithEnum()
+    {
+        this(AnotherEnum.Y);
+    }
+    
+    public BeanWithEnum(AnotherEnum anotherEnum)
+    {
+
+        this.anotherEnum = anotherEnum;
+    }
+
 
     public AnotherEnum getAnotherEnum()
     {
