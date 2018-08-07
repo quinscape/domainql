@@ -211,20 +211,22 @@ public class LogicBeanAnalyzer
                 final Class<?> elementClass = (Class<?>) ((ParameterizedType) genericReturnType)
                     .getActualTypeArguments()[0];
 
-//                final GraphQLOutputType elementType = domainQL.getOutputType(elementClass);
-//                if (elementType == null)
-//                {
-//                    throw new IllegalStateException(locationInfo + ": Cannot resolve GraphQL output type for
-// element type " + elementClass.getName());
-//                }
 
-                final GraphQLOutputType outputType = registeredOutputTypes.get(elementClass);
-                if (outputType == null)
+                final GraphQLScalarType scalar = DomainQL.getGraphQLScalarFor(elementClass, fieldAnno);
+                if (scalar != null)
                 {
-                    registerOutputType.accept(elementClass);
+                    resultType = new GraphQLList(scalar);
                 }
+                else
+                {
+                    final GraphQLOutputType outputType = registeredOutputTypes.get(elementClass);
+                    if (outputType == null)
+                    {
+                        registerOutputType.accept(elementClass);
+                    }
 
-                resultType = new GraphQLList(new GraphQLTypeReference(elementClass.getSimpleName()));
+                    resultType = new GraphQLList(new GraphQLTypeReference(elementClass.getSimpleName()));
+                }
             }
             else
             {
@@ -287,28 +289,48 @@ public class LogicBeanAnalyzer
                 else
                 {
                     GraphQLInputType inputType = DomainQL.getGraphQLScalarFor(parameterType, argAnno);
-                    final String inputTypeName;
                     if (inputType == null)
                     {
                         final String nameFromConfig = inputTypes.get(parameterType);
                         if (nameFromConfig != null)
                         {
-                            inputType = new GraphQLTypeReference(nameFromConfig);
-                            inputTypeName = nameFromConfig;
+                            inputType = GraphQLTypeReference.typeRef(nameFromConfig);
                         }
                         else
                         {
-                            final String newInputName = DomainQL.getInputTypeName(parameterType);
+                            if (List.class.isAssignableFrom(parameterType))
+                            {
+                                final Type genericReturnType = parameter.getParameterizedType();
+                                if (!(genericReturnType instanceof ParameterizedType))
+                                {
+                                    throw new DomainQLException(parameter + ": List parameter type must be parametrized.");
+                                }
 
-                            inputTypes.put(parameterType, newInputName);
-                            inputType = new GraphQLTypeReference(newInputName);
-                            inputTypeName = newInputName;
+                                final Class<?> elementClass = (Class<?>) ((ParameterizedType) genericReturnType)
+                                    .getActualTypeArguments()[0];
+
+
+                                final GraphQLScalarType scalar = DomainQL.getGraphQLScalarFor(elementClass, argAnno);
+                                if (scalar != null)
+                                {
+                                    inputType = new GraphQLList(scalar);
+                                }
+                                else
+                                {
+                                    final String newInputName = DomainQL.getInputTypeName(elementClass);
+                                    inputTypes.put(elementClass, newInputName);
+
+                                    inputType = new GraphQLList(new GraphQLTypeReference(newInputName));
+                                }
+                            }
+                            else
+                            {
+                                final String newInputName = DomainQL.getInputTypeName(parameterType);
+                                inputTypes.put(parameterType, DomainQL.getInputTypeName(parameterType));
+                                inputType = GraphQLTypeReference.typeRef(newInputName);
+                            }
                         }
 
-                    }
-                    else
-                    {
-                        inputTypeName = inputType.getName();
                     }
 
                     boolean isRequired = argAnno != null && argAnno.required();
@@ -342,7 +364,7 @@ public class LogicBeanAnalyzer
                         parameterName,
                         description,
                         isRequired,
-                        inputTypeName,
+                        inputType,
                         defaultValue,
                         inputTypes
                     );

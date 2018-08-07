@@ -3,6 +3,7 @@ package de.quinscape.domainql;
 
 import de.quinscape.domainql.beans.CustomParameterProviderLogic;
 import de.quinscape.domainql.beans.LogicWithAnnotated;
+import de.quinscape.domainql.beans.LogicWithGenerics;
 import de.quinscape.domainql.beans.LogicWithMirrorInput;
 import de.quinscape.domainql.beans.LogicWithWrongInjection;
 import de.quinscape.domainql.beans.LogicWithWrongInjection2;
@@ -21,6 +22,7 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import org.junit.Test;
@@ -501,5 +503,66 @@ public class DomainQLTest
 
         assertThat(schema.getType("DependencyBeanInput"), is(nullValue()));
         
+    }
+
+
+    @Test
+    public void testLogicWithGenerics()
+    {
+
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .logicBeans(Collections.singleton(new LogicWithGenerics()))
+            .buildGraphQLSchema();
+
+
+        final GraphQLObjectType mutationType = schema.getMutationType();
+        {
+
+
+            final GraphQLFieldDefinition mutation = mutationType.getFieldDefinition(
+                "mutationReturningListOfInts");
+
+            assertThat(mutation,is(notNullValue()));
+
+            final GraphQLList type = (GraphQLList) mutation.getType();
+            assertThat(type.getWrappedType().getName(), is( "Int"));
+        }
+        {
+
+            final GraphQLFieldDefinition mutation = mutationType.getFieldDefinition(
+                "mutationWithIntListParam");
+
+            assertThat(mutation,is(notNullValue()));
+
+            final GraphQLArgument graphQLArgument = mutation.getArguments().get(0);
+            final GraphQLList type = (GraphQLList) graphQLArgument.getType();
+            assertThat(type.getWrappedType().getName(), is( "Int"));
+        }
+
+        {
+
+
+            final GraphQLFieldDefinition mutation = mutationType.getFieldDefinition(
+                "mutationReturningListOfObject");
+
+            assertThat(mutation,is(notNullValue()));
+
+            final GraphQLList type = (GraphQLList) mutation.getType();
+            assertThat(type.getWrappedType().getName(), is( "DependencyBean"));
+        }
+
+
+        {
+
+            final GraphQLFieldDefinition mutation = mutationType.getFieldDefinition(
+                "mutationWithObjectListParam");
+
+            assertThat(mutation,is(notNullValue()));
+
+            final GraphQLArgument graphQLArgument = mutation.getArguments().get(0);
+            final GraphQLList type = (GraphQLList) graphQLArgument.getType();
+            assertThat(type.getWrappedType().getName(), is( "DependencyBeanInput"));
+        }
+
     }
 }

@@ -5,6 +5,7 @@ import de.quinscape.domainql.param.ParameterProvider;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLInputObjectType;
+import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ public class GraphQLValueProvider
 
     private final boolean isRequired;
 
-    private final String inputType;
+    private final GraphQLInputType inputType;
 
     private final Object defaultValue;
 
@@ -38,7 +39,7 @@ public class GraphQLValueProvider
         String argumentName,
         String description,
         boolean isRequired,
-        String inputType,
+        GraphQLInputType inputType,
         Object defaultValue,
         BiMap<Class<?>, String> inputTypes
     )
@@ -64,15 +65,15 @@ public class GraphQLValueProvider
 
         Object value = environment.getArgument(argumentName);
 
-        final GraphQLType type = schema.getType(inputType);
+        final GraphQLType type = schema.getType(inputType.getName());
 
         if (type instanceof GraphQLInputObjectType)
         {
-            Class<?> pojoClass = inputTypes.inverse().get(inputType);
+            Class<?> pojoClass = inputTypes.inverse().get(inputType.getName());
 
             if (pojoClass == null)
             {
-                throw new IllegalStateException("Cannot pojo class for Input type '" + inputType + "'");
+                throw new IllegalStateException("Cannot find pojo class for Input type '" + inputType + "'");
             }
 
             value = convert(pojoClass, (Map<String, Object>) value);
@@ -141,7 +142,7 @@ public class GraphQLValueProvider
     }
 
 
-    public String getInputType()
+    public GraphQLInputType getInputType()
     {
         return inputType;
     }

@@ -580,22 +580,22 @@ public final class DomainQL
     }
 
 
-    private List<GraphQLArgument> getGraphQLArguments(DomainQLMethod query)
+    private List<GraphQLArgument> getGraphQLArguments(DomainQLMethod domainQLMethod)
     {
         List<GraphQLArgument> arguments = new ArrayList<>();
-        for (ParameterProvider provider : query.getParameterProviders())
+        for (ParameterProvider provider : domainQLMethod.getParameterProviders())
         {
             if (provider instanceof GraphQLValueProvider)
             {
                 final GraphQLValueProvider graphQLValueProvider = (GraphQLValueProvider) provider;
-                final GraphQLTypeReference typeRef = GraphQLTypeReference.typeRef(graphQLValueProvider.getInputType());
+                final GraphQLInputType inputType = graphQLValueProvider.getInputType();
                 arguments.add(
                     GraphQLArgument.newArgument()
                         .name(graphQLValueProvider.getArgumentName())
                         .description(graphQLValueProvider.getDescription())
                         .defaultValue(graphQLValueProvider.getDefaultValue())
                         .type(
-                            graphQLValueProvider.isRequired() ? GraphQLNonNull.nonNull(typeRef) : typeRef
+                            graphQLValueProvider.isRequired() ? GraphQLNonNull.nonNull(inputType) : inputType
                         )
                         .build()
                 );
@@ -760,7 +760,6 @@ public final class DomainQL
         {
             throw new IllegalStateException();
         }
-
 
         final GraphQLScalarType type = DomainQL.getGraphQLScalarFor(propertyType, null);
         if (type != null)
@@ -1056,7 +1055,7 @@ public final class DomainQL
     /**
      * Builds the normal fields for the given type.
      * @param domainTypeBuilder     object builder
-     * @param classInfo             JSON classInfo for that type
+     * @param outputType            out type
      * @param foreignKeyFields      Names of fields that are part of a foreign keys
      * @param extraOutputTypes      Set to collect further extra output types coming from the fields
      *
