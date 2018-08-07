@@ -145,6 +145,8 @@ public final class DomainQL
 
     private final Map<Class<?>, GraphQLInputType> registeredInputTypes;
 
+    private final Map<Class<?>, GraphQLEnumType> registeredEnumTypes;
+
     private final DSLContext dslContext;
 
     private final Set<Object> logicBeans;
@@ -198,6 +200,7 @@ public final class DomainQL
 
         this.parameterProviderFactories = parameterProviderFactories;
         this.options = options;
+        registeredEnumTypes = new HashMap<>();
     }
 
 
@@ -384,6 +387,7 @@ public final class DomainQL
             logicBeans,
             inputTypes,
             registeredOutputTypes,
+            registeredEnumTypes,
             extraOutputTypes::add
         );
 
@@ -523,16 +527,10 @@ public final class DomainQL
 
             if (Enum.class.isAssignableFrom(nextType))
             {
-                final GraphQLEnumType.Builder enumBuilder = GraphQLEnumType.newEnum()
-                    .name(nextType.getSimpleName());
+                final GraphQLEnumType enumType = buildEnumType(nextType);
+                builder.additionalType(enumType);
 
-                for (String value : getEnumValues(nextType))
-                {
-                    enumBuilder.value(value);
-                };
-
-                builder.additionalType(enumBuilder.build());
-
+                registeredEnumTypes.put(nextType, enumType);
             }
             else if (DomainQL.getGraphQLScalarFor(nextType, graphQLFieldAnno) == null && !extraOutputTypes.contains(nextType) && !nextType.equals(Object.class))
             {
@@ -554,7 +552,23 @@ public final class DomainQL
 
     }
 
-    private List<String> getEnumValues(Class<?> type)
+
+    public static GraphQLEnumType buildEnumType(Class<?> nextType)
+    {
+        final GraphQLEnumType.Builder enumBuilder = GraphQLEnumType.newEnum()
+            .name(nextType.getSimpleName());
+
+        for (String value : getEnumValues(nextType))
+        {
+            enumBuilder.value(value);
+        }
+        ;
+
+        return enumBuilder.build();
+    }
+
+
+    static  List<String> getEnumValues(Class<?> type)
     {
         Enum[] enums = null;
         try
@@ -660,68 +674,92 @@ public final class DomainQL
             final Class<?> type = ensurePojoType(e.getKey());
             final String name = e.getValue();
 
-            log.debug("INPUT TYPE {} {}", name, type.getSimpleName());
-
-            final JSONClassInfo classInfo = JSONUtil.getClassInfo(type);
-
-
-            final GraphQLInputObjectType.Builder inputBuilder = GraphQLInputObjectType.newInputObject()
-                .name(name)
-                .description("Generated for " + type.getName());
-
-
-            for (JSONPropertyInfo info : classInfo.getPropertyInfos())
+            if (Enum.class.isAssignableFrom(type))
             {
-                final GraphQLField inputFieldAnno = JSONUtil.findAnnotation(info, GraphQLField.class);
-                final Class<Object> propertyType = info.getType();
-                GraphQLInputType inputType = getGraphQLScalarFor(propertyType, inputFieldAnno);
-                if (inputType == null)
+                if (!registeredEnumTypes.containsKey(type))
                 {
-                    if (List.class.isAssignableFrom(propertyType))
+                    final GraphQLEnumType enumType = buildEnumType(type);
+                    builder.additionalType(enumType);
+                    registeredEnumTypes.put(type, enumType);
+                }
+            }
+            else
+            {
+                log.debug("INPUT TYPE {} {}", name, type.getSimpleName());
+
+                final JSONClassInfo classInfo = JSONUtil.getClassInfo(type);
+
+
+                final GraphQLInputObjectType.Builder inputBuilder = GraphQLInputObjectType.newInputObject()
+                    .name(name)
+                    .description("Generated for " + type.getName());
+
+
+                for (JSONPropertyInfo info : classInfo.getPropertyInfos())
+                {
+                    final GraphQLField inputFieldAnno = JSONUtil.findAnnotation(info, GraphQLField.class);
+                    final Class<Object> propertyType = info.getType();
+                    GraphQLInputType inputType = getGraphQLScalarFor(propertyType, inputFieldAnno);
+                    if (inputType == null)
                     {
-                        inputType = (GraphQLInputType) getListType(type, info, false);
+                        if (List.class.isAssignableFrom(propertyType))
+                        {
+                            inputType = (GraphQLInputType) getListType(type, info, false);
+                        }
+                        else if (Enum.class.isAssignableFrom(propertyType))
+                        {
+                            inputType = registeredEnumTypes.get(propertyType);
+
+                            if (inputType == null)
+                            {
+                                final GraphQLEnumType enumType = buildEnumType(propertyType);
+
+                                builder.additionalType(enumType);
+                                registeredEnumTypes.put(propertyType, enumType);
+
+                                inputType = enumType;
+                            }
+                        }
+                        else
+                        {
+                            final String inputTypeName = typeToName.get(propertyType);
+
+                            inputType = inputTypeName != null ? typeRef(inputTypeName) : inputTypeRef(propertyType);
+                        }
+                    }
+
+                    final Object defaultValueFromAnno = inputFieldAnno != null ? inputFieldAnno.defaultValue() : null;
+                    final Object defaultValue;
+                    if (defaultValueFromAnno == null || String.class.isAssignableFrom(propertyType))
+                    {
+                        defaultValue = defaultValueFromAnno;
                     }
                     else
                     {
-                        final String inputTypeName = typeToName.get(propertyType);
-
-                        inputType = inputTypeName != null ? typeRef(inputTypeName) : inputTypeRef(propertyType);
+                        defaultValue = ConvertUtils.convert(defaultValueFromAnno, propertyType);
                     }
+
+                    final boolean jpaRequired = JSONUtil.findAnnotation(info, NotNull.class) != null;
+
+                    if (jpaRequired && inputFieldAnno != null && !inputFieldAnno.required())
+                    {
+                        throw new DomainQLException(type.getSimpleName() + "." + info.getJavaPropertyName() +
+                            ": Required field disagreement between @NotNull and @GraphQLField required value");
+                    }
+
+                    final boolean isRequired = (inputFieldAnno != null && inputFieldAnno.required()) || jpaRequired;
+
+                    inputBuilder.field(
+                        GraphQLInputObjectField.newInputObjectField()
+                            .name(inputFieldAnno != null && inputFieldAnno.value().length() > 0 ? inputFieldAnno.value() : info.getJsonName())
+                            .type(isRequired ? nonNull(inputType) : inputType)
+                            .description(inputFieldAnno != null && inputFieldAnno.description().length() > 0 ? inputFieldAnno.description() : null)
+                            .defaultValue(defaultValue)
+                            .build()
+                    );
                 }
-
-                final Object defaultValueFromAnno = inputFieldAnno != null ? inputFieldAnno.defaultValue() : null;
-                final Object defaultValue;
-                if (defaultValueFromAnno == null || String.class.isAssignableFrom(propertyType))
-                {
-                    defaultValue = defaultValueFromAnno;
-                }
-                else
-                {
-                    defaultValue = ConvertUtils.convert(defaultValueFromAnno, propertyType);
-                }
-
-                final boolean jpaRequired = JSONUtil.findAnnotation(info, NotNull.class) != null;
-
-                if (jpaRequired && inputFieldAnno != null && !inputFieldAnno.required())
-                {
-                    throw new DomainQLException(type.getSimpleName() + "." + info.getJavaPropertyName() +
-                        ": Required field disagreement between @NotNull and @GraphQLField required value");
-                }
-
-                final boolean isRequired = (inputFieldAnno != null && inputFieldAnno.required()) || jpaRequired;
-
-                inputBuilder.field(
-                    GraphQLInputObjectField.newInputObjectField()
-                        .name(inputFieldAnno != null && inputFieldAnno.value().length() > 0 ? inputFieldAnno.value() : info.getJsonName())
-                        .type(isRequired ? nonNull(inputType) : inputType)
-                        .description(inputFieldAnno != null && inputFieldAnno.description().length() > 0 ? inputFieldAnno.description() : null)
-                        .defaultValue(defaultValue)
-                        .build()
-                );
+                builder.additionalType(inputBuilder.build());
             }
-
-
-            builder.additionalType(inputBuilder.build());
         }
 
     }

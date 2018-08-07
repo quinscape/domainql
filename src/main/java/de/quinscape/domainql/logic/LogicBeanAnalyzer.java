@@ -9,6 +9,7 @@ import de.quinscape.domainql.annotation.GraphQLMutation;
 import de.quinscape.domainql.annotation.GraphQLQuery;
 import de.quinscape.domainql.param.ParameterProvider;
 import de.quinscape.domainql.param.ParameterProviderFactory;
+import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLOutputType;
@@ -56,6 +57,8 @@ public class LogicBeanAnalyzer
 
     private final Map<Class<?>, GraphQLOutputType> registeredOutputTypes;
 
+    private final Map<Class<?>, GraphQLEnumType> registeredEnumTypes;
+
     private final Consumer<Class<?>> registerOutputType;
 
 
@@ -65,6 +68,7 @@ public class LogicBeanAnalyzer
         Collection<Object> logicBeans,
         BiMap<Class<?>, String> inputTypes,
         Map<Class<?>, GraphQLOutputType> registeredOutputTypes,
+        Map<Class<?>, GraphQLEnumType> registeredEnumTypes,
         Consumer<Class<?>> registerOutputType
     )
     {
@@ -72,6 +76,7 @@ public class LogicBeanAnalyzer
         this.parameterProviderFactories = parameterProviderFactories;
         this.inputTypes = inputTypes;
         this.registeredOutputTypes = registeredOutputTypes;
+        this.registeredEnumTypes = registeredEnumTypes;
         this.registerOutputType = registerOutputType;
         logicBeans.forEach(this::discover);
     }
@@ -227,6 +232,17 @@ public class LogicBeanAnalyzer
 
                     resultType = new GraphQLList(new GraphQLTypeReference(elementClass.getSimpleName()));
                 }
+            }
+            else if (Enum.class.isAssignableFrom(returnType))
+            {
+                GraphQLEnumType enumType = registeredEnumTypes.get(returnType);
+                if (enumType == null)
+                {
+                    enumType = DomainQL.buildEnumType(returnType);
+                    registeredEnumTypes.put(returnType, enumType);
+
+                }
+                resultType = enumType;
             }
             else
             {
