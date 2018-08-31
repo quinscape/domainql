@@ -527,7 +527,12 @@ public final class DomainQL
 
             if (Enum.class.isAssignableFrom(nextType))
             {
-                final GraphQLEnumType enumType = buildEnumType(nextType);
+                GraphQLEnumType enumType = registeredEnumTypes.get(nextType);
+                if (enumType == null)
+                {
+                    enumType = buildEnumType(nextType);
+                }
+
                 builder.additionalType(enumType);
 
                 registeredEnumTypes.put((Class<? extends Enum>) nextType, enumType);
