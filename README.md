@@ -87,9 +87,9 @@ Technologies involved:
     ```java
     @GraphQLQuery
     public List<Product> products(
-        @GraphQLInput( defaultValue = "0")
+        @GraphQLField( defaultValue = "0")
         int offset,
-        @GraphQLInput( defaultValue = "100")
+        @GraphQLField( defaultValue = "100")
         int limit
     )
     {
@@ -103,10 +103,11 @@ Technologies involved:
     }
     ```
     
-    Query methods are annotated with @GraphQLQuery, mutations with @GraphQLMutations. You can use @GraphQLInput 
+    Query methods are annotated with @GraphQLQuery, mutations with @GraphQLMutations. You can use @GraphQLField 
     annotations on the method parameters to (re)define name, description or not-null status. If the Java compiler 
     provided method parameter names (-parameters switch on Javac) the method parameter names will be automatically used 
-    from the Java parameters.
+    from the Java parameters. Otherwise you will need to provide the correct name for
+    every query or mutation parameter via @GraphQLField
   
  4. Use DomainQL on generated Schema
  
@@ -122,23 +123,6 @@ Technologies involved:
             // configure object creation for schema relationships
             .configureRelation( ...)
             .buildGraphQLSchema();
-        /*
-        
-                Alternatively
-                ----------------------------------------------------------------
-        
-                final DomainQL domainQL = DomainQL.newDomainQL(dslContext)
-                    ...
-                    .build();
-        
-                final GraphQLSchema.Builder builder = GraphQLSchema.newSchema();
-                domainQL.register(builder);
-        
-                 .. add more definitions ...
-        
-                GraphQLSchema schema = builder.build();
-        
-        */
    
     ```
   
@@ -219,5 +203,3 @@ method of the builder.
 
 This will be necessary to prevent the embedded objects of the same type from multiple foreign keys 
 from conflicting with each other    
- 
-
