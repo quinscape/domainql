@@ -177,7 +177,7 @@ There is no special handling of the relation ship. Foo will only receive a plain
 The target of the relation will be embedded as GraphQL object. By default, the algorithm will name the embedded object 
 like the underlying foreign key stripped of the foreign key suffix ("_id" by default).
 
-Foo will receive a bull "bar" object field.
+Foo will receive a full "bar" object field.
 
 ### SourceField.OBJECT_AND_SCALAR
 
