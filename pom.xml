@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.quinscape.domainql</groupId>
     <artifactId>domainql</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <version>0.9</version>
 
     <name>DomainQL</name>
     <description>
@@ -182,7 +180,7 @@
         <connection>scm:git:https://github.com/quinscape/domainql.git</connection>
         <developerConnection>scm:git:git@github.com:quinscape/domainql.git</developerConnection>
         <url>https://github.com/quinscape/domainql/</url>
-        <tag>HEAD</tag>
+        <tag>domainql-0.9</tag>
     </scm>
 
     <build>
@@ -341,7 +339,7 @@
                         <database>
                             <name>org.jooq.util.postgres.PostgresDatabase</name>
                             <includes>.*</includes>
-                            <excludes></excludes>
+                            <excludes />
                             <!-- In case your database supports catalogs, e.g. SQL Server:
                             <inputCatalog>public</inputCatalog>
                               -->
