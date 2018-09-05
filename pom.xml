@@ -6,7 +6,32 @@
 
     <groupId>de.quinscape.domainql</groupId>
     <artifactId>domainql</artifactId>
-    <version>0.8</version>
+    <version>0.9-SNAPSHOT</version>
+
+    <name>DomainQL</name>
+    <description>
+        Annotation-based convention over configuration GraphQL schema generator.
+    </description>
+
+    <url>https://github.com/quinscape/domainql/</url>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Sven Helmberger</name>
+            <email>sven.helmberger@quinscape.de</email>
+            <url>https://www.quinscape.de/</url>
+        </developer>
+    </developers>
+
+    <inceptionYear>2018</inceptionYear>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -17,12 +42,6 @@
 
         <spring.core.version>5.0.4.RELEASE</spring.core.version>
     </properties>
-
-    <scm>
-        <connection>scm:git:ssh://git@bitbucket-vm:7999/xcd/domainql.git</connection>
-        <developerConnection>scm:git:ssh://git@bitbucket-vm:7999/xcd/domainql.git</developerConnection>
-        <url>https://intern.quinscape.de/bitbucket/projects/XCD/repos/domainql/browse</url>
-    </scm>
 
     <dependencies>
         <dependency>
@@ -136,7 +155,7 @@
         <dependency>
             <groupId>de.quinscape</groupId>
             <artifactId>spring-jsview</artifactId>
-            <version>0.1</version>
+            <version>0.2</version>
         </dependency>
 
         <dependency>
@@ -148,8 +167,103 @@
 
     </dependencies>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+    <scm>
+        <connection>scm:git:https://github.com/quinscape/domainql.git</connection>
+        <developerConnection>scm:git:git@github.com:quinscape/domainql.git</developerConnection>
+        <url>https://github.com/quinscape/domainql/</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <build>
         <plugins>
+
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.8</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!--
+                        Use "@quinscape.de" qualifier for key so we don't always use the default key and developers
+                        already using GPG can keep their private key.
+
+                        As-is the key chosen needs to be created with a quinscape mail address.
+                    -->
+                    <keyname>@quinscape.de</keyname>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <useReleaseProfile>false</useReleaseProfile>
+                    <releaseProfiles>release</releaseProfiles>
+                    <goals>deploy</goals>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
