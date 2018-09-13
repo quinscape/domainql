@@ -269,7 +269,9 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
-                    <parameters>true</parameters>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
                 </configuration>
                 <executions>
                     <execution>
@@ -281,7 +283,9 @@
                         <configuration>
                             <source>1.8</source>
                             <target>1.8</target>
-                            <parameters>true</parameters>
+                            <compilerArgs>
+                                <arg>-parameters</arg>
+                            </compilerArgs>
                         </configuration>
                     </execution>
                 </executions>
@@ -364,3 +368,6 @@
         </plugins>
     </build>
 </project>
+
+
+
