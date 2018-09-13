@@ -27,4 +27,11 @@ public @interface GraphQLMutation
      * @return description
      */
     String description() default "";
+
+    /**
+     * If set to <code>true</code>, provide response as-is with standard JSONification rules. Doing so is only
+     * valid if the DomainQL service is configured to support the @full directive
+     */
+    boolean full() default false;
+
 }

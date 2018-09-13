@@ -64,6 +64,8 @@ public class DomainQLBuilder
 
     private Set<GraphQLDirective> additionalDirectives = new LinkedHashSet<>(STANDARD_DIRECTIVES);
 
+    private boolean fullSupported;
+
 
     DomainQLBuilder(DSLContext dslContext)
     {
@@ -102,7 +104,8 @@ public class DomainQLBuilder
             mirrorInputs,
             Collections.unmodifiableSet(additionalQueries),
             Collections.unmodifiableSet(additionalMutations),
-            Collections.unmodifiableSet(additionalDirectives)
+            Collections.unmodifiableSet(additionalDirectives),
+            fullSupported
         );
     }
 
@@ -419,6 +422,24 @@ public class DomainQLBuilder
     public DomainQLBuilder withoutStandardDirectives()
     {
         additionalDirectives.removeAll(STANDARD_DIRECTIVES);
+        return this;
+    }
+
+
+    public boolean isFullSupported()
+    {
+        return fullSupported;
+    }
+
+    /**
+     * Configures whether to support the @full directive for this DomainQL service or not.
+     *
+     * @return  this builder
+     */
+
+    public DomainQLBuilder withFullDirectiveSupported(boolean fullSupported)
+    {
+        this.fullSupported = fullSupported;
         return this;
     }
 }

@@ -2,8 +2,6 @@ package de.quinscape.domainql;
 
 
 import com.google.common.collect.ImmutableMap;
-import de.quinscape.domainql.beans.AnotherEnum;
-import de.quinscape.domainql.beans.BeanWithEnum;
 import de.quinscape.domainql.beans.CustomFetcherLogic;
 import de.quinscape.domainql.beans.GetterArgLogic;
 import de.quinscape.domainql.beans.LogicWithEnums;
@@ -13,9 +11,11 @@ import de.quinscape.domainql.beans.TestLogic;
 import de.quinscape.domainql.beans.TypeConversionLogic;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
+import de.quinscape.domainql.beans.FullDirectiveLogic;
 import de.quinscape.domainql.mock.TestProvider;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.domainql.testdomain.Public;
+import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
@@ -444,5 +444,97 @@ public class DomainQLExecutionTest
                 assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"objectWithEnumMutation\":{\"anotherEnum\":\"Z\"}}"    ));
             }
         }
+    }
+
+
+    @Test
+    public void testFullDirective()
+    {
+    final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
+        .logicBeans(Collections.singletonList(new FullDirectiveLogic()))
+        .createMirrorInputTypes(true)
+        .withFullDirectiveSupported(true)
+        .buildGraphQLSchema();
+
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        {
+
+            final DomainQLExecutionContext domainQLExecutionContext = new DomainQLExecutionContext();
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("    query fullQuery \n" +
+                    "    {\n" +
+                    "        fullQuery @full\n" +
+                    "    }")
+                .context(domainQLExecutionContext)
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+            assumeNoErrors(executionResult);
+            assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"fullQuery\":true}"));
+
+            assertThat(JSONUtil.DEFAULT_GENERATOR.forValue(domainQLExecutionContext.getResponse()), is("{\"name\":\"Blafusel\",\"num\":12948}"));
+        }
+    }
+
+    @Test
+    public void testMissingFullDirective()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
+            .logicBeans(Collections.singletonList(new FullDirectiveLogic()))
+            .createMirrorInputTypes(true)
+            .withFullDirectiveSupported(true)
+            .buildGraphQLSchema();
+
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        {
+
+            final DomainQLExecutionContext context = new DomainQLExecutionContext();
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("query fullQuery \n" +
+                    "{\n" +
+                    "    fullQuery\n" +
+                    "}")
+                .context(context)
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+            final List<GraphQLError> errors = executionResult.getErrors();
+            assertThat(errors.size(), is(1));
+            assertThat(errors.get(0).getMessage(), containsString("Query 'fullQuery' is annotated with (full=true) and cannot be queried without @full"));
+        }
+    }
+
+    @Test()
+    public void testFullDirectiveWithMissingContext()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
+            .logicBeans(Collections.singletonList(new FullDirectiveLogic()))
+            .createMirrorInputTypes(true)
+            .withFullDirectiveSupported(true)
+            .buildGraphQLSchema();
+
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("query fullQuery \n" +
+                "{\n" +
+                "    fullQuery @full\n" +
+                "}")
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+
+        final List<GraphQLError> errors = executionResult.getErrors();
+        assertThat(errors.size(), is(1));
+        assertThat(errors.get(0).getMessage(), containsString("A new de.quinscape.domainql.DomainQLExecutionContext instance must be provided as .context() in the GraphQL endpoint."));
     }
 }

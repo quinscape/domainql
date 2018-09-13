@@ -26,6 +26,7 @@ import de.quinscape.domainql.scalar.GraphQLDateScalar;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.Scalars;
+import graphql.introspection.Introspection;
 import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLDirective;
@@ -59,7 +60,6 @@ import org.svenson.info.JavaObjectPropertyInfo;
 import javax.persistence.Column;
 import javax.validation.constraints.NotNull;
 import java.beans.Introspector;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -167,6 +167,8 @@ public final class DomainQL
 
     private final Set<GraphQLDirective> additionalDirectives;
 
+    private final boolean fullSupported;
+
 
     DomainQL(
         DSLContext dslContext,
@@ -181,7 +183,8 @@ public final class DomainQL
         Set<GraphQLFieldDefinition> additionalQueries,
         Set<GraphQLFieldDefinition> additionalMutations,
 
-        Set<GraphQLDirective> additionalDirectives
+        Set<GraphQLDirective> additionalDirectives,
+        boolean fullSupported
     )
     {
         this.dslContext = dslContext;
@@ -194,6 +197,7 @@ public final class DomainQL
         this.additionalQueries = additionalQueries;
         this.additionalMutations = additionalMutations;
         this.additionalDirectives = additionalDirectives;
+        this.fullSupported = fullSupported;
 
         registeredOutputTypes = new HashMap<>(JAVA_TYPE_TO_GRAPHQL);
         registeredInputTypes = new HashMap<>(JAVA_TYPE_TO_GRAPHQL);
@@ -660,9 +664,32 @@ public final class DomainQL
 
         defineInputTypes(builder, map);
 
+
+
         builder.additionalDirectives(
             additionalDirectives
         );
+
+        if (fullSupported)
+        {
+            builder.additionalDirective(
+                GraphQLDirective.newDirective()
+                    .name("full")
+                    .description(
+                        "Escape-hatch to make GraphQL get out of your way and return the complete DomainQL query or " +
+                            "mutation response as-is with standard JSONification")
+                    .validLocations(
+                        Introspection.DirectiveLocation.FIELD
+                    )
+                    .build()
+            );
+        }
+    }
+
+
+    public boolean isFullSupported()
+    {
+        return fullSupported;
     }
 
 

@@ -9,6 +9,7 @@ import de.quinscape.domainql.annotation.GraphQLMutation;
 import de.quinscape.domainql.annotation.GraphQLQuery;
 import de.quinscape.domainql.param.ParameterProvider;
 import de.quinscape.domainql.param.ParameterProviderFactory;
+import graphql.Scalars;
 import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLList;
@@ -119,16 +120,23 @@ public class LogicBeanAnalyzer
             final Class<?>[] parameterTypes = method.getParameterTypes();
 
             final GraphQLQuery queryAnno = method.getDeclaredAnnotation(GraphQLQuery.class);
-            final GraphQLMutation mutationAnno = method.getDeclaredAnnotation(GraphQLMutation.class);
+
 
 
             final String locationInfo = logicBean.getClass().getName() + ":" + methodName;
             if (queryAnno != null)
             {
+
+
                 final GraphQLOutputType resultType = getGraphQLOutputType(locationInfo, method);
                 final String name = queryAnno.value().length() > 0 ? queryAnno.value() : methodName;
                 final int methodIndex = methodAccess.getIndex(methodName, parameterTypes);
                 log.debug("QUERY {}", name);
+
+                if (queryAnno.full() && !domainQL.isFullSupported())
+                {
+                    throw new IllegalStateException("Query " + name + " cannot declare full: DomainQL service not configured to support @full");
+                }
 
                 final List<ParameterProvider> parameterProviders = createParameterProviders(
                     locationInfo,
@@ -136,20 +144,21 @@ public class LogicBeanAnalyzer
                 );
 
                 final Query query = new Query(
-                    name.length() > 0 ? name : methodName,
+                    name,
                     queryAnno.description(),
+                    queryAnno.full(),
                     logicBean,
                     methodAccess,
                     methodIndex,
                     parameterProviders,
-                    resultType
+                    queryAnno.full() ? Scalars.GraphQLBoolean : resultType
                 );
                 queries.add(
                     query
                 );
-
             }
 
+            final GraphQLMutation mutationAnno = method.getDeclaredAnnotation(GraphQLMutation.class);
             if (mutationAnno != null)
             {
 
@@ -157,6 +166,11 @@ public class LogicBeanAnalyzer
                 final int methodIndex = methodAccess.getIndex(methodName, parameterTypes);
 
                 log.debug("MUTATION {}", name);
+
+                if (mutationAnno.full() && !domainQL.isFullSupported())
+                {
+                    throw new IllegalStateException("Mutation " + name + " cannot declare full: DomainQL service not configured to support @full");
+                }
 
                 final GraphQLOutputType resultType = getGraphQLOutputType(locationInfo, method);
 
@@ -167,11 +181,12 @@ public class LogicBeanAnalyzer
                 final Mutation mutation = new Mutation(
                     name.length() > 0 ? name : methodName,
                     mutationAnno.description(),
+                    mutationAnno.full(),
                     logicBean,
                     methodAccess,
                     methodIndex,
                     parameterProviders,
-                    resultType
+                    mutationAnno.full() ? Scalars.GraphQLBoolean : resultType
                 );
                 mutations.add(
                     mutation
@@ -291,6 +306,7 @@ public class LogicBeanAnalyzer
                 for (ParameterProviderFactory factory : parameterProviderFactories)
                 {
                     provider = factory.createIfApplicable(parameterType, parameterAnnotations);
+
                     if (provider != null)
                     {
                         break;

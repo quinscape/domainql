@@ -13,7 +13,7 @@ public class DataFetchingEnvironmentProviderFactory
     @Override
     public ParameterProvider createIfApplicable(
         Class<?> parameterClass, Annotation[] annotations
-    ) throws Exception
+    )
     {
         if (DataFetchingEnvironment.class.isAssignableFrom(parameterClass))
         {

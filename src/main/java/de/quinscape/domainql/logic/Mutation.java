@@ -15,6 +15,7 @@ public class Mutation
     public Mutation(
         String name,
         String description,
+        boolean full,
         Object logicBean,
         MethodAccess methodAccess,
         int methodIndex,
@@ -22,7 +23,7 @@ public class Mutation
         GraphQLOutputType resultType
     )
     {
-        super(name, description, logicBean, methodAccess, methodIndex, parameterProviders, resultType);
+        super(name, description, full, logicBean, methodAccess, methodIndex, parameterProviders, resultType);
 
     }
 
