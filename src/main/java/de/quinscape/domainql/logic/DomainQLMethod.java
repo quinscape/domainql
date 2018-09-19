@@ -99,16 +99,27 @@ public abstract class DomainQLMethod
         {
             ensureFullDirective(environment);
 
-            final DomainQLExecutionContext context = environment.getContext();
-            if (context == null)
-            {
-                throw new DomainQLExecutionException("Cannot execute @full " + this.getClass().getSimpleName() + " '" + name + ": A new de.quinscape.domainql.DomainQLExecutionContext instance must be provided as .context() in the GraphQL endpoint.");
-            }
+            final DomainQLExecutionContext context = getExecutionContext(environment);
             context.setResponse(result);
 
             return true;
         }
         return result;
+    }
+
+
+    private DomainQLExecutionContext getExecutionContext(DataFetchingEnvironment environment)
+    {
+        final Object ctx = environment.getContext();
+        if (!(ctx instanceof DomainQLExecutionContext))
+        {
+            throw new DomainQLExecutionException(
+                "Cannot execute @full " + this.getClass().getSimpleName() + " '" + name +
+                ": A new de.quinscape.domainql.DomainQLExecutionContext instance or subclass must be provided as .context() in the GraphQL endpoint."
+
+            );
+        }
+        return (DomainQLExecutionContext) ctx;
     }
 
 

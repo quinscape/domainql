@@ -535,6 +535,6 @@ public class DomainQLExecutionTest
 
         final List<GraphQLError> errors = executionResult.getErrors();
         assertThat(errors.size(), is(1));
-        assertThat(errors.get(0).getMessage(), containsString("A new de.quinscape.domainql.DomainQLExecutionContext instance must be provided as .context() in the GraphQL endpoint."));
+        assertThat(errors.get(0).getMessage(), containsString(" A new de.quinscape.domainql.DomainQLExecutionContext instance or subclass must be provided as .context() in the GraphQL endpoint"));
     }
 }
