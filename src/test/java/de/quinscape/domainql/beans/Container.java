@@ -1,25 +1,32 @@
 package de.quinscape.domainql.beans;
 
-import de.quinscape.domainql.annotation.GraphQLField;
+import javax.validation.constraints.NotNull;
 
-public class ComplexInput
+/**
+ * Generic container test bean for direct inclusion of the generic T
+ * 
+ * @param <T>
+ */
+public class Container<T>
 {
-    private String value;
+    private T value;
+
     private int num;
 
-    @GraphQLField(notNull = true)
-    public String getValue()
+
+    public T getValue()
     {
         return value;
     }
 
 
-    public void setValue(String value)
+    public void setValue(T value)
     {
         this.value = value;
     }
 
 
+    @NotNull
     public int getNum()
     {
         return num;

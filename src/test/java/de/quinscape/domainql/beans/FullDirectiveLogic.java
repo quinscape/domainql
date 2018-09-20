@@ -8,9 +8,9 @@ public class FullDirectiveLogic
 {
 
     @GraphQLQuery( full = true)
-    public FulLResponse fullQuery()
+    public FullResponse fullQuery()
     {
-        final FulLResponse response = new FulLResponse();
+        final FullResponse response = new FullResponse();
         response.setName("Blafusel");
         response.setNum(12948);
         

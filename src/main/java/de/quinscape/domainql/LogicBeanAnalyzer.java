@@ -1,16 +1,16 @@
-package de.quinscape.domainql.logic;
+package de.quinscape.domainql;
 
 import com.esotericsoftware.reflectasm.MethodAccess;
-import com.google.common.collect.BiMap;
-import de.quinscape.domainql.DomainQL;
-import de.quinscape.domainql.DomainQLException;
 import de.quinscape.domainql.annotation.GraphQLField;
 import de.quinscape.domainql.annotation.GraphQLMutation;
 import de.quinscape.domainql.annotation.GraphQLQuery;
+import de.quinscape.domainql.annotation.ResolvedGenericType;
+import de.quinscape.domainql.logic.GraphQLValueProvider;
+import de.quinscape.domainql.logic.Mutation;
+import de.quinscape.domainql.logic.Query;
 import de.quinscape.domainql.param.ParameterProvider;
 import de.quinscape.domainql.param.ParameterProviderFactory;
 import graphql.Scalars;
-import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLOutputType;
@@ -30,12 +30,9 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Consumer;
 
 /**
  * Analyzes annotated LogicBeans and finds queries and mutations.
@@ -54,43 +51,20 @@ public class LogicBeanAnalyzer
 
     private final Collection<ParameterProviderFactory> parameterProviderFactories;
 
-    private final BiMap<Class<?>, String> inputTypes;
-
-    private final Map<Class<?>, GraphQLOutputType> registeredOutputTypes;
-
-    private final Map<Class<? extends Enum>, GraphQLEnumType> registeredEnumTypes;
-
-    private final Consumer<Class<?>> registerOutputType;
-
+    private final TypeRegistry typeRegistry;
 
     public LogicBeanAnalyzer(
         DomainQL domainQL,
         Collection<ParameterProviderFactory> parameterProviderFactories,
         Collection<Object> logicBeans,
-        BiMap<Class<?>, String> inputTypes,
-        Map<Class<?>, GraphQLOutputType> registeredOutputTypes,
-        Map<Class<? extends Enum>, GraphQLEnumType> registeredEnumTypes,
-        Consumer<Class<?>> registerOutputType
+        TypeRegistry typeRegistry
     )
     {
         this.domainQL = domainQL;
         this.parameterProviderFactories = parameterProviderFactories;
-        this.inputTypes = inputTypes;
-        this.registeredOutputTypes = registeredOutputTypes;
-        this.registeredEnumTypes = registeredEnumTypes;
-        this.registerOutputType = registerOutputType;
+        this.typeRegistry = typeRegistry;
         logicBeans.forEach(this::discover);
-    }
 
-
-    private Map<String, Class<?>> invert(Map<Class<?>, String> inputTypes)
-    {
-        Map<String, Class<?>> map = new HashMap<>();
-        for (Map.Entry<Class<?>, String> e : inputTypes.entrySet())
-        {
-            map.put(e.getValue(), e.getKey());
-        }
-        return map;
     }
 
 
@@ -140,8 +114,9 @@ public class LogicBeanAnalyzer
 
                 final List<ParameterProvider> parameterProviders = createParameterProviders(
                     locationInfo,
-                    method.getParameters()
+                    method
                 );
+
 
                 final Query query = new Query(
                     name,
@@ -174,9 +149,14 @@ public class LogicBeanAnalyzer
 
                 final GraphQLOutputType resultType = getGraphQLOutputType(locationInfo, method);
 
+                if (resultType == null)
+                {
+                    throw new IllegalStateException("Could not find type for " + locationInfo + ", method = " + method);
+                }
+
                 final List<ParameterProvider> parameterProviders = createParameterProviders(
                     locationInfo,
-                    method.getParameters()
+                    method
                 );
                 final Mutation mutation = new Mutation(
                     name.length() > 0 ? name : methodName,
@@ -200,6 +180,8 @@ public class LogicBeanAnalyzer
     {
         final Class<?> returnType = method.getReturnType();
 
+        final TypeContext ctx = new TypeContext(null, method);
+
         final GraphQLOutputType resultType;
         if (returnType == null || returnType.equals(Void.TYPE))
         {
@@ -220,18 +202,16 @@ public class LogicBeanAnalyzer
                 return scalarType;
             }
 
+            final Type[] actualTypeArguments = ctx.getActualTypeArguments();
             if (List.class.isAssignableFrom(returnType))
             {
-                final Type genericReturnType = method.getGenericReturnType();
-                if (!(genericReturnType instanceof ParameterizedType))
+                if (actualTypeArguments == null)
                 {
-                    throw new DomainQLException(locationInfo + ": List return type must be parametrized.");
+                    throw new IllegalStateException(locationInfo + ": List return type must be parametrized.");
                 }
 
-                final Class<?> elementClass = (Class<?>) ((ParameterizedType) genericReturnType)
-                    .getActualTypeArguments()[0];
 
-
+                final Class<?> elementClass = ctx.getFirstActualType();
                 final GraphQLScalarType scalar = DomainQL.getGraphQLScalarFor(elementClass, fieldAnno);
                 if (scalar != null)
                 {
@@ -239,57 +219,47 @@ public class LogicBeanAnalyzer
                 }
                 else
                 {
-                    final GraphQLOutputType outputType = registeredOutputTypes.get(elementClass);
-                    if (outputType == null)
-                    {
-                        registerOutputType.accept(elementClass);
-                    }
-
-                    resultType = new GraphQLList(new GraphQLTypeReference(elementClass.getSimpleName()));
+                    // create new type context for the element of the generic list
+                    final OutputType outputType = typeRegistry.register(new TypeContext(null,  elementClass));
+                    resultType = new GraphQLList(new GraphQLTypeReference(outputType.getName()));
                 }
             }
             else if (Enum.class.isAssignableFrom(returnType))
             {
-                GraphQLEnumType enumType = registeredEnumTypes.get(returnType);
-                if (enumType == null)
-                {
-                    enumType = DomainQL.buildEnumType(returnType);
-                    registeredEnumTypes.put((Class<? extends Enum>) returnType, enumType);
+                final OutputType enumType = typeRegistry.register(ctx);
 
-                }
-                resultType = enumType;
+                resultType = new GraphQLTypeReference(enumType.getName());
             }
             else
             {
-                final GraphQLOutputType outputType = registeredOutputTypes.get(returnType);
-                if (outputType == null)
-                {
-
-                    registerOutputType.accept(returnType);
-                }
-
-                resultType = new GraphQLTypeReference(returnType.getSimpleName());
+                final OutputType outputType = typeRegistry.register(ctx);
+                resultType = new GraphQLTypeReference(outputType.getName());
             }
-
         }
         return resultType;
     }
 
 
+
     private List<ParameterProvider> createParameterProviders(
-        String name, Parameter[] parameters
+        String name, Method method
     )
     {
-        try
-        {
+//        try
+//        {
+            final Parameter[] parameters = method.getParameters();
+            final Type[] genericParameterTypes = method.getGenericParameterTypes();
+
             List<ParameterProvider> list = new ArrayList<>(parameters.length);
             for (int i = 0, parameterTypesLength = parameters.length; i < parameterTypesLength; i++)
             {
                 final Parameter parameter = parameters[i];
+                final Type genericParameterType = genericParameterTypes[i];
                 Class<?> parameterType = parameter.getType();
                 final Annotation[] parameterAnnotations = parameter.getDeclaredAnnotations();
 
                 final GraphQLField argAnno = parameter.getDeclaredAnnotation(GraphQLField.class);
+                final ResolvedGenericType genericTypeAnno = parameter.getDeclaredAnnotation(ResolvedGenericType.class);
 
                 if ((argAnno == null || argAnno.value().length() == 0) && !parameter.isNamePresent())
                 {
@@ -305,7 +275,7 @@ public class LogicBeanAnalyzer
                 ParameterProvider provider = null;
                 for (ParameterProviderFactory factory : parameterProviderFactories)
                 {
-                    provider = factory.createIfApplicable(parameterType, parameterAnnotations);
+                    provider = invokeFactory(parameterType, parameterAnnotations, factory);
 
                     if (provider != null)
                     {
@@ -320,52 +290,47 @@ public class LogicBeanAnalyzer
                 }
                 else
                 {
+                    final TypeContext paramTypeContext = new TypeContext(
+                        null,
+                        parameter.getType(), genericParameterType, genericTypeAnno);
                     GraphQLInputType inputType = DomainQL.getGraphQLScalarFor(parameterType, argAnno);
                     if (inputType == null)
                     {
-                        final String nameFromConfig = inputTypes.get(parameterType);
-                        if (nameFromConfig != null)
+                        if (List.class.isAssignableFrom(parameterType))
                         {
-                            inputType = GraphQLTypeReference.typeRef(nameFromConfig);
-                        }
-                        else
-                        {
-                            if (List.class.isAssignableFrom(parameterType))
+                            final Type genericReturnType = parameter.getParameterizedType();
+                            if (!(genericReturnType instanceof ParameterizedType))
                             {
-                                final Type genericReturnType = parameter.getParameterizedType();
-                                if (!(genericReturnType instanceof ParameterizedType))
-                                {
-                                    throw new DomainQLException(parameter + ": List parameter type must be parametrized.");
-                                }
+                                throw new DomainQLException(parameter + ": List parameter type must be parametrized.");
+                            }
 
-                                final Class<?> elementClass = (Class<?>) ((ParameterizedType) genericReturnType)
-                                    .getActualTypeArguments()[0];
+                            final Class<?> elementClass = (Class<?>) ((ParameterizedType) genericReturnType)
+                                .getActualTypeArguments()[0];
 
 
-                                final GraphQLScalarType scalar = DomainQL.getGraphQLScalarFor(elementClass, argAnno);
-                                if (scalar != null)
-                                {
-                                    inputType = new GraphQLList(scalar);
-                                }
-                                else
-                                {
-                                    final String newInputName = DomainQL.getInputTypeName(elementClass);
-                                    inputTypes.put(elementClass, newInputName);
-
-                                    inputType = new GraphQLList(new GraphQLTypeReference(newInputName));
-                                }
+                            final GraphQLScalarType scalar = DomainQL.getGraphQLScalarFor(elementClass, argAnno);
+                            if (scalar != null)
+                            {
+                                inputType = new GraphQLList(scalar);
                             }
                             else
                             {
-                                final String newInputName = DomainQL.getInputTypeName(parameterType);
-                                inputTypes.put(parameterType, DomainQL.getInputTypeName(parameterType));
-                                inputType = GraphQLTypeReference.typeRef(newInputName);
+                                InputType newInputType = typeRegistry.registerInput(
+                                    // create new type context for the element of the generic list.
+                                    new TypeContext(paramTypeContext, elementClass)
+                                );
+                                inputType = new GraphQLList(new GraphQLTypeReference(newInputType.getName()));
                             }
                         }
-
+                        else
+                        {
+                            final InputType parameterInputType = typeRegistry.registerInput(paramTypeContext);
+                            final String nameFromConfig = parameterInputType.getName();
+                            inputType = GraphQLTypeReference.typeRef(nameFromConfig);
+                        }
                     }
 
-                    boolean isRequired = argAnno != null && argAnno.required();
+                    boolean isRequired = argAnno != null && argAnno.notNull();
                     final NotNull notNullAnno = parameter.getAnnotation(NotNull.class);
                     boolean jpaRequired = notNullAnno != null;
 
@@ -398,8 +363,7 @@ public class LogicBeanAnalyzer
                         isRequired,
                         inputType,
                         defaultValue,
-                        inputTypes,
-                        registeredEnumTypes
+                        typeRegistry
                     );
 
                     final String paramDesc = graphQLValueProvider.getDescription();
@@ -412,6 +376,21 @@ public class LogicBeanAnalyzer
                 }
             }
             return list;
+//        }
+//        catch (Exception e)
+//        {
+//            throw new DomainQLException(e);
+//        }
+    }
+
+
+    private ParameterProvider invokeFactory(
+        Class<?> parameterType, Annotation[] parameterAnnotations, ParameterProviderFactory factory
+    )
+    {
+        try
+        {
+            return factory.createIfApplicable(parameterType, parameterAnnotations);
         }
         catch (Exception e)
         {

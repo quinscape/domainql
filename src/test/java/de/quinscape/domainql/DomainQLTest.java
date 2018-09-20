@@ -1,23 +1,13 @@
 package de.quinscape.domainql;
 
 
-import de.quinscape.domainql.beans.CustomParameterProviderLogic;
-import de.quinscape.domainql.beans.LogicWithAnnotated;
-import de.quinscape.domainql.beans.LogicWithGenerics;
 import de.quinscape.domainql.beans.LogicWithMirrorInput;
-import de.quinscape.domainql.beans.LogicWithWrongInjection;
-import de.quinscape.domainql.beans.LogicWithWrongInjection2;
-import de.quinscape.domainql.beans.NoMirroLogic;
-import de.quinscape.domainql.beans.SourceTwoInput;
 import de.quinscape.domainql.beans.TestLogic;
-import de.quinscape.domainql.beans.TypeRepeatLogic;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.domainql.testdomain.Public;
-import de.quinscape.domainql.testdomain.tables.SourceOne;
 import graphql.Scalars;
-import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLList;
@@ -28,7 +18,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 

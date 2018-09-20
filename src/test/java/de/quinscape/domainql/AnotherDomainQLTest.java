@@ -1,6 +1,15 @@
 package de.quinscape.domainql;
 
 import de.quinscape.domainql.beans.CustomParameterProviderLogic;
+import de.quinscape.domainql.beans.DegenerifDBLogic;
+import de.quinscape.domainql.beans.DegenerifiedContainerLogic;
+import de.quinscape.domainql.beans.DegenerifiedInputLogic;
+import de.quinscape.domainql.beans.DegenerifyContainerLogic;
+import de.quinscape.domainql.beans.DegenerifyLogic;
+import de.quinscape.domainql.beans.DoubleDegenerificationLogic;
+import de.quinscape.domainql.beans.ImplicitOverrideLogic;
+import de.quinscape.domainql.beans.ImplicitOverrideNonInputLogic;
+import de.quinscape.domainql.beans.ListReturningLogic;
 import de.quinscape.domainql.beans.LogicWithAnnotated;
 import de.quinscape.domainql.beans.LogicWithEnums;
 import de.quinscape.domainql.beans.LogicWithEnums2;
@@ -9,6 +18,7 @@ import de.quinscape.domainql.beans.LogicWithMirrorInput;
 import de.quinscape.domainql.beans.LogicWithWrongInjection;
 import de.quinscape.domainql.beans.LogicWithWrongInjection2;
 import de.quinscape.domainql.beans.NoMirroLogic;
+import de.quinscape.domainql.beans.DegenerifyAndRenameLogic;
 import de.quinscape.domainql.beans.SourceTwoInput;
 import de.quinscape.domainql.beans.TestLogic;
 import de.quinscape.domainql.beans.TypeRepeatLogic;
@@ -22,15 +32,19 @@ import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLList;
+import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 
 import static de.quinscape.domainql.testdomain.Tables.*;
 import static graphql.schema.GraphQLNonNull.nonNull;
@@ -56,7 +70,6 @@ public class AnotherDomainQLTest
             .configureRelation( SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE, "objField", null)
             .configureRelation(  SOURCE_FIVE.TARGET_ID, SourceField.NONE, TargetField.ONE, null, "oneObj")
             .configureRelation(   SOURCE_SIX.TARGET_ID, SourceField.NONE, TargetField.MANY, null, "manyObj")
-            .createMirrorInputTypes(true)
             .buildGraphQLSchema();
 
 
@@ -111,9 +124,7 @@ public class AnotherDomainQLTest
         final GraphQLSchema schema = DomainQL.newDomainQL(null)
             .objectTypes(Public.PUBLIC)
             .logicBeans(Arrays.asList(new TestLogic(), new LogicWithMirrorInput(), new NoMirroLogic()))
-            .createMirrorInputTypes(true)
             // test override
-            .overrideInputTypes(SourceTwoInput.class)
             .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.NONE, TargetField.NONE)
             .configureRelation(   SOURCE_TWO.TARGET_ID, SourceField.SCALAR, TargetField.NONE)
             .configureRelation( SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE)
@@ -132,16 +143,16 @@ public class AnotherDomainQLTest
             assertThat(sourceOneInput.getField("targetId").getType(),is(nonNull(Scalars.GraphQLString)));
         }
 
-        {
-
-            final GraphQLInputObjectType sourceOneInput = (GraphQLInputObjectType) schema.getType("SourceTwoInput");
-            assertThat(sourceOneInput, is(notNullValue()));
-
-            assertThat(sourceOneInput.getFields().size(), is(3));
-            assertThat(sourceOneInput.getField("id").getType(),is(nonNull(Scalars.GraphQLString)));
-            assertThat(sourceOneInput.getField("targetId").getType(),is(nonNull(Scalars.GraphQLString)));
-            assertThat(sourceOneInput.getField("foo").getType(),is(Scalars.GraphQLString));
-        }
+// Type not used, so it is now not generated
+//        {
+//            final GraphQLInputObjectType sourceOneInput = (GraphQLInputObjectType) schema.getType("SourceTwoInput");
+//            assertThat(sourceOneInput, is(notNullValue()));
+//
+//            assertThat(sourceOneInput.getFields().size(), is(3));
+//            assertThat(sourceOneInput.getField("id").getType(),is(nonNull(Scalars.GraphQLString)));
+//            assertThat(sourceOneInput.getField("targetId").getType(),is(nonNull(Scalars.GraphQLString)));
+//            assertThat(sourceOneInput.getField("foo").getType(),is(Scalars.GraphQLString));
+//        }
 
 
         {
@@ -214,19 +225,19 @@ public class AnotherDomainQLTest
         }
     }
 
-
-    @Test(expected =  DomainQLTypeException.class)
-    public void testWrongType()
-    {
-        final GraphQLSchema schema = DomainQL.newDomainQL(null)
-            .objectTypes(Public.PUBLIC)
-            .logicBeans(Collections.singleton(new TestLogic()))
-            .overrideInputTypes(SourceOne.class)
-
-            // source variants
-            .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.OBJECT_AND_SCALAR, TargetField.NONE)
-            .buildGraphQLSchema();
-    }
+//  no type overriding anymore
+//    @Test(expected =  DomainQLTypeException.class)
+//    public void testWrongType()
+//    {
+//        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+//            .objectTypes(Public.PUBLIC)
+//            .logicBeans(Collections.singleton(new TestLogic()))
+//            //.overrideInputTypes(SourceOne.class)
+//
+//            // source variants
+//            .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.OBJECT_AND_SCALAR, TargetField.NONE)
+//            .buildGraphQLSchema();
+//    }
 
     @Test(expected =  DomainQLTypeException.class)
     public void testWrongTypeAsQueryInput()
@@ -441,4 +452,213 @@ public class AnotherDomainQLTest
             assertThat(myEnum.getValues().get(2).getName(), is("Z"));
         }
     }
+
+    @Test
+    public void testDegenerify()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .logicBeans(Collections.singleton(new DegenerifyLogic()))
+            .buildGraphQLSchema();
+
+        final GraphQLObjectType pagedPayload = (GraphQLObjectType) schema.getType("PagedPayload");
+
+        assertThat(pagedPayload, is(notNullValue()));
+        assertThat(pagedPayload.getFieldDefinitions().size(), is(2));
+        final GraphQLList listProp = (GraphQLList) ((GraphQLNonNull)pagedPayload.getFieldDefinitions().get(0).getType()).getWrappedType();
+        final GraphQLOutputType numProp = (GraphQLOutputType) ((GraphQLNonNull)pagedPayload.getFieldDefinitions().get(1).getType()).getWrappedType();
+        assertThat(listProp.getWrappedType().getName(), is( "Payload"));
+        assertThat(numProp.getName(), is( "Int"));
+
+
+        assertThat(schema.getType("Paged"), is(nullValue()));
+
+        final GraphQLObjectType queryType = schema.getQueryType();
+        GraphQLFieldDefinition query = queryType.getFieldDefinition("getPayload");
+
+        assertThat(query,is(notNullValue()));
+        assertThat(query.getType().getName(), is("PagedPayload"));
+
+    }
+
+    @Test
+    public void testDegenerifyRename()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .logicBeans(Collections.singleton(new DegenerifyAndRenameLogic()))
+            .buildGraphQLSchema();
+
+        final GraphQLObjectType pagedPayload = (GraphQLObjectType) schema.getType("PagedAndRenamed");
+
+        assertThat(pagedPayload, is(notNullValue()));
+        assertThat(pagedPayload.getFieldDefinitions().size(), is(2));
+        final GraphQLList listProp = (GraphQLList) ((GraphQLNonNull)pagedPayload.getFieldDefinitions().get(0).getType()).getWrappedType();
+        final GraphQLOutputType numProp = (GraphQLOutputType) ((GraphQLNonNull)pagedPayload.getFieldDefinitions().get(1).getType()).getWrappedType();
+        assertThat(listProp.getWrappedType().getName(), is( "AnnotatedPayload"));
+        assertThat(numProp.getName(), is( "Int"));
+
+
+        assertThat(schema.getType("Paged"), is(nullValue()));
+
+        final GraphQLObjectType queryType = schema.getQueryType();
+        GraphQLFieldDefinition query = queryType.getFieldDefinition("getPayload");
+
+        assertThat(query,is(notNullValue()));
+        assertThat(query.getType().getName(), is("PagedAndRenamed"));
+
+    }
+
+    @Test
+    public void testDegenerifiedDBObject()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new DegenerifDBLogic()))
+            .buildGraphQLSchema();
+
+//        for (Map.Entry<String, GraphQLType> e : schema.getTypeMap().entrySet())
+//        {
+//            log.info("{}.: {}", e.getKey(), e.getValue());
+//        }
+
+        final GraphQLObjectType pagedPayload = (GraphQLObjectType) schema.getType("PagedSourceOne");
+
+        assertThat(pagedPayload, is(notNullValue()));
+        assertThat(pagedPayload.getFieldDefinitions().size(), is(2));
+        final GraphQLList listProp = (GraphQLList) ((GraphQLNonNull)pagedPayload.getFieldDefinitions().get(0).getType()).getWrappedType();
+        final GraphQLOutputType numProp = (GraphQLOutputType) ((GraphQLNonNull)pagedPayload.getFieldDefinitions().get(1).getType()).getWrappedType();
+        assertThat(listProp.getWrappedType().getName(), is( "SourceOne"));
+        assertThat(numProp.getName(), is( "Int"));
+
+
+        assertThat(schema.getType("Paged"), is(nullValue()));
+
+        final GraphQLObjectType queryType = schema.getQueryType();
+        GraphQLFieldDefinition query = queryType.getFieldDefinition("sourceOnes");
+
+        assertThat(query,is(notNullValue()));
+        assertThat(query.getType().getName(), is("PagedSourceOne"));
+
+    }
+
+
+    @Test
+    public void testListReturningLogic()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .logicBeans(Collections.singleton(new ListReturningLogic()))
+            .buildGraphQLSchema();
+
+        final GraphQLObjectType queryType = schema.getQueryType();
+
+        GraphQLFieldDefinition query = queryType.getFieldDefinition("listOfThrees");
+        assertThat(query,is(notNullValue()));
+        final GraphQLList type = (GraphQLList) query.getType();
+        assertThat(type.getWrappedType().getName(), is("SourceThree"));
+    }
+
+
+    @Test
+    public void testImplicitOverride()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new ImplicitOverrideLogic()))
+            .buildGraphQLSchema();
+
+        final GraphQLObjectType queryType = schema.getQueryType();
+
+        GraphQLFieldDefinition query = queryType.getFieldDefinition("queryThatOverrides");
+        assertThat(query,is(notNullValue()));
+        final GraphQLArgument arg = query.getArgument("sourceOneInput");
+        assertThat(arg,is(notNullValue()));
+
+        assertThat(arg.getType().getName(), is("SourceOneInput"));
+
+        final GraphQLInputObjectType sourceOneInput = (GraphQLInputObjectType) schema.getType("SourceOneInput");
+        assertThat(sourceOneInput.getField("id").getType(),is(nonNull(Scalars.GraphQLString)));
+        assertThat(sourceOneInput.getField("targetId").getType(),is(nonNull(Scalars.GraphQLString)));
+        assertThat(sourceOneInput.getField("extra").getType(),is(Scalars.GraphQLString));
+    }
+
+    @Test
+    public void testImplicitOverrideNonInputLogic()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new ImplicitOverrideNonInputLogic()))
+            .buildGraphQLSchema();
+
+        final GraphQLObjectType queryType = schema.getQueryType();
+
+        GraphQLFieldDefinition query = queryType.getFieldDefinition("queryThatOverrides");
+        assertThat(query,is(notNullValue()));
+        final GraphQLArgument arg = query.getArgument("sourceOneInput");
+        assertThat(arg,is(notNullValue()));
+
+        assertThat(arg.getType().getName(), is("SourceOneInput"));
+
+        final GraphQLInputObjectType sourceOneInput = (GraphQLInputObjectType) schema.getType("SourceOneInput");
+        assertThat(sourceOneInput.getField("id").getType(),is(nonNull(Scalars.GraphQLString)));
+        assertThat(sourceOneInput.getField("targetId").getType(),is(nonNull(Scalars.GraphQLString)));
+        assertThat(sourceOneInput.getField("extra").getType(),is(Scalars.GraphQLString));
+
+    }
+
+
+    @Test
+    public void testDegenerifiedListInput()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .logicBeans(Collections.singleton(new DegenerifiedInputLogic()))
+            .buildGraphQLSchema();
+
+
+        final GraphQLInputObjectType sourceOneInput = (GraphQLInputObjectType) schema.getType("PagedPayloadInput");
+        assertThat(sourceOneInput.getField("rowCount").getType(),is(nonNull(Scalars.GraphQLInt)));
+        assertThat(sourceOneInput.getField("rows").getType(),is(nonNull(new GraphQLList(schema.getType("PayloadInput")))));
+
+
+    }
+
+    @Test
+    public void testDegenerifiedInput()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .logicBeans(Collections.singleton(new DegenerifiedContainerLogic()))
+            .buildGraphQLSchema();
+
+        final GraphQLInputObjectType sourceOneInput = (GraphQLInputObjectType) schema.getType("ContainerPayloadInput");
+        assertThat(sourceOneInput.getField("num").getType(),is(nonNull(Scalars.GraphQLInt)));
+        assertThat(sourceOneInput.getField("value").getType(),is(schema.getType("PayloadInput")));
+
+    }
+
+
+    @Test
+    public void testDegenerifiedContainerOutput()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .logicBeans(Collections.singleton(new DegenerifyContainerLogic()))
+            .buildGraphQLSchema();
+
+        final GraphQLObjectType containerPayload = (GraphQLObjectType) schema.getType("ContainerPayload");
+
+        //log.info(containerPayload.getFieldDefinitions().toString());
+
+        assertThat(containerPayload.getFieldDefinition("num").getType(),is(nonNull(Scalars.GraphQLInt)));
+        assertThat(containerPayload.getFieldDefinition("value").getType(),is(schema.getType("Payload")));
+
+    }
+
+
+    @Test
+    public void testDoubleDegenerification()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .logicBeans(Collections.singleton(new DoubleDegenerificationLogic()))
+            .buildGraphQLSchema();
+
+
+    }
 }
+

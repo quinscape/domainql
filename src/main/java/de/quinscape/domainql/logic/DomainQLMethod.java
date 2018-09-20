@@ -47,6 +47,17 @@ public abstract class DomainQLMethod
         GraphQLOutputType resultType
     )
     {
+        if (name == null)
+        {
+            throw new IllegalArgumentException("name can't be null");
+        }
+
+        if (resultType == null)
+        {
+            throw new IllegalArgumentException("resultType can't be null");
+        }
+
+
         this.name = name;
         this.description = description;
         this.full = full;

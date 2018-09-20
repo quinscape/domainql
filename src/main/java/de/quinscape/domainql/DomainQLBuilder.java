@@ -53,10 +53,6 @@ public class DomainQLBuilder
     private RelationConfiguration defaultRelationConfiguration = new RelationConfiguration(
         SourceField.SCALAR, TargetField.NONE);
 
-    private boolean mirrorInputs;
-
-    private Set<Class<?>> inputTypes = new LinkedHashSet<>();
-
     private Set<Table<?>> jooqTables = new LinkedHashSet<>();
 
     private Set<GraphQLFieldDefinition> additionalQueries  = new LinkedHashSet<>();
@@ -96,12 +92,10 @@ public class DomainQLBuilder
             dslContext,
             Collections.unmodifiableSet(logicBeans),
             Collections.unmodifiableSet(jooqTables),
-            Collections.unmodifiableSet(inputTypes),
             Collections.unmodifiableCollection(parameterProviderFactories),
             Collections.unmodifiableMap( resolveFields( relationConfigurations)),
             defaultRelationConfiguration,
             optionsBuilder.buildOptions(),
-            mirrorInputs,
             Collections.unmodifiableSet(additionalQueries),
             Collections.unmodifiableSet(additionalMutations),
             Collections.unmodifiableSet(additionalDirectives),
@@ -313,40 +307,6 @@ public class DomainQLBuilder
 
         return schema;
     }
-
-    /**
-     * If set to <code>true</code>, generate a mirror input types for the JOOQ types. For every domain type Foo there
-     * will be an identical input type FooInput.
-     * <p>
-     *     You can still redefine individual input types with {@link #overrideInputTypes(Class[])}
-     * </p>
-     *
-     * @param mirrorInputs  <code>true</code> to create mirror input types
-     *
-     * @return this builder
-     */
-    public DomainQLBuilder createMirrorInputTypes(boolean mirrorInputs)
-    {
-        this.mirrorInputs = mirrorInputs;
-
-        return this;
-    }
-
-
-    /**
-     * Registers additional POJOs to create Graphql input types for. Note that input types from Queries and Mutations
-     * are automatically registered.
-     *
-     * @param classes       annotated POJO classes.
-     * @return this builder
-     */
-    public DomainQLBuilder overrideInputTypes(Class<?>... classes)
-    {
-        Collections.addAll(inputTypes, classes);
-
-        return this;
-    }
-
 
     public DomainQLBuilder objectTypes(Schema schema)
     {

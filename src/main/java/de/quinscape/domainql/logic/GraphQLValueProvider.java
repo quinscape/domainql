@@ -1,12 +1,14 @@
 package de.quinscape.domainql.logic;
 
-import com.google.common.collect.BiMap;
-import de.quinscape.domainql.DomainQLException;
+import de.quinscape.domainql.InputType;
+import de.quinscape.domainql.OutputType;
+import de.quinscape.domainql.TypeContext;
+import de.quinscape.domainql.TypeRegistry;
 import de.quinscape.domainql.param.ParameterProvider;
+import de.quinscape.domainql.util.DegenerificationUtil;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLEnumType;
-import graphql.schema.GraphQLEnumValueDefinition;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLSchema;
@@ -15,7 +17,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.svenson.info.JSONClassInfo;
 import org.svenson.info.JSONPropertyInfo;
+import org.svenson.info.JavaObjectPropertyInfo;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,9 +42,7 @@ public class GraphQLValueProvider
 
     private final Object defaultValue;
 
-    private final BiMap<Class<?>, String> inputTypes;
-
-    private final Map<Class<? extends Enum>, GraphQLEnumType> registeredEnumTypes;
+    private final TypeRegistry typeRegistry;
 
 
     public GraphQLValueProvider(
@@ -47,8 +51,7 @@ public class GraphQLValueProvider
         boolean isRequired,
         GraphQLInputType inputType,
         Object defaultValue,
-        BiMap<Class<?>, String> inputTypes,
-        Map<Class<? extends Enum>, GraphQLEnumType> registeredEnumTypes
+        TypeRegistry typeRegistry
     )
     {
         this.argumentName = argumentName;
@@ -56,10 +59,8 @@ public class GraphQLValueProvider
         this.isRequired = isRequired;
         this.inputType = inputType;
         this.defaultValue = defaultValue;
-        this.inputTypes = inputTypes;
-        this.registeredEnumTypes = registeredEnumTypes;
+        this.typeRegistry = typeRegistry;
     }
-
 
     public boolean isRequired()
     {
@@ -76,46 +77,39 @@ public class GraphQLValueProvider
 
         final GraphQLType type = schema.getType(inputType.getName());
 
-        if (type instanceof GraphQLInputObjectType)
+        if (type instanceof GraphQLEnumType && value instanceof String)
         {
-            Class<?> pojoClass = inputTypes.inverse().get(inputType.getName());
 
-            if (pojoClass == null)
+            final OutputType outputType = typeRegistry.lookup(type.getName());
+
+            final Class<?> javaType = outputType.getJavaType();
+            if (!Enum.class.isAssignableFrom(javaType))
             {
-                throw new IllegalStateException("Cannot find pojo class for Input type '" + inputType + "'");
+                throw new IllegalStateException(outputType + " is not an enum type");
             }
 
-            value = convert(pojoClass, (Map<String, Object>) value);
-        }
-        else if (type instanceof GraphQLEnumType && value instanceof String)
-        {
-
-            Class<? extends Enum> enumType = findPojoTypeForEnum((GraphQLEnumType) type);
+            Class<? extends Enum> enumType = (Class<? extends Enum>) javaType;
 
             return Enum.valueOf(enumType, (String) value);
+        }
+        else if (type instanceof GraphQLInputObjectType)
+        {
+            final InputType inputType = typeRegistry.lookupInput(this.inputType.getName());
+
+            if (inputType == null)
+            {
+                throw new IllegalStateException("Could not find input type '" + this.inputType.getName() + "'");
+            }
+            value = convert(inputType, (Map<String, Object>) value);
         }
 
         return value;
     }
 
 
-    private Class<? extends Enum> findPojoTypeForEnum(GraphQLEnumType type)
+    private Object convert(InputType inputType, Map<String, Object> value)
     {
-        for (Map.Entry<Class<? extends Enum>, GraphQLEnumType> e : registeredEnumTypes.entrySet())
-        {
-            if (e.getValue().equals(type))
-            {
-                return e.getKey();
-            }
-        }
-
-        throw new IllegalStateException("No enum type registered for type: " + type);
-    }
-
-
-    private Object convert(Class<?> pojoClass, Map<String, Object> value)
-    {
-
+        Class<?> pojoClass = inputType.getJavaType();
         try
         {
             if (pojoClass.isInstance(value))
@@ -131,21 +125,54 @@ public class GraphQLValueProvider
                 final String name = e.getKey();
                 final JSONPropertyInfo propertyInfo = classInfo.getPropertyInfo(name);
 
-                final Class<Object> propertyType = propertyInfo.getType();
+                final Method getterMethod = ((JavaObjectPropertyInfo) propertyInfo).getGetterMethod();
 
+                final Class<Object> propertyType = propertyInfo.getType();
                 final Object orig = value.get(name);
 
                 final Object converted;
-                if (inputTypes.get(propertyType) != null)
+
+                if (List.class.isAssignableFrom(propertyType))
                 {
-                    converted = convert(propertyType, (Map<String, Object>) orig);
-                    JSONUtil.DEFAULT_UTIL.setProperty(pojoInstance, name, converted);
+                    Class<?> nextType = DegenerificationUtil.getElementType(inputType, getterMethod);
+
+                    List<?> origList = (List) orig;
+                    List<Object> convertedList = new ArrayList<>(origList.size());
+
+                    final InputType fieldType = typeRegistry.lookupInput(
+                        new TypeContext(inputType.getTypeContext(), nextType));
+
+                    for (Object origValue : origList)
+                    {
+                        Object convertedValue;
+                        if (fieldType != null && !fieldType.isEnum())
+                        {
+                            convertedValue = convert(fieldType, (Map<String, Object>) origValue);
+                        }
+                        else
+                        {
+                            convertedValue = orig;
+                        }
+                        convertedList.add(convertedValue);
+
+                    }
+                    JSONUtil.DEFAULT_UTIL.setProperty(pojoInstance, name, convertedList);
                 }
                 else
                 {
-                    converted = orig;
+                    final TypeContext typeContext = DegenerificationUtil.getType(inputType.getTypeContext(), inputType, getterMethod);
+                    final InputType fieldType = typeRegistry.lookupInput(typeContext);
+
+                    if (fieldType != null && !fieldType.isEnum())
+                    {
+                        converted = convert(fieldType, (Map<String, Object>) orig);
+                    }
+                    else
+                    {
+                        converted = orig;
+                    }
+                    JSONUtil.DEFAULT_UTIL.setProperty(pojoInstance, name, converted);
                 }
-                JSONUtil.DEFAULT_UTIL.setProperty(pojoInstance, name, converted);
             }
             return pojoInstance;
 

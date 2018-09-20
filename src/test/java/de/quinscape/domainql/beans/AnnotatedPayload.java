@@ -1,9 +1,24 @@
 package de.quinscape.domainql.beans;
 
-public class FulLResponse
+import de.quinscape.domainql.annotation.GraphQLObject;
+
+public class AnnotatedPayload
 {
     private String name;
+
     private int num;
+
+    public AnnotatedPayload()
+    {
+        this(null, 0);
+    }
+
+    public AnnotatedPayload(String name, int num)
+    {
+
+        this.name = name;
+        this.num = num;
+    }
 
 
     public String getName()
@@ -28,4 +43,5 @@ public class FulLResponse
     {
         this.num = num;
     }
+
 }

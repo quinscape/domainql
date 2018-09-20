@@ -47,7 +47,7 @@ public class TestLogic
     }
 
     @GraphQLQuery
-    public String queryString2(@GraphQLField(required = true) String value, @GraphQLField(required = true) String second)
+    public String queryString2(@GraphQLField(notNull = true) String value, @GraphQLField(notNull = true) String second)
     {
         return value + ":" + second;
     }

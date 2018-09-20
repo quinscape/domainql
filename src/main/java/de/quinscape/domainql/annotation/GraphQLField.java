@@ -51,5 +51,5 @@ public @interface GraphQLField
      *
      * @return is required?
      */
-    boolean required() default false;
+    boolean notNull() default false;
 }

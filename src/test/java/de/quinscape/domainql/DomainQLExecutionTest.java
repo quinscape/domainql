@@ -3,6 +3,11 @@ package de.quinscape.domainql;
 
 import com.google.common.collect.ImmutableMap;
 import de.quinscape.domainql.beans.CustomFetcherLogic;
+import de.quinscape.domainql.beans.DegenerifiedContainerLogic;
+import de.quinscape.domainql.beans.DegenerifiedInputLogic;
+import de.quinscape.domainql.beans.DegenerifyAndRenameLogic;
+import de.quinscape.domainql.beans.DegenerifyContainerLogic;
+import de.quinscape.domainql.beans.DoubleDegenerificationLogic;
 import de.quinscape.domainql.beans.GetterArgLogic;
 import de.quinscape.domainql.beans.LogicWithEnums;
 import de.quinscape.domainql.beans.LogicWithEnums2;
@@ -15,6 +20,7 @@ import de.quinscape.domainql.beans.FullDirectiveLogic;
 import de.quinscape.domainql.mock.TestProvider;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.domainql.testdomain.Public;
+import de.quinscape.domainql.util.Paged;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
@@ -23,7 +29,10 @@ import graphql.GraphQLError;
 import graphql.Scalars;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLInputObjectType;
+import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLSchema;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -40,8 +49,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static de.quinscape.domainql.testdomain.Tables.*;
+import static graphql.schema.GraphQLNonNull.nonNull;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
@@ -63,7 +74,6 @@ public class DomainQLExecutionTest
     final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
         .objectTypes(Public.PUBLIC)
         .logicBeans(Arrays.asList(logic, new TypeConversionLogic()))
-        .createMirrorInputTypes(true)
 
         // source variants
         .configureRelation(    SOURCE_ONE.TARGET_ID, SourceField.NONE, TargetField.NONE)
@@ -101,6 +111,10 @@ public class DomainQLExecutionTest
 
         .buildGraphQLSchema();
 
+
+    {
+        log.info("QUERY TYPE: {}", schema.getQueryType());
+    }
 
     @Test
     public void testQuery()
@@ -146,6 +160,7 @@ public class DomainQLExecutionTest
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 
+
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
             // language=GraphQL
             .query("{ walkForwardRef { id target { id } } }")
@@ -153,7 +168,11 @@ public class DomainQLExecutionTest
 
         ExecutionResult executionResult = graphQL.execute(executionInput);
 
-        assertThat(executionResult.getErrors().size(), is(0));
+        final List<GraphQLError> errors = executionResult.getErrors();
+
+        log.info(errors.toString());
+
+        assertThat(errors.size(), is(0));
         assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"walkForwardRef\":[{\"id\":\"id1\",\"target\":{\"id\":\"id2\"}}]}"));
     }
 
@@ -246,7 +265,6 @@ public class DomainQLExecutionTest
 
         final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
             .logicBeans(Collections.singletonList(new TypeConversionLogic()))
-            .createMirrorInputTypes(true)
             .buildGraphQLSchema();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
@@ -271,7 +289,6 @@ public class DomainQLExecutionTest
     {
         final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
             .logicBeans(Collections.singletonList(new CustomFetcherLogic()))
-            .createMirrorInputTypes(true)
             .buildGraphQLSchema();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
@@ -293,7 +310,6 @@ public class DomainQLExecutionTest
     {
         final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
             .logicBeans(Collections.singletonList(new GetterArgLogic()))
-            .createMirrorInputTypes(true)
             .buildGraphQLSchema();
 
         log.info(((GraphQLObjectType)schema.getType("GetterArgBean")).getFieldDefinition("modifiedValue").toString());
@@ -363,7 +379,6 @@ public class DomainQLExecutionTest
         {
             final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
                 .logicBeans(Arrays.asList(new LogicWithEnums(), new LogicWithEnums2()))
-                .createMirrorInputTypes(true)
                 .buildGraphQLSchema();
 
             GraphQL graphQL = GraphQL.newGraphQL(schema).build();
@@ -452,7 +467,6 @@ public class DomainQLExecutionTest
     {
     final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
         .logicBeans(Collections.singletonList(new FullDirectiveLogic()))
-        .createMirrorInputTypes(true)
         .withFullDirectiveSupported(true)
         .buildGraphQLSchema();
 
@@ -484,7 +498,6 @@ public class DomainQLExecutionTest
     {
         final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
             .logicBeans(Collections.singletonList(new FullDirectiveLogic()))
-            .createMirrorInputTypes(true)
             .withFullDirectiveSupported(true)
             .buildGraphQLSchema();
 
@@ -515,7 +528,6 @@ public class DomainQLExecutionTest
     {
         final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
             .logicBeans(Collections.singletonList(new FullDirectiveLogic()))
-            .createMirrorInputTypes(true)
             .withFullDirectiveSupported(true)
             .buildGraphQLSchema();
 
@@ -537,4 +549,219 @@ public class DomainQLExecutionTest
         assertThat(errors.size(), is(1));
         assertThat(errors.get(0).getMessage(), containsString(" A new de.quinscape.domainql.DomainQLExecutionContext instance or subclass must be provided as .context() in the GraphQL endpoint"));
     }
+
+
+    @Test
+    public void testDegenerify()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .logicBeans(Collections.singleton(new DegenerifyAndRenameLogic()))
+            .buildGraphQLSchema();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("query getPayload\n" +
+                "{\n" +
+                "    getPayload{\n" +
+                "        rows{\n" +
+                "            name\n" +
+                "            num\n" +
+                "        }\n" +
+                "        rowCount\n" +
+                "    }\n" +
+                "}")
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+
+        final List<GraphQLError> errors = executionResult.getErrors();
+        assertThat(errors.size(), is(0));
+
+        final Map<String,Object> m = (Map<String, Object>) ((Map<String,Object>)executionResult.getData()).get("getPayload");
+
+        assertThat(m.get("rowCount"), is(2));
+        final List rows = (List) m.get("rows");
+        assertThat(rows.size(), is(2));
+
+        final String json = JSONUtil.DEFAULT_GENERATOR.forValue(m);
+
+        assertThat(json, containsString("\"aaa\""));
+        assertThat(json, containsString("\"bbb\""));
+        assertThat(json, containsString("555"));
+        assertThat(json, containsString("7777"));
+
+    }
+
+    @Test
+    public void testDegenerifiedListInput()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .logicBeans(Collections.singleton(new DegenerifiedInputLogic()))
+            .buildGraphQLSchema();
+
+
+        final GraphQLInputObjectType sourceOneInput = (GraphQLInputObjectType) schema.getType("PagedPayloadInput");
+        assertThat(sourceOneInput.getField("rowCount").getType(),is(nonNull(Scalars.GraphQLInt)));
+        assertThat(sourceOneInput.getField("rows").getType(),is(nonNull(new GraphQLList(schema.getType("PayloadInput")))));
+
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        Map<String, Object> payloadData = JSONUtil.DEFAULT_PARSER.parse(Map.class,"{\n" +
+            "    \"rows\": [\n" +
+            "        {\n" +
+            "            \"name\": \"AAA\",\n" +
+            "            \"num\": 100\n" +
+            "        }, {\n" +
+            "            \"name\": \"BBB\",\n" +
+            "            \"num\": 101\n" +
+            "        }\n" +
+            "    ],\n" +
+            "    \"rowCount\": 3\n" +
+            "}");
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("mutation mutationWithDegenerifiedInput($pagedPayload: PagedPayloadInput!)\n" +
+                "{\n" +
+                "    mutationWithDegenerifiedInput(pagedPayload: $pagedPayload)\n" +
+                "}")
+            .variables(ImmutableMap.of("pagedPayload", payloadData))
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+        final List<GraphQLError> errors = executionResult.getErrors();
+
+        log.info(errors.toString());
+
+        assertThat(errors.size(), is(0));
+        final Map<String,Object> data = executionResult.getData();
+
+        assertThat(data.get("mutationWithDegenerifiedInput"), is("AAA:100|BBB:101|"));
+
+    }
+
+    @Test
+    public void testDegenerifiedInput()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .logicBeans(Collections.singleton(new DegenerifiedContainerLogic()))
+            .buildGraphQLSchema();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        Map<String, Object> containerData = JSONUtil.DEFAULT_PARSER.parse(Map.class,"{\n" +
+            "    \"value\": {\n" +
+            "        \"name\": \"CCC\",\n" +
+            "        \"num\": 102\n" +
+            "    },\n" +
+            "    \"num\": 333\n" +
+            "}");
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("query containerQuery($container: ContainerPayloadInput!)\n" +
+                "{\n" +
+                "    containerQuery(container: $container)\n" +
+                "}")
+            .variables(ImmutableMap.of("container", containerData))
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+        final List<GraphQLError> errors = executionResult.getErrors();
+
+        log.info(errors.toString());
+
+        assertThat(errors.size(), is(0));
+        final Map<String,Object> data = executionResult.getData();
+
+        assertThat(data.get("containerQuery"), is("CCC:102:333"));
+
+    }
+
+    @Test
+    public void testDegenerifiedContainerOutput()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .logicBeans(Collections.singleton(new DegenerifyContainerLogic()))
+            .buildGraphQLSchema();
+
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("query queryContainer\n" +
+                "{\n" +
+                "    queryContainer{\n" +
+                "        value{\n" +
+                "            name\n" +
+                "            num\n" +
+                "        }\n" +
+                "        num\n" +
+                "    }\n" +
+                "}")
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+
+        final List<GraphQLError> errors = executionResult.getErrors();
+        log.info(errors.toString());
+        assertThat(errors.size(), is(0));
+
+        final Map<String,Object> m = (Map<String, Object>) ((Map<String,Object>)executionResult.getData()).get("queryContainer");
+
+        assertThat(m.get("num"), is(555));
+        Map<String,Object> payload = (Map<String, Object>) m.get("value");
+
+        assertThat(payload.get("name"), is("DDD"));
+        assertThat(payload.get("num"), is(444));
+
+    }
+
+
+    @Test
+    public void testDoubleDegenerification()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .logicBeans(Collections.singleton(new DoubleDegenerificationLogic()))
+            .buildGraphQLSchema();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        Map<String, Object> containerPropData = JSONUtil.DEFAULT_PARSER.parse(Map.class,"{\n" +
+            "    \"value\" : {\n" +
+            "        \"value\": {\n" +
+            "            \"name\": \"EEE\",\n" +
+            "            \"num\": 666\n" +
+            "        },\n" +
+            "        \"num\": 777\n" +
+            "    }\n" +
+            "}");
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("mutation mutationWithDD($c: ContainerPropPayloadInput!)\n" +
+                "{\n" +
+                "    mutationWithDD(c: $c)\n" +
+                "}")
+            .variables(ImmutableMap.of("c", containerPropData))
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+
+        final List<GraphQLError> errors = executionResult.getErrors();
+        log.info(errors.toString());
+        assertThat(errors.size(), is(0));
+
+        final String result = (String) ((Map<String, Object>) executionResult.getData()).get("mutationWithDD");
+
+        assertThat(result, is("[EEE:666:777]"));
+
+    }
+
 }
