@@ -13,6 +13,10 @@ Technologies involved:
 
 # Usage
 
+To get started quickly, you can use the [domainqlstarter](https://github.com/quinscape/domainqlstarter) project as a starting point which has all the Java and Javascript parts, the Maven POM and a Webpack build integrated into one fullstack project, or you can look at that project to see how to set things up in your own project.
+
+## Steps in your own project
+
 1. Design a database schema
    
    The current convention following JOOQ defaults would be to specify all field names separated with underscores.
