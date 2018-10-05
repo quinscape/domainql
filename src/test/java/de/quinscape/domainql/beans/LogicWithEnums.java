@@ -1,7 +1,6 @@
 package de.quinscape.domainql.beans;
 
 import de.quinscape.domainql.annotation.GraphQLLogic;
-import de.quinscape.domainql.annotation.GraphQLMutation;
 import de.quinscape.domainql.annotation.GraphQLQuery;
 
 @GraphQLLogic

@@ -1,7 +1,5 @@
 package de.quinscape.domainql.beans;
 
-import de.quinscape.domainql.annotation.GraphQLObject;
-
 public class AnnotatedPayload
 {
     private String name;

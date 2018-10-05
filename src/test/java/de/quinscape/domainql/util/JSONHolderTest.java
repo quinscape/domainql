@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
 
 public class JSONHolderTest
 {

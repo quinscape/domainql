@@ -2,8 +2,6 @@ package de.quinscape.domainql.fetcher;
 
 import de.quinscape.domainql.DomainQLException;
 
-import java.lang.reflect.InvocationTargetException;
-
 public class MethodFetchingException
     extends DomainQLException
 {

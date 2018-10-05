@@ -1,6 +1,5 @@
 package de.quinscape.domainql.preload;
 
-import de.quinscape.domainql.DomainQLException;
 import de.quinscape.spring.jsview.JsViewContext;
 import de.quinscape.spring.jsview.JsViewProvider;
 import de.quinscape.spring.jsview.loader.ResourceHandle;

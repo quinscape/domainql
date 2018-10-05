@@ -1,7 +1,5 @@
 package de.quinscape.domainql;
 
-import graphql.schema.GraphQLOutputType;
-
 public class OutputType
     implements ComplexType
 {

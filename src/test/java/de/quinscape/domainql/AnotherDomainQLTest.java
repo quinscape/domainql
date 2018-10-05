@@ -4,6 +4,7 @@ import de.quinscape.domainql.beans.CustomParameterProviderLogic;
 import de.quinscape.domainql.beans.DegenerifDBLogic;
 import de.quinscape.domainql.beans.DegenerifiedContainerLogic;
 import de.quinscape.domainql.beans.DegenerifiedInputLogic;
+import de.quinscape.domainql.beans.DegenerifyAndRenameLogic;
 import de.quinscape.domainql.beans.DegenerifyContainerLogic;
 import de.quinscape.domainql.beans.DegenerifyLogic;
 import de.quinscape.domainql.beans.DoubleDegenerificationLogic;
@@ -18,14 +19,11 @@ import de.quinscape.domainql.beans.LogicWithMirrorInput;
 import de.quinscape.domainql.beans.LogicWithWrongInjection;
 import de.quinscape.domainql.beans.LogicWithWrongInjection2;
 import de.quinscape.domainql.beans.NoMirroLogic;
-import de.quinscape.domainql.beans.DegenerifyAndRenameLogic;
-import de.quinscape.domainql.beans.SourceTwoInput;
 import de.quinscape.domainql.beans.TestLogic;
 import de.quinscape.domainql.beans.TypeRepeatLogic;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.testdomain.Public;
-import de.quinscape.domainql.testdomain.tables.SourceOne;
 import graphql.Scalars;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLEnumType;
@@ -36,19 +34,16 @@ import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLSchema;
-import graphql.schema.GraphQLType;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Map;
 
 import static de.quinscape.domainql.testdomain.Tables.*;
-import static graphql.schema.GraphQLNonNull.nonNull;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static graphql.schema.GraphQLNonNull.*;
+import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
 public class AnotherDomainQLTest

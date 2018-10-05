@@ -5,10 +5,8 @@ import de.quinscape.domainql.DomainQLExecutionContext;
 import de.quinscape.domainql.DomainQLExecutionException;
 import de.quinscape.domainql.param.ParameterProvider;
 import graphql.language.Directive;
-import graphql.language.Field;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLOutputType;
 
 import java.util.List;

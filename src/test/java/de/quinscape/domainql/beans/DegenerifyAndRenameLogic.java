@@ -1,7 +1,6 @@
 package de.quinscape.domainql.beans;
 
 import de.quinscape.domainql.annotation.GraphQLLogic;
-import de.quinscape.domainql.annotation.GraphQLObject;
 import de.quinscape.domainql.annotation.GraphQLQuery;
 import de.quinscape.domainql.annotation.ResolvedGenericType;
 import de.quinscape.domainql.util.Paged;
