@@ -25,9 +25,9 @@ public class TypeRegistry
     private final DomainQL domainQL;
 
 
-    private Map<TypeKey, InputType> inputTypes = new HashMap<>();
+    private Map<TypeContext, InputType> inputTypes = new HashMap<>();
 
-    private Map<TypeKey, OutputType> outputTypes = new HashMap<>();
+    private Map<TypeContext, OutputType> outputTypes = new HashMap<>();
 
 
     public TypeRegistry(DomainQL domainQL)
@@ -49,9 +49,8 @@ public class TypeRegistry
         final Class<?> javaType = typeContext.getType();
         DomainQL.ensurePojoType(javaType);
 
-        final TypeKey key = new TypeKey(typeContext);
 
-        final InputType existing = inputTypes.get(key);
+        final InputType existing = inputTypes.get(typeContext);
         if (existing != null)
         {
             return existing;
@@ -60,7 +59,7 @@ public class TypeRegistry
         if (Enum.class.isAssignableFrom(javaType))
         {
             final InputType enumType = new InputType(javaType.getSimpleName(), typeContext, javaType);
-            inputTypes.put(key, enumType);
+            inputTypes.put(typeContext, enumType);
             return enumType;
         }
 
@@ -76,7 +75,7 @@ public class TypeRegistry
 
         final InputType newType = new InputType(inputTypeName, typeContext, javaType);
 
-        inputTypes.put(key, newType);
+        inputTypes.put(typeContext, newType);
 
         final Type[] actualTypeArguments = typeContext.getActualTypeArguments();
 
@@ -117,9 +116,7 @@ public class TypeRegistry
         final Class<?> javaType = ctx.getType();
         DomainQL.ensurePojoType(javaType);
 
-        final TypeKey key = new TypeKey(ctx);
-
-        final OutputType existing = outputTypes.get(key);
+        final OutputType existing = outputTypes.get(ctx);
         if (existing != null)
         {
             return existing;
@@ -128,14 +125,14 @@ public class TypeRegistry
         if (Enum.class.isAssignableFrom(javaType))
         {
             final OutputType enumType = new OutputType(ctx, javaType);
-            outputTypes.put(key, enumType);
+            outputTypes.put(ctx, enumType);
             return enumType;
         }
 
 
         final OutputType newType = new OutputType(ctx, javaType);
 
-        outputTypes.put(key, newType);
+        outputTypes.put(ctx, newType);
 
         final Type[] actualTypeArguments = ctx.getActualTypeArguments();
 
@@ -176,8 +173,7 @@ public class TypeRegistry
 
     public InputType lookupInput(TypeContext typeContext)
     {
-        TypeKey key = new TypeKey(typeContext);
-        return inputTypes.get(key);
+        return inputTypes.get(typeContext);
     }
 
     public InputType lookupInput(String name)
@@ -310,9 +306,7 @@ public class TypeRegistry
     {
         DomainQL.ensurePojoType(javaType);
 
-        final TypeKey key = new TypeKey(ctx);
-
-        return outputTypes.get(key);
+        return outputTypes.get(ctx);
     }
 
 

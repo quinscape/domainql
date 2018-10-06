@@ -12,22 +12,37 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * Encapsulates a type reference defined by either a simple java type or based off a getter method returing a type.
- * <p>
- * This method returned type can be a generic type that will be degenerified automatically.
+ * Encapsulates a type reference which might be either a simple java type of a degenerified generic type based on a
+ * raw type and concrete type variable substitutions.
+ * 
  */
 public final class TypeContext
 {
     private final static Logger log = LoggerFactory.getLogger(TypeContext.class);
 
+    /**
+     * Raw context type
+     */
     private final Class<?> type;
 
+    /**
+     * Actual type arguments (same indexes as {@link #typeVars})
+     */
     private final Type[] actualTypeArguments;
 
+    /**
+     * Type variables (same indexes as {@link #actualTypeArguments})
+     */
     private final TypeVariable[] typeVars;
 
+    /**
+     * Name of the corresponding GraphQL type.
+     */
     private final String typeName;
 
+    /**
+     * Parent type context.
+     */
     private final TypeContext parent;
 
 
@@ -221,6 +236,10 @@ public final class TypeContext
     @Override
     public boolean equals(Object o)
     {
+        // comparing just the final type name is the easiest way to compare
+        // considering all the factors of raw type, type var resolution
+        // including resolution from the parent chain
+
         if (this == o)
         {
             return true;
@@ -229,13 +248,8 @@ public final class TypeContext
         if (o instanceof TypeContext)
         {
             TypeContext that = (TypeContext) o;
+            return Objects.equals(this.typeName, that.typeName);
 
-            if (!Objects.equals(this.typeName,that.typeName))
-            {
-                return false;
-            }
-
-            return true;//Objects.equals(this.parent ,that.parent);
         }
         return false;
     }
@@ -244,7 +258,7 @@ public final class TypeContext
     @Override
     public int hashCode()
     {
-        return Objects.hash(typeName);
+        return 17 + typeName.hashCode() * 37;
     }
 
 
@@ -262,7 +276,7 @@ public final class TypeContext
 
     /**
      * Returns a clear text java-ish description of the type context
-     * @return
+     * @return clear text java-ish description of the type context
      */
     public String describe()
     {
