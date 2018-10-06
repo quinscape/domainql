@@ -1,8 +1,9 @@
-package de.quinscape.domainql.beans;
+package de.quinscape.domainql.logic;
 
 import de.quinscape.domainql.annotation.GraphQLField;
 import de.quinscape.domainql.annotation.GraphQLLogic;
 import de.quinscape.domainql.annotation.GraphQLMutation;
+import de.quinscape.domainql.beans.Payload;
 import de.quinscape.domainql.util.Paged;
 
 @GraphQLLogic

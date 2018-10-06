@@ -1,7 +1,9 @@
-package de.quinscape.domainql.beans;
+package de.quinscape.domainql.logic;
 
 import de.quinscape.domainql.annotation.GraphQLLogic;
 import de.quinscape.domainql.annotation.GraphQLQuery;
+import de.quinscape.domainql.beans.BeanWithEnum;
+import de.quinscape.domainql.beans.MyEnum;
 
 @GraphQLLogic
 public class LogicWithEnums

@@ -1,13 +1,14 @@
-package de.quinscape.domainql.beans;
+package de.quinscape.domainql.logic;
 
 import de.quinscape.domainql.annotation.GraphQLLogic;
 import de.quinscape.domainql.annotation.GraphQLQuery;
+import de.quinscape.domainql.beans.BeanWithSix;
 
 @GraphQLLogic
-public class NoMirroLogic
+public class TypeRepeatLogic
 {
     @GraphQLQuery
-    public NoMirrorBean getValue()
+    public BeanWithSix beanWithSix()
     {
         return null;
     }

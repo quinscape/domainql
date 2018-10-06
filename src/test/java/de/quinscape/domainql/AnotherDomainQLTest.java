@@ -1,26 +1,26 @@
 package de.quinscape.domainql;
 
-import de.quinscape.domainql.beans.CustomParameterProviderLogic;
-import de.quinscape.domainql.beans.DegenerifDBLogic;
-import de.quinscape.domainql.beans.DegenerifiedContainerLogic;
-import de.quinscape.domainql.beans.DegenerifiedInputLogic;
-import de.quinscape.domainql.beans.DegenerifyAndRenameLogic;
-import de.quinscape.domainql.beans.DegenerifyContainerLogic;
-import de.quinscape.domainql.beans.DegenerifyLogic;
-import de.quinscape.domainql.beans.DoubleDegenerificationLogic;
-import de.quinscape.domainql.beans.ImplicitOverrideLogic;
-import de.quinscape.domainql.beans.ImplicitOverrideNonInputLogic;
-import de.quinscape.domainql.beans.ListReturningLogic;
-import de.quinscape.domainql.beans.LogicWithAnnotated;
-import de.quinscape.domainql.beans.LogicWithEnums;
-import de.quinscape.domainql.beans.LogicWithEnums2;
-import de.quinscape.domainql.beans.LogicWithGenerics;
-import de.quinscape.domainql.beans.LogicWithMirrorInput;
-import de.quinscape.domainql.beans.LogicWithWrongInjection;
-import de.quinscape.domainql.beans.LogicWithWrongInjection2;
-import de.quinscape.domainql.beans.NoMirroLogic;
-import de.quinscape.domainql.beans.TestLogic;
-import de.quinscape.domainql.beans.TypeRepeatLogic;
+import de.quinscape.domainql.logic.CustomParameterProviderLogic;
+import de.quinscape.domainql.logic.DegenerifDBLogic;
+import de.quinscape.domainql.logic.DegenerifiedContainerLogic;
+import de.quinscape.domainql.logic.DegenerifiedInputLogic;
+import de.quinscape.domainql.logic.DegenerifyAndRenameLogic;
+import de.quinscape.domainql.logic.DegenerifyContainerLogic;
+import de.quinscape.domainql.logic.DegenerifyLogic;
+import de.quinscape.domainql.logic.DoubleDegenerificationLogic;
+import de.quinscape.domainql.logic.ImplicitOverrideLogic;
+import de.quinscape.domainql.logic.ImplicitOverrideNonInputLogic;
+import de.quinscape.domainql.logic.ListReturningLogic;
+import de.quinscape.domainql.logic.LogicWithAnnotated;
+import de.quinscape.domainql.logic.LogicWithEnums;
+import de.quinscape.domainql.logic.LogicWithEnums2;
+import de.quinscape.domainql.logic.LogicWithGenerics;
+import de.quinscape.domainql.logic.LogicWithMirrorInput;
+import de.quinscape.domainql.logic.LogicWithWrongInjection;
+import de.quinscape.domainql.logic.LogicWithWrongInjection2;
+import de.quinscape.domainql.logic.NoMirrorLogic;
+import de.quinscape.domainql.logic.TestLogic;
+import de.quinscape.domainql.logic.TypeRepeatLogic;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.testdomain.Public;
@@ -118,7 +118,7 @@ public class AnotherDomainQLTest
 
         final GraphQLSchema schema = DomainQL.newDomainQL(null)
             .objectTypes(Public.PUBLIC)
-            .logicBeans(Arrays.asList(new TestLogic(), new LogicWithMirrorInput(), new NoMirroLogic()))
+            .logicBeans(Arrays.asList(new TestLogic(), new LogicWithMirrorInput(), new NoMirrorLogic()))
             // test override
             .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.NONE, TargetField.NONE)
             .configureRelation(   SOURCE_TWO.TARGET_ID, SourceField.SCALAR, TargetField.NONE)

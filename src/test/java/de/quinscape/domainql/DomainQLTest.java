@@ -1,8 +1,8 @@
 package de.quinscape.domainql;
 
 
-import de.quinscape.domainql.beans.LogicWithMirrorInput;
-import de.quinscape.domainql.beans.TestLogic;
+import de.quinscape.domainql.logic.LogicWithMirrorInput;
+import de.quinscape.domainql.logic.TestLogic;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
