@@ -42,6 +42,10 @@ public class DomainObjectScalar
 
                     final DomainObject domainObject = (DomainObject) result;
 
+                    if (domainObject instanceof GenericDomainObject)
+                    {
+                        return ((GenericDomainObject) domainObject).contents();
+                    }
 
                     final Set<String> propertyNames = domainObject.propertyNames();
                     Map<String, Object> convertedType = Maps.newHashMapWithExpectedSize(propertyNames.size());
@@ -63,13 +67,9 @@ public class DomainObjectScalar
                         throw new CoercingParseValueException("Cannot coerce " + input + " to DomainObject");
                     }
 
-                    final Map<String,Object> inputMap = (Map<String, Object>) input;
-                    DomainObject convertedType = new GenericDomainObject();
-                    for (Map.Entry<String, Object> e : inputMap.entrySet())
-                    {
-                        convertedType.setProperty(e.getKey(), e.getValue());
-                    }
-                    return convertedType;
+                    return new GenericDomainObject(
+                        (Map<String, Object>) input
+                    );
                 }
 
 
