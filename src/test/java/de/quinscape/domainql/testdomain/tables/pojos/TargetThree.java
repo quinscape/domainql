@@ -4,6 +4,10 @@
 package de.quinscape.domainql.testdomain.tables.pojos;
 
 
+import de.quinscape.domainql.generic.DomainObject;
+
+import java.io.Serializable;
+
 import javax.annotation.Generated;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,7 +16,6 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.io.Serializable;
 
 
 /**
@@ -30,9 +33,9 @@ import java.io.Serializable;
 @Table(name = "target_three", schema = "public", indexes = {
     @Index(name = "pk_target_three", unique = true, columnList = "id ASC")
 })
-public class TargetThree implements Serializable {
+public class TargetThree implements DomainObject, Serializable {
 
-    private static final long serialVersionUID = -13197833;
+    private static final long serialVersionUID = 497741525;
 
     private String id;
 

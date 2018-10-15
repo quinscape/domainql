@@ -89,52 +89,12 @@ public final class DomainQL
 {
     private final static Logger log = LoggerFactory.getLogger(DomainQL.class);
 
-    private final static Map<Class<?>, GraphQLScalarType> JAVA_TYPE_TO_GRAPHQL;
-    private final static Map<String, GraphQLScalarType> NAME_TO_GRAPHQL;
+
+    //private final static Map<String, GraphQLScalarType> NAME_TO_GRAPHQL;
 
     public static final String INPUT_SUFFIX = "Input";
 
-    static
-    {
-        final Map<Class<?>, GraphQLScalarType> map = new HashMap<>();
 
-        map.put(Boolean.class, Scalars.GraphQLBoolean);
-        map.put(Boolean.TYPE, Scalars.GraphQLBoolean);
-        map.put(Byte.class, Scalars.GraphQLByte);
-        map.put(Byte.TYPE, Scalars.GraphQLByte);
-        map.put(Short.class, Scalars.GraphQLShort);
-        map.put(Short.TYPE, Scalars.GraphQLShort);
-        map.put(Integer.class, Scalars.GraphQLInt);
-        map.put(Integer.TYPE, Scalars.GraphQLInt);
-        map.put(Double.class, Scalars.GraphQLFloat);
-        map.put(Double.TYPE, Scalars.GraphQLFloat);
-        map.put(Long.class, Scalars.GraphQLLong);
-        map.put(Long.TYPE, Scalars.GraphQLLong);
-        map.put(String.class, Scalars.GraphQLString);
-        map.put(BigDecimal.class, Scalars.GraphQLBigDecimal);
-        map.put(BigInteger.class, Scalars.GraphQLBigInteger);
-        map.put(Timestamp.class, new GraphQLTimestampScalar());
-        map.put(Date.class, new GraphQLDateScalar());
-
-        JAVA_TYPE_TO_GRAPHQL = Collections.unmodifiableMap(map);
-    }
-
-    static
-    {
-        final Map<String, GraphQLScalarType> map = new HashMap<>();
-
-        final Collection<GraphQLScalarType> scalarTypes = new ArrayList<>(JAVA_TYPE_TO_GRAPHQL.values());
-
-        // types only available by name
-        scalarTypes.add(new GraphQLCurrencyScalar());
-
-        for (GraphQLScalarType scalarType : scalarTypes)
-        {
-            map.put(scalarType.getName(), scalarType);
-        }
-
-        NAME_TO_GRAPHQL = Collections.unmodifiableMap(map);
-    }
 
     private final Collection<ParameterProviderFactory> parameterProviderFactories;
 
@@ -156,6 +116,8 @@ public final class DomainQL
 
     private final Set<GraphQLDirective> additionalDirectives;
 
+    private final Set<Class<?>> additionalInputTypes;
+
     private final boolean fullSupported;
 
     private final TypeRegistry typeRegistry;
@@ -171,8 +133,9 @@ public final class DomainQL
         Options options,
         Set<GraphQLFieldDefinition> additionalQueries,
         Set<GraphQLFieldDefinition> additionalMutations,
-
         Set<GraphQLDirective> additionalDirectives,
+        Map<Class<?>, GraphQLScalarType> additionalScalarTypes,
+        Set<Class<?>> additionalInputTypes,
         boolean fullSupported
     )
     {
@@ -184,17 +147,16 @@ public final class DomainQL
         this.additionalQueries = additionalQueries;
         this.additionalMutations = additionalMutations;
         this.additionalDirectives = additionalDirectives;
+        this.additionalInputTypes = additionalInputTypes;
         this.fullSupported = fullSupported;
         this.parameterProviderFactories = parameterProviderFactories;
         this.options = options;
 
-        //  XXX: scalars in type registry?
-//        registeredOutputTypes = new HashMap<>(JAVA_TYPE_TO_GRAPHQL);
-//        registeredInputTypes = new HashMap<>(JAVA_TYPE_TO_GRAPHQL);
-//        registeredEnumTypes = new HashMap<>();
 
-        this.typeRegistry = new TypeRegistry(this);
+        this.typeRegistry = new TypeRegistry(this, additionalScalarTypes);
     }
+
+
 
 
     public Set<GraphQLDirective> getAdditionalDirectives()
@@ -203,33 +165,6 @@ public final class DomainQL
     }
 
 
-    /**
-     * Returns the GraphQL type associated with the given java type.
-     * <p>
-     * These are the types common to all DomainQL definitions. The supported
-     * types are
-     *
-     * <ul>
-     * <li>Primitives and their object wrappers</li>
-     * <li>String</li>
-     * <li>BigDecimal</li>
-     * <li>BigInteger</li>
-     * <li>java.sql.Timestamp</li>
-     * <li>java.sql.Date</li>
-     * </ul>
-     *
-     * @param cls java type
-     * @return GraphQL scalar type
-     */
-    public static GraphQLScalarType getGraphQLScalarFor(Class<?> cls, GraphQLField inputAnno)
-    {
-        if (inputAnno != null && inputAnno.type().length() > 0)
-        {
-            return NAME_TO_GRAPHQL.get(inputAnno.type());
-        }
-        return JAVA_TYPE_TO_GRAPHQL.get(cls);
-    }
-    
     public static String getInputTypeName(Class<?> parameterType)
     {
         final String nameFromType = parameterType.getSimpleName();
@@ -350,6 +285,11 @@ public final class DomainQL
 
         for (JSONPropertyInfo info : classInfo.getPropertyInfos())
         {
+            if (info.isReadOnly())
+            {
+                continue;
+            }
+
             final Class<Object> type = info.getType();
             final Column jpaColumnAnno = getColumnAnnotation(pojoType, info);
 
@@ -373,7 +313,7 @@ public final class DomainQL
         for (OutputType outputType : typeRegistry.getOutputTypes())
         {
             final Class<?> javaType = outputType.getJavaType();
-            if (typesForJooqDomain.contains(outputType.getName()) || outputType.isEnum() || DomainQL.getGraphQLScalarFor(javaType, null) != null)
+            if (typesForJooqDomain.contains(outputType.getName()) || outputType.isEnum() || typeRegistry.getGraphQLScalarFor(javaType, null) != null)
             {
                 continue;
             }
@@ -582,6 +522,11 @@ public final class DomainQL
             defineTypeForTable(builder, table, pojoType, typesForJooqDomain);
         }
 
+        for (Class<?> inputType : additionalInputTypes)
+        {
+            typeRegistry.registerInput(new TypeContext(null, inputType));
+        }
+
         return new LogicBeanAnalyzer(
             this,
             parameterProviderFactories,
@@ -655,7 +600,7 @@ public final class DomainQL
 
                 final GraphQLField inputFieldAnno = JSONUtil.findAnnotation(info, GraphQLField.class);
                 final Class<?> propertyType = info.getType();
-                GraphQLInputType graphQLFieldType = getGraphQLScalarFor(propertyType, inputFieldAnno);
+                GraphQLInputType graphQLFieldType = typeRegistry.getGraphQLScalarFor(propertyType, inputFieldAnno);
                 if (graphQLFieldType == null)
                 {
                     if (List.class.isAssignableFrom(propertyType))
@@ -728,7 +673,7 @@ public final class DomainQL
             throw new IllegalStateException();
         }
 
-        final GraphQLScalarType type = DomainQL.getGraphQLScalarFor(propertyType, (GraphQLField) null);
+        final GraphQLScalarType type = typeRegistry.getGraphQLScalarFor(propertyType, (GraphQLField) null);
         if (type != null)
         {
             return type;
@@ -747,7 +692,7 @@ public final class DomainQL
             throw new IllegalStateException();
         }
 
-        final GraphQLScalarType type = DomainQL.getGraphQLScalarFor(propertyType, null);
+        final GraphQLScalarType type = typeRegistry.getGraphQLScalarFor(propertyType, null);
         if (type != null)
         {
             return type;
@@ -839,6 +784,8 @@ public final class DomainQL
             buildBackReferenceFields(domainTypeBuilder, pojoType, table, jooqTables);
 
             final GraphQLObjectType newObjectType = domainTypeBuilder.build();
+
+
             builder.additionalType(newObjectType);
 
             typesForJooqDomain.add(outputType.getName());
@@ -1116,7 +1063,7 @@ public final class DomainQL
             }
             else
             {
-                final GraphQLScalarType scalarType = DomainQL.getGraphQLScalarFor(type, fieldAnno);
+                final GraphQLScalarType scalarType = typeRegistry.getGraphQLScalarFor(type, fieldAnno);
                 if (scalarType != null)
                 {
                     graphQLType = scalarType;
@@ -1187,7 +1134,7 @@ public final class DomainQL
                 }
                 else
                 {
-                    final GraphQLScalarType scalarType = DomainQL.getGraphQLScalarFor(returnType, fieldAnno);
+                    final GraphQLScalarType scalarType = typeRegistry.getGraphQLScalarFor(returnType, fieldAnno);
                     if (scalarType != null)
                     {
                         graphQLType = scalarType;
@@ -1244,7 +1191,7 @@ public final class DomainQL
                     }
                     else
                     {
-                        final GraphQLScalarType scalarType = DomainQL.getGraphQLScalarFor(parameterType, paramFieldAnno);
+                        final GraphQLScalarType scalarType = typeRegistry.getGraphQLScalarFor(parameterType, paramFieldAnno);
                         if (scalarType != null)
                         {
                             paramGQLType = scalarType;
@@ -1406,6 +1353,12 @@ public final class DomainQL
     public Set<GraphQLFieldDefinition> getAdditionalMutations()
     {
         return additionalMutations;
+    }
+
+
+    public TypeRegistry getTypeRegistry()
+    {
+        return typeRegistry;
     }
 }
 

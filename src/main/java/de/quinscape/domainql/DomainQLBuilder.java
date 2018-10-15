@@ -9,6 +9,7 @@ import de.quinscape.domainql.param.ParameterProviderFactory;
 import graphql.Directives;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import org.jooq.DSLContext;
 import org.jooq.ForeignKey;
@@ -19,6 +20,7 @@ import org.jooq.TableField;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -58,10 +60,13 @@ public class DomainQLBuilder
     private Set<GraphQLFieldDefinition> additionalQueries  = new LinkedHashSet<>();
     private Set<GraphQLFieldDefinition> additionalMutations = new LinkedHashSet<>();
 
+    private Set<Class<?>> additionalInputTypes = new LinkedHashSet<>();
+
     private Set<GraphQLDirective> additionalDirectives = new LinkedHashSet<>(STANDARD_DIRECTIVES);
 
     private boolean fullSupported;
 
+    private Map<Class<?>, GraphQLScalarType> additionalScalarTypes = new LinkedHashMap<>();
 
     DomainQLBuilder(DSLContext dslContext)
     {
@@ -99,6 +104,8 @@ public class DomainQLBuilder
             Collections.unmodifiableSet(additionalQueries),
             Collections.unmodifiableSet(additionalMutations),
             Collections.unmodifiableSet(additionalDirectives),
+            additionalScalarTypes,
+            Collections.unmodifiableSet(additionalInputTypes),
             fullSupported
         );
     }
@@ -400,6 +407,68 @@ public class DomainQLBuilder
     public DomainQLBuilder withFullDirectiveSupported(boolean fullSupported)
     {
         this.fullSupported = fullSupported;
+        return this;
+    }
+
+
+    public Map<Class<?>, GraphQLScalarType> getAdditionalScalarTypes()
+    {
+        return additionalScalarTypes;
+    }
+
+
+    /**
+     * Adds an additional scalar type
+     *
+     * @param cls           Java type for the scalar
+     * @param scalarType    scalar type
+     *
+     * @return this builder
+     */
+    public DomainQLBuilder withAdditionalScalar( Class<?> cls, GraphQLScalarType scalarType)
+    {
+        this.additionalScalarTypes.put(cls, scalarType);
+        return this;
+    }
+
+
+    public Set<Class<?>> getAdditionalInputTypes()
+    {
+        return additionalInputTypes;
+    }
+
+
+    /**
+     * Adds an additional input type.
+     *
+     * This can be useful to define additional client-side types without actually accepting them anywhere. Or to
+     * define all possible generic domain types.
+     *
+     * @param inputType     java type to add an input type for. <code>Input</code> will be added to the end of the simple name if the name does not already end in <code>Input</code>.
+     *
+     * @return  this builder
+     */
+    public DomainQLBuilder withAdditionalInputType(Class<?> inputType)
+    {
+        this.additionalInputTypes.add(inputType);
+
+        return this;
+    }
+
+    /**
+     * Adds additional input types.
+     *
+     * This can be useful to define additional client-side types without actually accepting them anywhere. Or to
+     * define all possible generic domain types.
+     *
+     * @param inputTypes     java types to add an input type for. <code>Input</code> will be added to the end of the simple name if the name does not already end in <code>Input</code>.
+     *
+     * @return  this builder
+     */
+    public DomainQLBuilder withAdditionalInputTypes(Class<?>... inputTypes)
+    {
+        Collections.addAll(this.additionalInputTypes, inputTypes);
+
         return this;
     }
 }

@@ -8,6 +8,12 @@ import de.quinscape.domainql.testdomain.Indexes;
 import de.quinscape.domainql.testdomain.Keys;
 import de.quinscape.domainql.testdomain.Public;
 import de.quinscape.domainql.testdomain.tables.records.TargetSixRecord;
+
+import java.util.Arrays;
+import java.util.List;
+
+import javax.annotation.Generated;
+
 import org.jooq.Field;
 import org.jooq.Index;
 import org.jooq.Name;
@@ -17,10 +23,6 @@ import org.jooq.TableField;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
-
-import javax.annotation.Generated;
-import java.util.Arrays;
-import java.util.List;
 
 
 /**

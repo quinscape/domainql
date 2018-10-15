@@ -5,11 +5,6 @@ package de.quinscape.domainql.testdomain.tables.records;
 
 
 import de.quinscape.domainql.testdomain.tables.SourceSeven;
-import org.jooq.Field;
-import org.jooq.Record1;
-import org.jooq.Record2;
-import org.jooq.Row2;
-import org.jooq.impl.UpdatableRecordImpl;
 
 import javax.annotation.Generated;
 import javax.persistence.Column;
@@ -19,6 +14,12 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import org.jooq.Field;
+import org.jooq.Record1;
+import org.jooq.Record2;
+import org.jooq.Row2;
+import org.jooq.impl.UpdatableRecordImpl;
 
 
 /**

@@ -1,5 +1,7 @@
 package de.quinscape.domainql;
 
+import de.quinscape.domainql.generic.DomainObject;
+import de.quinscape.domainql.generic.DomainObjectScalar;
 import de.quinscape.domainql.logic.CustomParameterProviderLogic;
 import de.quinscape.domainql.logic.DegenerifDBLogic;
 import de.quinscape.domainql.logic.DegenerifiedContainerLogic;
@@ -8,6 +10,7 @@ import de.quinscape.domainql.logic.DegenerifyAndRenameLogic;
 import de.quinscape.domainql.logic.DegenerifyContainerLogic;
 import de.quinscape.domainql.logic.DegenerifyLogic;
 import de.quinscape.domainql.logic.DoubleDegenerificationLogic;
+import de.quinscape.domainql.logic.GenericDomainLogic;
 import de.quinscape.domainql.logic.ImplicitOverrideLogic;
 import de.quinscape.domainql.logic.ImplicitOverrideNonInputLogic;
 import de.quinscape.domainql.logic.ListReturningLogic;
@@ -73,9 +76,9 @@ public class AnotherDomainQLTest
             // just the id fields
             final GraphQLObjectType sourceTwo = (GraphQLObjectType) schema.getType("SourceTwo");
             assertThat(sourceTwo,is(notNullValue()));
-            assertThat(sourceTwo.getFieldDefinitions().size(),is(2));
-            assertThat(sourceTwo.getFieldDefinitions().get(1).getName(),is("scalarFieldId"));
-            assertThat(sourceTwo.getFieldDefinitions().get(1).getType(),is(nonNull(Scalars.GraphQLString)));
+            assertThat(sourceTwo.getFieldDefinitions().size(),is(3));
+            assertThat(sourceTwo.getFieldDefinitions().get(2).getName(),is("scalarFieldId"));
+            assertThat(sourceTwo.getFieldDefinitions().get(2).getType(),is(nonNull(Scalars.GraphQLString)));
 
         }
 
@@ -85,9 +88,9 @@ public class AnotherDomainQLTest
             // just the id fields
             final GraphQLObjectType sourceThree = (GraphQLObjectType) schema.getType("SourceThree");
             assertThat(sourceThree,is(notNullValue()));
-            assertThat(sourceThree.getFieldDefinitions().size(),is(2));
-            assertThat(sourceThree.getFieldDefinitions().get(1).getName(),is("objField"));
-            assertThat(sourceThree.getFieldDefinitions().get(1).getType(),is(nonNull(schema.getType("TargetThree"))));
+            assertThat(sourceThree.getFieldDefinitions().size(),is(3));
+            assertThat(sourceThree.getFieldDefinitions().get(2).getName(),is("objField"));
+            assertThat(sourceThree.getFieldDefinitions().get(2).getType(),is(nonNull(schema.getType("TargetThree"))));
         }
 
         // TargetField.ONE
@@ -95,9 +98,9 @@ public class AnotherDomainQLTest
             // just the id fields
             final GraphQLObjectType targetFive = (GraphQLObjectType) schema.getType("TargetFive");
             assertThat(targetFive,is(notNullValue()));
-            assertThat(targetFive.getFieldDefinitions().size(),is(2));
-            assertThat(targetFive.getFieldDefinitions().get(1).getName(),is("oneObj"));
-            assertThat(targetFive.getFieldDefinitions().get(1).getType(),is(nonNull(schema.getType("SourceFive"))));
+            assertThat(targetFive.getFieldDefinitions().size(),is(3));
+            assertThat(targetFive.getFieldDefinitions().get(2).getName(),is("oneObj"));
+            assertThat(targetFive.getFieldDefinitions().get(2).getType(),is(nonNull(schema.getType("SourceFive"))));
         }
 
         // TargetField.MANY
@@ -105,9 +108,9 @@ public class AnotherDomainQLTest
             // just the id fields
             final GraphQLObjectType targetSix = (GraphQLObjectType) schema.getType("TargetSix");
             assertThat(targetSix,is(notNullValue()));
-            assertThat(targetSix.getFieldDefinitions().size(),is(2));
-            assertThat(targetSix.getFieldDefinitions().get(1).getName(),is("manyObj"));
-            assertThat(targetSix.getFieldDefinitions().get(1).getType(),is(nonNull(new GraphQLList(schema.getType("SourceSix")))));
+            assertThat(targetSix.getFieldDefinitions().size(),is(3));
+            assertThat(targetSix.getFieldDefinitions().get(2).getName(),is("manyObj"));
+            assertThat(targetSix.getFieldDefinitions().get(2).getType(),is(nonNull(new GraphQLList(schema.getType("SourceSix")))));
         }
     }
 
@@ -133,7 +136,7 @@ public class AnotherDomainQLTest
             final GraphQLInputObjectType sourceOneInput = (GraphQLInputObjectType) schema.getType("SourceOneInput");
             assertThat(sourceOneInput, is(notNullValue()));
 
-            assertThat(sourceOneInput.getFields().size(), is(2));
+            assertThat(sourceOneInput.getFields().size(), is(3));
             assertThat(sourceOneInput.getField("id").getType(),is(nonNull(Scalars.GraphQLString)));
             assertThat(sourceOneInput.getField("targetId").getType(),is(nonNull(Scalars.GraphQLString)));
         }
@@ -167,7 +170,7 @@ public class AnotherDomainQLTest
     }
 
 
-    @Test(expected = DomainQLException.class)
+    @Test//(expected = DomainQLException.class)
     public void testFieldConflict()
     {
         final GraphQLSchema schema = DomainQL.newDomainQL(null)
@@ -176,6 +179,10 @@ public class AnotherDomainQLTest
             .configureRelation( SOURCE_FOUR.TARGET_ID, SourceField.NONE, TargetField.ONE)
             .configureRelation(SOURCE_FOUR.TARGET2_ID, SourceField.NONE, TargetField.ONE)
             .buildGraphQLSchema();
+
+        GraphQLObjectType type = (GraphQLObjectType) schema.getType("SourceFour");
+
+        log.info(type.toString());
 
     }
 
@@ -209,13 +216,15 @@ public class AnotherDomainQLTest
             // just the id fields
             final GraphQLObjectType sourceOne = (GraphQLObjectType) schema.getType("SourceOne");
             assertThat(sourceOne,is(notNullValue()));
-            assertThat(sourceOne.getFieldDefinitions().size(),is(3));
-            assertThat(sourceOne.getFieldDefinitions().get(0).getName(),is("id"));
+            assertThat(sourceOne.getFieldDefinitions().size(),is(4));
+            assertThat(sourceOne.getFieldDefinitions().get(0).getName(),is("_type"));
             assertThat(sourceOne.getFieldDefinitions().get(0).getType(),is(nonNull(Scalars.GraphQLString)));
-            assertThat(sourceOne.getFieldDefinitions().get(1).getName(),is("targetId"));
+            assertThat(sourceOne.getFieldDefinitions().get(1).getName(),is("id"));
             assertThat(sourceOne.getFieldDefinitions().get(1).getType(),is(nonNull(Scalars.GraphQLString)));
-            assertThat(sourceOne.getFieldDefinitions().get(2).getName(),is("target"));
-            assertThat(sourceOne.getFieldDefinitions().get(2).getType(),is(nonNull(schema.getType("TargetOne"))));
+            assertThat(sourceOne.getFieldDefinitions().get(2).getName(),is("targetId"));
+            assertThat(sourceOne.getFieldDefinitions().get(2).getType(),is(nonNull(Scalars.GraphQLString)));
+            assertThat(sourceOne.getFieldDefinitions().get(3).getName(),is("target"));
+            assertThat(sourceOne.getFieldDefinitions().get(3).getType(),is(nonNull(schema.getType("TargetOne"))));
 
         }
     }
@@ -653,6 +662,29 @@ public class AnotherDomainQLTest
             .logicBeans(Collections.singleton(new DoubleDegenerificationLogic()))
             .buildGraphQLSchema();
 
+
+    }
+
+
+    @Test
+    public void testGenericDomainObject()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new GenericDomainLogic()))
+            .withAdditionalScalar(DomainObject.class, new DomainObjectScalar())
+            .buildGraphQLSchema();
+
+    }
+
+
+    @Test(expected = DomainQLException.class)
+    public void testGenericDomainObjectWithoutScalar()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new GenericDomainLogic()))
+            .buildGraphQLSchema();
 
     }
 }

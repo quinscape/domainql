@@ -2,6 +2,8 @@ package de.quinscape.domainql;
 
 
 import com.google.common.collect.ImmutableMap;
+import de.quinscape.domainql.generic.DomainObject;
+import de.quinscape.domainql.generic.DomainObjectScalar;
 import de.quinscape.domainql.logic.CustomFetcherLogic;
 import de.quinscape.domainql.logic.DegenerifiedContainerLogic;
 import de.quinscape.domainql.logic.DegenerifiedInputLogic;
@@ -9,6 +11,7 @@ import de.quinscape.domainql.logic.DegenerifyAndRenameLogic;
 import de.quinscape.domainql.logic.DegenerifyContainerLogic;
 import de.quinscape.domainql.logic.DoubleDegenerificationLogic;
 import de.quinscape.domainql.logic.FullDirectiveLogic;
+import de.quinscape.domainql.logic.GenericDomainLogic;
 import de.quinscape.domainql.logic.GetterArgLogic;
 import de.quinscape.domainql.logic.LogicWithEnums;
 import de.quinscape.domainql.logic.LogicWithEnums2;
@@ -20,6 +23,7 @@ import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.mock.TestProvider;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.domainql.testdomain.Public;
+import de.quinscape.domainql.testdomain.tables.pojos.Foo;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
@@ -759,6 +763,47 @@ public class DomainQLExecutionTest
         final String result = (String) ((Map<String, Object>) executionResult.getData()).get("mutationWithDD");
 
         assertThat(result, is("[EEE:666:777]"));
+
+    }
+
+
+    @Test
+    public void testGenericDomainObject()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new GenericDomainLogic()))
+            .withAdditionalScalar(DomainObject.class, new DomainObjectScalar())
+            .withAdditionalInputType(Foo.class)
+            .buildGraphQLSchema();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        Map<String, Object> domainObjectJSON = JSONUtil.DEFAULT_PARSER.parse(Map.class,"{\n" +
+            "    \"_type\" : \"Foo\",\n" +
+            "    \"id\": \"e7c103e7-f559-4896-ac44-702b8458f207\",\n" +
+            "    \"name\" : \"GreenFoo\",\n" +
+            "    \"num\" : 9384,\n" +
+            "    \"created\" : \"2018-10-15T14:03:58.078Z\"\n" +
+            "}");
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("mutation store($domainObject: DomainObject!)\n" +
+                "{\n" +
+                "    store(domainObject: $domainObject)\n" +
+                "}")
+            .variables(ImmutableMap.of("domainObject", domainObjectJSON))
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+        final List<GraphQLError> errors = executionResult.getErrors();
+        log.info(errors.toString());
+        assertThat(errors.size(), is(0));
+
+        final Object data = ((Map<String,Object>)executionResult.getData()).get("store");
+
+        assertThat(data, is("{\"_javaType\":\"de.quinscape.domainql.testdomain.tables.pojos.Foo\",\"_type\":\"=Foo (String)\",\"created\":\"=2018-10-15 16:03:58.078 (Timestamp)\",\"id\":\"=e7c103e7-f559-4896-ac44-702b8458f207 (String)\",\"name\":\"=GreenFoo (String)\",\"num\":\"=9384 (Integer)\"}"));
 
     }
 

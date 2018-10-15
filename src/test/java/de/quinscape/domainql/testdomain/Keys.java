@@ -4,6 +4,7 @@
 package de.quinscape.domainql.testdomain;
 
 
+import de.quinscape.domainql.testdomain.tables.Foo;
 import de.quinscape.domainql.testdomain.tables.SourceFive;
 import de.quinscape.domainql.testdomain.tables.SourceFour;
 import de.quinscape.domainql.testdomain.tables.SourceOne;
@@ -18,6 +19,7 @@ import de.quinscape.domainql.testdomain.tables.TargetSeven;
 import de.quinscape.domainql.testdomain.tables.TargetSix;
 import de.quinscape.domainql.testdomain.tables.TargetThree;
 import de.quinscape.domainql.testdomain.tables.TargetTwo;
+import de.quinscape.domainql.testdomain.tables.records.FooRecord;
 import de.quinscape.domainql.testdomain.tables.records.SourceFiveRecord;
 import de.quinscape.domainql.testdomain.tables.records.SourceFourRecord;
 import de.quinscape.domainql.testdomain.tables.records.SourceOneRecord;
@@ -32,11 +34,12 @@ import de.quinscape.domainql.testdomain.tables.records.TargetSevenRecord;
 import de.quinscape.domainql.testdomain.tables.records.TargetSixRecord;
 import de.quinscape.domainql.testdomain.tables.records.TargetThreeRecord;
 import de.quinscape.domainql.testdomain.tables.records.TargetTwoRecord;
+
+import javax.annotation.Generated;
+
 import org.jooq.ForeignKey;
 import org.jooq.UniqueKey;
 import org.jooq.impl.Internal;
-
-import javax.annotation.Generated;
 
 
 /**
@@ -62,6 +65,7 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final UniqueKey<FooRecord> PK_FOO = UniqueKeys0.PK_FOO;
     public static final UniqueKey<SourceFiveRecord> PK_SOURCE_FIVE = UniqueKeys0.PK_SOURCE_FIVE;
     public static final UniqueKey<SourceFourRecord> PK_SOURCE_FOUR = UniqueKeys0.PK_SOURCE_FOUR;
     public static final UniqueKey<SourceOneRecord> PK_SOURCE_ONE = UniqueKeys0.PK_SOURCE_ONE;
@@ -96,6 +100,7 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     private static class UniqueKeys0 {
+        public static final UniqueKey<FooRecord> PK_FOO = Internal.createUniqueKey(Foo.FOO, "pk_foo", Foo.FOO.ID);
         public static final UniqueKey<SourceFiveRecord> PK_SOURCE_FIVE = Internal.createUniqueKey(SourceFive.SOURCE_FIVE, "pk_source_five", SourceFive.SOURCE_FIVE.ID);
         public static final UniqueKey<SourceFourRecord> PK_SOURCE_FOUR = Internal.createUniqueKey(SourceFour.SOURCE_FOUR, "pk_source_four", SourceFour.SOURCE_FOUR.ID);
         public static final UniqueKey<SourceOneRecord> PK_SOURCE_ONE = Internal.createUniqueKey(SourceOne.SOURCE_ONE, "pk_source_one", SourceOne.SOURCE_ONE.ID);

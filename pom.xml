@@ -65,6 +65,7 @@
             <artifactId>jooq</artifactId>
             <version>3.10.6</version>
         </dependency>
+
         <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>jooq-codegen</artifactId>
@@ -74,7 +75,7 @@
         <dependency>
             <groupId>com.graphql-java</groupId>
             <artifactId>graphql-java</artifactId>
-            <version>8.0</version>
+            <version>10.0</version>
         </dependency>
 
         <dependency>
@@ -114,26 +115,7 @@
             <version>1.7.25</version>
         </dependency>
 
-        <!-- Test dependencies -->
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
-            <version>1.3</version>
-            <scope>test</scope>
-        </dependency>
 
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.25</version>
-        </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
@@ -158,6 +140,28 @@
             <artifactId>javax.servlet-api</artifactId>
             <version>3.1.0</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.25</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>
@@ -303,7 +307,15 @@
                 <artifactId>jooq-codegen-maven</artifactId>
                 <version>3.10.6</version>
 
-                <!-- The plugin should hook into the generate goal -->
+                <!--
+                    The generated classes are only used in tests.
+
+                    To update them you need to first do a "mvn clean install", then remove uncomment the <executions>
+                    block below and do a "mvn generate-sources" and then comment the block out again.
+
+                    This is a complication brought on by using a generator from the same sources we're building here but
+                    at the same time rarely ever needing to be run.
+                 -->
                 <!--
                 <executions>
                     <execution>
@@ -313,6 +325,7 @@
                     </execution>
                 </executions>
                 -->
+
 
                 <!-- Manage the plugin's dependency. In this example, we'll use a PostgreSQL database -->
                 <dependencies>
@@ -358,6 +371,11 @@
                             <jpaAnnotations>true</jpaAnnotations>
                             <springAnnotations>true</springAnnotations>
                         </generate>
+                        <strategy>
+                            <name>
+                                de.quinscape.domainql.generic.DomainObjectGeneratorStrategy
+                            </name>
+                        </strategy>
                     </generator>
                 </configuration>
             </plugin>

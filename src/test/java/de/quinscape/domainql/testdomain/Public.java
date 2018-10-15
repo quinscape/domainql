@@ -4,6 +4,7 @@
 package de.quinscape.domainql.testdomain;
 
 
+import de.quinscape.domainql.testdomain.tables.Foo;
 import de.quinscape.domainql.testdomain.tables.SourceFive;
 import de.quinscape.domainql.testdomain.tables.SourceFour;
 import de.quinscape.domainql.testdomain.tables.SourceOne;
@@ -18,14 +19,16 @@ import de.quinscape.domainql.testdomain.tables.TargetSeven;
 import de.quinscape.domainql.testdomain.tables.TargetSix;
 import de.quinscape.domainql.testdomain.tables.TargetThree;
 import de.quinscape.domainql.testdomain.tables.TargetTwo;
-import org.jooq.Catalog;
-import org.jooq.Table;
-import org.jooq.impl.SchemaImpl;
 
-import javax.annotation.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.annotation.Generated;
+
+import org.jooq.Catalog;
+import org.jooq.Table;
+import org.jooq.impl.SchemaImpl;
 
 
 /**
@@ -41,12 +44,17 @@ import java.util.List;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = -1061958551;
+    private static final long serialVersionUID = 1587208651;
 
     /**
      * The reference instance of <code>public</code>
      */
     public static final Public PUBLIC = new Public();
+
+    /**
+     * The table <code>public.foo</code>.
+     */
+    public final Foo FOO = de.quinscape.domainql.testdomain.tables.Foo.FOO;
 
     /**
      * The table <code>public.source_five</code>.
@@ -143,6 +151,7 @@ public class Public extends SchemaImpl {
 
     private final List<Table<?>> getTables0() {
         return Arrays.<Table<?>>asList(
+            Foo.FOO,
             SourceFive.SOURCE_FIVE,
             SourceFour.SOURCE_FOUR,
             SourceOne.SOURCE_ONE,

@@ -145,15 +145,15 @@ public class DomainQLTest
             // just the id fields
             final GraphQLObjectType sourceOne = (GraphQLObjectType) schema.getType("SourceOne");
             assertThat(sourceOne,is(notNullValue()));
-            assertThat(sourceOne.getFieldDefinitions().size(),is(1));
-            assertThat(sourceOne.getFieldDefinitions().get(0).getName(),is("id"));
-            assertThat(sourceOne.getFieldDefinitions().get(0).getType(),is(nonNull(Scalars.GraphQLString)));
+            assertThat(sourceOne.getFieldDefinitions().size(),is(2));
+            assertThat(sourceOne.getFieldDefinitions().get(1).getName(),is("id"));
+            assertThat(sourceOne.getFieldDefinitions().get(1).getType(),is(nonNull(Scalars.GraphQLString)));
 
             final GraphQLObjectType targetOne = (GraphQLObjectType) schema.getType("TargetOne");
             assertThat(targetOne,is(notNullValue()));
-            assertThat(targetOne.getFieldDefinitions().size(),is(1));
-            assertThat(targetOne.getFieldDefinitions().get(0).getName(),is("id"));
-            assertThat(targetOne.getFieldDefinitions().get(0).getType(),is(nonNull(Scalars.GraphQLString)));
+            assertThat(targetOne.getFieldDefinitions().size(),is(2));
+            assertThat(targetOne.getFieldDefinitions().get(1).getName(),is("id"));
+            assertThat(targetOne.getFieldDefinitions().get(1).getType(),is(nonNull(Scalars.GraphQLString)));
 
         }
 
@@ -162,9 +162,9 @@ public class DomainQLTest
             // just the id fields
             final GraphQLObjectType sourceTwo = (GraphQLObjectType) schema.getType("SourceTwo");
             assertThat(sourceTwo,is(notNullValue()));
-            assertThat(sourceTwo.getFieldDefinitions().size(),is(2));
-            assertThat(sourceTwo.getFieldDefinitions().get(1).getName(),is("targetId"));
-            assertThat(sourceTwo.getFieldDefinitions().get(1).getType(),is(nonNull(Scalars.GraphQLString)));
+            assertThat(sourceTwo.getFieldDefinitions().size(),is(3));
+            assertThat(sourceTwo.getFieldDefinitions().get(2).getName(),is("targetId"));
+            assertThat(sourceTwo.getFieldDefinitions().get(2).getType(),is(nonNull(Scalars.GraphQLString)));
 
         }
 
@@ -174,7 +174,7 @@ public class DomainQLTest
             // just the id fields
             final GraphQLObjectType sourceThree = (GraphQLObjectType) schema.getType("SourceThree");
             assertThat(sourceThree,is(notNullValue()));
-            assertThat(sourceThree.getFieldDefinitions().size(),is(2));
+            assertThat(sourceThree.getFieldDefinitions().size(),is(3));
             assertThat(sourceThree.getFieldDefinition("target").getType(),is(nonNull(schema.getType("TargetThree"))));
         }
 
@@ -183,7 +183,7 @@ public class DomainQLTest
             // just the id fields
             final GraphQLObjectType targetFive = (GraphQLObjectType) schema.getType("TargetFive");
             assertThat(targetFive,is(notNullValue()));
-            assertThat(targetFive.getFieldDefinitions().size(),is(2));
+            assertThat(targetFive.getFieldDefinitions().size(),is(3));
             assertThat(targetFive.getFieldDefinition("sourceFive").getType(),is(nonNull(schema.getType("SourceFive"))));
         }
 
@@ -192,7 +192,7 @@ public class DomainQLTest
             // just the id fields
             final GraphQLObjectType targetSix = (GraphQLObjectType) schema.getType("TargetSix");
             assertThat(targetSix,is(notNullValue()));
-            assertThat(targetSix.getFieldDefinitions().size(),is(2));
+            assertThat(targetSix.getFieldDefinitions().size(),is(3));
             assertThat(targetSix.getFieldDefinition("sourceSixes").getType(),is(nonNull(new GraphQLList(schema.getType("SourceSix")))));
         }
 
@@ -205,12 +205,12 @@ public class DomainQLTest
 
             log.info("fieldDefs = {}", fieldDefs);
 
-            assertThat(fieldDefs.size(),is(2));
+            assertThat(fieldDefs.size(),is(3));
             assertThat(targetSeven.getFieldDefinition("name").getType(), is(nonNull(Scalars.GraphQLString)));
 
 
             final GraphQLObjectType sourceSeven = (GraphQLObjectType) schema.getType("SourceSeven");
-            assertThat(sourceSeven.getFieldDefinitions().size(), is(2));
+            assertThat(sourceSeven.getFieldDefinitions().size(), is(3));
             assertThat(sourceSeven.getFieldDefinition("target").getType(), is(nonNull(schema.getType("TargetSeven"))));
 
         }

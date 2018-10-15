@@ -4,6 +4,7 @@
 package de.quinscape.domainql.testdomain;
 
 
+import de.quinscape.domainql.testdomain.tables.Foo;
 import de.quinscape.domainql.testdomain.tables.SourceFive;
 import de.quinscape.domainql.testdomain.tables.SourceFour;
 import de.quinscape.domainql.testdomain.tables.SourceOne;
@@ -18,11 +19,12 @@ import de.quinscape.domainql.testdomain.tables.TargetSeven;
 import de.quinscape.domainql.testdomain.tables.TargetSix;
 import de.quinscape.domainql.testdomain.tables.TargetThree;
 import de.quinscape.domainql.testdomain.tables.TargetTwo;
+
+import javax.annotation.Generated;
+
 import org.jooq.Index;
 import org.jooq.OrderField;
 import org.jooq.impl.Internal;
-
-import javax.annotation.Generated;
 
 
 /**
@@ -42,6 +44,7 @@ public class Indexes {
     // INDEX definitions
     // -------------------------------------------------------------------------
 
+    public static final Index PK_FOO = Indexes0.PK_FOO;
     public static final Index PK_SOURCE_FIVE = Indexes0.PK_SOURCE_FIVE;
     public static final Index PK_SOURCE_FOUR = Indexes0.PK_SOURCE_FOUR;
     public static final Index PK_SOURCE_ONE = Indexes0.PK_SOURCE_ONE;
@@ -63,6 +66,7 @@ public class Indexes {
     // -------------------------------------------------------------------------
 
     private static class Indexes0 {
+        public static Index PK_FOO = Internal.createIndex("pk_foo", Foo.FOO, new OrderField[] { Foo.FOO.ID }, true);
         public static Index PK_SOURCE_FIVE = Internal.createIndex("pk_source_five", SourceFive.SOURCE_FIVE, new OrderField[] { SourceFive.SOURCE_FIVE.ID }, true);
         public static Index PK_SOURCE_FOUR = Internal.createIndex("pk_source_four", SourceFour.SOURCE_FOUR, new OrderField[] { SourceFour.SOURCE_FOUR.ID }, true);
         public static Index PK_SOURCE_ONE = Internal.createIndex("pk_source_one", SourceOne.SOURCE_ONE, new OrderField[] { SourceOne.SOURCE_ONE.ID }, true);

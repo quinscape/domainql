@@ -180,6 +180,7 @@ public class LogicBeanAnalyzer
     {
         final Class<?> returnType = method.getReturnType();
 
+
         final TypeContext ctx = new TypeContext(null, method);
 
         final GraphQLOutputType resultType;
@@ -196,11 +197,12 @@ public class LogicBeanAnalyzer
                 throw new DomainQLException(locationInfo + ": Return values can't have names");
             }
 
-            final GraphQLScalarType scalarType = DomainQL.getGraphQLScalarFor(returnType, fieldAnno);
+            final GraphQLScalarType scalarType = domainQL.getTypeRegistry().getGraphQLScalarFor(returnType, fieldAnno);
             if (scalarType != null)
             {
                 return scalarType;
             }
+
 
             final Type[] actualTypeArguments = ctx.getActualTypeArguments();
             if (List.class.isAssignableFrom(returnType))
@@ -212,7 +214,7 @@ public class LogicBeanAnalyzer
 
 
                 final Class<?> elementClass = ctx.getFirstActualType();
-                final GraphQLScalarType scalar = DomainQL.getGraphQLScalarFor(elementClass, fieldAnno);
+                final GraphQLScalarType scalar = domainQL.getTypeRegistry().getGraphQLScalarFor(elementClass, fieldAnno);
                 if (scalar != null)
                 {
                     resultType = new GraphQLList(scalar);
@@ -232,6 +234,11 @@ public class LogicBeanAnalyzer
             }
             else
             {
+                if (returnType.isInterface())
+                {
+                    throw new DomainQLException("Cannot handle " + returnType);
+                }
+
                 final OutputType outputType = typeRegistry.register(ctx);
                 resultType = new GraphQLTypeReference(outputType.getName());
             }
@@ -292,8 +299,12 @@ public class LogicBeanAnalyzer
                 {
                     final TypeContext paramTypeContext = new TypeContext(
                         null,
-                        parameter.getType(), genericParameterType, genericTypeAnno);
-                    GraphQLInputType inputType = DomainQL.getGraphQLScalarFor(parameterType, argAnno);
+                        parameterType,
+                        genericParameterType,
+                        genericTypeAnno
+                    );
+                    
+                    GraphQLInputType inputType = domainQL.getTypeRegistry().getGraphQLScalarFor(parameterType, argAnno);
                     if (inputType == null)
                     {
                         if (List.class.isAssignableFrom(parameterType))
@@ -308,7 +319,7 @@ public class LogicBeanAnalyzer
                                 .getActualTypeArguments()[0];
 
 
-                            final GraphQLScalarType scalar = DomainQL.getGraphQLScalarFor(elementClass, argAnno);
+                            final GraphQLScalarType scalar = domainQL.getTypeRegistry().getGraphQLScalarFor(elementClass, argAnno);
                             if (scalar != null)
                             {
                                 inputType = new GraphQLList(scalar);
@@ -324,6 +335,12 @@ public class LogicBeanAnalyzer
                         }
                         else
                         {
+                            if (parameterType.isInterface())
+                            {
+                                throw new DomainQLException("Cannot handle " + parameterType);
+                            }
+
+
                             final InputType parameterInputType = typeRegistry.registerInput(paramTypeContext);
                             final String nameFromConfig = parameterInputType.getName();
                             inputType = GraphQLTypeReference.typeRef(nameFromConfig);
@@ -363,7 +380,8 @@ public class LogicBeanAnalyzer
                         isRequired,
                         inputType,
                         defaultValue,
-                        typeRegistry
+                        typeRegistry,
+                        parameterType
                     );
 
                     final String paramDesc = graphQLValueProvider.getDescription();

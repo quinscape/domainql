@@ -7,6 +7,7 @@ package de.quinscape.domainql.testdomain.tables.pojos;
 import de.quinscape.domainql.generic.DomainObject;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 import javax.annotation.Generated;
 import javax.persistence.Column;
@@ -30,30 +31,37 @@ import javax.validation.constraints.Size;
 )
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 @Entity
-@Table(name = "target_seven", schema = "public", indexes = {
-    @Index(name = "pk_target_seven", unique = true, columnList = "id ASC"),
-    @Index(name = "target_seven_name_key", unique = true, columnList = "name ASC")
+@Table(name = "foo", schema = "public", indexes = {
+    @Index(name = "pk_foo", unique = true, columnList = "id ASC")
 })
-public class TargetSeven implements DomainObject, Serializable {
+public class Foo implements DomainObject, Serializable {
 
-    private static final long serialVersionUID = -1911002900;
+    private static final long serialVersionUID = -1676380319;
 
-    private String id;
-    private String name;
+    private String    id;
+    private String    name;
+    private Integer   num;
+    private Timestamp created;
 
-    public TargetSeven() {}
+    public Foo() {}
 
-    public TargetSeven(TargetSeven value) {
+    public Foo(Foo value) {
         this.id = value.id;
         this.name = value.name;
+        this.num = value.num;
+        this.created = value.created;
     }
 
-    public TargetSeven(
-        String id,
-        String name
+    public Foo(
+        String    id,
+        String    name,
+        Integer   num,
+        Timestamp created
     ) {
         this.id = id;
         this.name = name;
+        this.num = num;
+        this.created = created;
     }
 
     @Id
@@ -68,9 +76,9 @@ public class TargetSeven implements DomainObject, Serializable {
         this.id = id;
     }
 
-    @Column(name = "name", unique = true, nullable = false, length = 36)
+    @Column(name = "name", nullable = false, length = 100)
     @NotNull
-    @Size(max = 36)
+    @Size(max = 100)
     public String getName() {
         return this.name;
     }
@@ -79,12 +87,34 @@ public class TargetSeven implements DomainObject, Serializable {
         this.name = name;
     }
 
+    @Column(name = "num", nullable = false, precision = 32)
+    @NotNull
+    public Integer getNum() {
+        return this.num;
+    }
+
+    public void setNum(Integer num) {
+        this.num = num;
+    }
+
+    @Column(name = "created", nullable = false)
+    @NotNull
+    public Timestamp getCreated() {
+        return this.created;
+    }
+
+    public void setCreated(Timestamp created) {
+        this.created = created;
+    }
+
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("TargetSeven (");
+        StringBuilder sb = new StringBuilder("Foo (");
 
         sb.append(id);
         sb.append(", ").append(name);
+        sb.append(", ").append(num);
+        sb.append(", ").append(created);
 
         sb.append(")");
         return sb.toString();

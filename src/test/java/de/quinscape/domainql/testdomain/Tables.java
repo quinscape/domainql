@@ -4,6 +4,7 @@
 package de.quinscape.domainql.testdomain;
 
 
+import de.quinscape.domainql.testdomain.tables.Foo;
 import de.quinscape.domainql.testdomain.tables.SourceFive;
 import de.quinscape.domainql.testdomain.tables.SourceFour;
 import de.quinscape.domainql.testdomain.tables.SourceOne;
@@ -34,6 +35,11 @@ import javax.annotation.Generated;
 )
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
+
+    /**
+     * The table <code>public.foo</code>.
+     */
+    public static final Foo FOO = de.quinscape.domainql.testdomain.tables.Foo.FOO;
 
     /**
      * The table <code>public.source_five</code>.

@@ -4,7 +4,9 @@
 package de.quinscape.domainql.testdomain.tables.records;
 
 
-import de.quinscape.domainql.testdomain.tables.SourceFour;
+import de.quinscape.domainql.testdomain.tables.Foo;
+
+import java.sql.Timestamp;
 
 import javax.annotation.Generated;
 import javax.persistence.Column;
@@ -17,8 +19,8 @@ import javax.validation.constraints.Size;
 
 import org.jooq.Field;
 import org.jooq.Record1;
-import org.jooq.Record3;
-import org.jooq.Row3;
+import org.jooq.Record4;
+import org.jooq.Row4;
 import org.jooq.impl.UpdatableRecordImpl;
 
 
@@ -34,22 +36,22 @@ import org.jooq.impl.UpdatableRecordImpl;
 )
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 @Entity
-@Table(name = "source_four", schema = "public", indexes = {
-    @Index(name = "pk_source_four", unique = true, columnList = "id ASC")
+@Table(name = "foo", schema = "public", indexes = {
+    @Index(name = "pk_foo", unique = true, columnList = "id ASC")
 })
-public class SourceFourRecord extends UpdatableRecordImpl<SourceFourRecord> implements Record3<String, String, String> {
+public class FooRecord extends UpdatableRecordImpl<FooRecord> implements Record4<String, String, Integer, Timestamp> {
 
-    private static final long serialVersionUID = 955040777;
+    private static final long serialVersionUID = 24624623;
 
     /**
-     * Setter for <code>public.source_four.id</code>.
+     * Setter for <code>public.foo.id</code>.
      */
     public void setId(String value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>public.source_four.id</code>.
+     * Getter for <code>public.foo.id</code>.
      */
     @Id
     @Column(name = "id", unique = true, nullable = false, length = 36)
@@ -60,37 +62,52 @@ public class SourceFourRecord extends UpdatableRecordImpl<SourceFourRecord> impl
     }
 
     /**
-     * Setter for <code>public.source_four.target_id</code>.
+     * Setter for <code>public.foo.name</code>.
      */
-    public void setTargetId(String value) {
+    public void setName(String value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>public.source_four.target_id</code>.
+     * Getter for <code>public.foo.name</code>.
      */
-    @Column(name = "target_id", nullable = false, length = 36)
+    @Column(name = "name", nullable = false, length = 100)
     @NotNull
-    @Size(max = 36)
-    public String getTargetId() {
+    @Size(max = 100)
+    public String getName() {
         return (String) get(1);
     }
 
     /**
-     * Setter for <code>public.source_four.target2_id</code>.
+     * Setter for <code>public.foo.num</code>.
      */
-    public void setTarget2Id(String value) {
+    public void setNum(Integer value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>public.source_four.target2_id</code>.
+     * Getter for <code>public.foo.num</code>.
      */
-    @Column(name = "target2_id", nullable = false, length = 36)
+    @Column(name = "num", nullable = false, precision = 32)
     @NotNull
-    @Size(max = 36)
-    public String getTarget2Id() {
-        return (String) get(2);
+    public Integer getNum() {
+        return (Integer) get(2);
+    }
+
+    /**
+     * Setter for <code>public.foo.created</code>.
+     */
+    public void setCreated(Timestamp value) {
+        set(3, value);
+    }
+
+    /**
+     * Getter for <code>public.foo.created</code>.
+     */
+    @Column(name = "created", nullable = false)
+    @NotNull
+    public Timestamp getCreated() {
+        return (Timestamp) get(3);
     }
 
     // -------------------------------------------------------------------------
@@ -106,23 +123,23 @@ public class SourceFourRecord extends UpdatableRecordImpl<SourceFourRecord> impl
     }
 
     // -------------------------------------------------------------------------
-    // Record3 type implementation
+    // Record4 type implementation
     // -------------------------------------------------------------------------
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Row3<String, String, String> fieldsRow() {
-        return (Row3) super.fieldsRow();
+    public Row4<String, String, Integer, Timestamp> fieldsRow() {
+        return (Row4) super.fieldsRow();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Row3<String, String, String> valuesRow() {
-        return (Row3) super.valuesRow();
+    public Row4<String, String, Integer, Timestamp> valuesRow() {
+        return (Row4) super.valuesRow();
     }
 
     /**
@@ -130,7 +147,7 @@ public class SourceFourRecord extends UpdatableRecordImpl<SourceFourRecord> impl
      */
     @Override
     public Field<String> field1() {
-        return SourceFour.SOURCE_FOUR.ID;
+        return Foo.FOO.ID;
     }
 
     /**
@@ -138,15 +155,23 @@ public class SourceFourRecord extends UpdatableRecordImpl<SourceFourRecord> impl
      */
     @Override
     public Field<String> field2() {
-        return SourceFour.SOURCE_FOUR.TARGET_ID;
+        return Foo.FOO.NAME;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Field<String> field3() {
-        return SourceFour.SOURCE_FOUR.TARGET2_ID;
+    public Field<Integer> field3() {
+        return Foo.FOO.NUM;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Field<Timestamp> field4() {
+        return Foo.FOO.CREATED;
     }
 
     /**
@@ -162,15 +187,23 @@ public class SourceFourRecord extends UpdatableRecordImpl<SourceFourRecord> impl
      */
     @Override
     public String component2() {
-        return getTargetId();
+        return getName();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String component3() {
-        return getTarget2Id();
+    public Integer component3() {
+        return getNum();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Timestamp component4() {
+        return getCreated();
     }
 
     /**
@@ -186,22 +219,30 @@ public class SourceFourRecord extends UpdatableRecordImpl<SourceFourRecord> impl
      */
     @Override
     public String value2() {
-        return getTargetId();
+        return getName();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String value3() {
-        return getTarget2Id();
+    public Integer value3() {
+        return getNum();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SourceFourRecord value1(String value) {
+    public Timestamp value4() {
+        return getCreated();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public FooRecord value1(String value) {
         setId(value);
         return this;
     }
@@ -210,8 +251,8 @@ public class SourceFourRecord extends UpdatableRecordImpl<SourceFourRecord> impl
      * {@inheritDoc}
      */
     @Override
-    public SourceFourRecord value2(String value) {
-        setTargetId(value);
+    public FooRecord value2(String value) {
+        setName(value);
         return this;
     }
 
@@ -219,8 +260,8 @@ public class SourceFourRecord extends UpdatableRecordImpl<SourceFourRecord> impl
      * {@inheritDoc}
      */
     @Override
-    public SourceFourRecord value3(String value) {
-        setTarget2Id(value);
+    public FooRecord value3(Integer value) {
+        setNum(value);
         return this;
     }
 
@@ -228,10 +269,20 @@ public class SourceFourRecord extends UpdatableRecordImpl<SourceFourRecord> impl
      * {@inheritDoc}
      */
     @Override
-    public SourceFourRecord values(String value1, String value2, String value3) {
+    public FooRecord value4(Timestamp value) {
+        setCreated(value);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public FooRecord values(String value1, String value2, Integer value3, Timestamp value4) {
         value1(value1);
         value2(value2);
         value3(value3);
+        value4(value4);
         return this;
     }
 
@@ -240,20 +291,21 @@ public class SourceFourRecord extends UpdatableRecordImpl<SourceFourRecord> impl
     // -------------------------------------------------------------------------
 
     /**
-     * Create a detached SourceFourRecord
+     * Create a detached FooRecord
      */
-    public SourceFourRecord() {
-        super(SourceFour.SOURCE_FOUR);
+    public FooRecord() {
+        super(Foo.FOO);
     }
 
     /**
-     * Create a detached, initialised SourceFourRecord
+     * Create a detached, initialised FooRecord
      */
-    public SourceFourRecord(String id, String targetId, String target2Id) {
-        super(SourceFour.SOURCE_FOUR);
+    public FooRecord(String id, String name, Integer num, Timestamp created) {
+        super(Foo.FOO);
 
         set(0, id);
-        set(1, targetId);
-        set(2, target2Id);
+        set(1, name);
+        set(2, num);
+        set(3, created);
     }
 }
