@@ -153,7 +153,7 @@ public class InformationSchemaOperations
         final FieldType sqlType = getSQLType(runtimeContext, domainProperty);
         String typeExpr = sqlType.getSqlExpression(runtimeContext, domainProperty);
         final String[] fieldName = namingStrategy.getFieldName(type.getName(), domainProperty.getName());
-        return fieldName[1] + " " + typeExpr + (domainProperty.isRequired() ? " NOT NULL" : "") + (domainProperty.isUnique() ? " UNIQUE" : "");
+        return fieldName[1] + " " + typeExpr + (domainProperty.isNotNull() ? " NOT NULL" : "") + (domainProperty.isUnique() ? " UNIQUE" : "");
     }
 
 
@@ -222,7 +222,7 @@ public class InformationSchemaOperations
         {
             final FieldType fieldType = getSQLType(runtimeContext, domainProperty);
             final String name = namingStrategy.getFieldName(type.getName(), domainProperty.getName())[1];
-            final boolean nullable = !domainProperty.isRequired();
+            final boolean nullable = !domainProperty.isNotNull();
             final boolean unique = domainProperty.isUnique();
 
             final String sqlType = fieldType.getSqlExpression(runtimeContext,domainProperty);

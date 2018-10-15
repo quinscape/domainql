@@ -347,24 +347,25 @@ public class LogicBeanAnalyzer
                         }
                     }
 
-                    boolean isRequired = argAnno != null && argAnno.notNull();
+                    final boolean fieldAnnoPresent = argAnno != null;
                     final NotNull notNullAnno = parameter.getAnnotation(NotNull.class);
-                    boolean jpaRequired = notNullAnno != null;
+                    boolean jpaNotNull = notNullAnno != null;
 
 
-                    if (jpaRequired && !isRequired)
+                    if (jpaNotNull && fieldAnnoPresent && !argAnno.notNull())
                     {
                         throw new DomainQLException(name +
                             ": Required field disagreement between @NotNull and @GraphQLField required value");
                     }
 
+                    final boolean isNotNull = jpaNotNull || (fieldAnnoPresent && argAnno.notNull());
 
-                    final String parameterName = argAnno != null && argAnno.value().length() > 0 ? argAnno
+                    final String parameterName = fieldAnnoPresent && argAnno.value().length() > 0 ? argAnno
                         .value() : parameter.getName();
-                    final String description = argAnno != null ? argAnno.description() : null;
+                    final String description = fieldAnnoPresent ? argAnno.description() : null;
                     final Object defaultValue;
 
-                    final Object defaultValueFromAnno = argAnno != null ? argAnno.defaultValue() : null;
+                    final Object defaultValueFromAnno = fieldAnnoPresent ? argAnno.defaultValue() : null;
                     if (String.class.isAssignableFrom(parameterType))
                     {
                         defaultValue = defaultValueFromAnno;
@@ -377,7 +378,7 @@ public class LogicBeanAnalyzer
                     final GraphQLValueProvider graphQLValueProvider = new GraphQLValueProvider(
                         parameterName,
                         description,
-                        isRequired,
+                        isNotNull,
                         inputType,
                         defaultValue,
                         typeRegistry,

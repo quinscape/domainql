@@ -97,7 +97,7 @@ public final class DomainGenerator
             final Class<Object> type = info.getType();
             final Column jpaColumnAnno = JSONUtil.findAnnotation(info, Column.class);
 
-            final boolean isRequired = JSONUtil.findAnnotation(info, NotNull.class) != null;
+            final boolean isNotNull = JSONUtil.findAnnotation(info, NotNull.class) != null;
 
             final String name = info.getJsonName();
 
@@ -109,7 +109,7 @@ public final class DomainGenerator
                     .withDescription(previousField != null ? previousField.getDescription() : null)
                     .withType(FieldType.getFieldType(type))
                     .withMaxLength(jpaColumnAnno.length())
-                    .isRequired(isRequired)
+                    .isNotNull(isNotNull)
                     .setUnique(hasDedicatedUniqueKey(table, jpaColumnAnno.name()))
                     .build()
             );

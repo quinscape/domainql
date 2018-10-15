@@ -17,12 +17,8 @@ import de.quinscape.domainql.logic.Mutation;
 import de.quinscape.domainql.logic.Query;
 import de.quinscape.domainql.param.ParameterProvider;
 import de.quinscape.domainql.param.ParameterProviderFactory;
-import de.quinscape.domainql.scalar.GraphQLCurrencyScalar;
-import de.quinscape.domainql.scalar.GraphQLDateScalar;
-import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.domainql.util.DegenerificationUtil;
 import de.quinscape.spring.jsview.util.JSONUtil;
-import graphql.Scalars;
 import graphql.introspection.Introspection;
 import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLArgument;
@@ -64,14 +60,9 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.sql.Date;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -448,7 +439,7 @@ public final class DomainQL
                         .description(graphQLValueProvider.getDescription())
                         .defaultValue(graphQLValueProvider.getDefaultValue())
                         .type(
-                            graphQLValueProvider.isRequired() ? GraphQLNonNull.nonNull(inputType) : inputType
+                            graphQLValueProvider.isNotNull() ? GraphQLNonNull.nonNull(inputType) : inputType
                         )
                         .build()
                 );
@@ -634,20 +625,20 @@ public final class DomainQL
                     defaultValue = ConvertUtils.convert(defaultValueFromAnno, propertyType);
                 }
 
-                final boolean jpaRequired = JSONUtil.findAnnotation(info, NotNull.class) != null;
+                final boolean jpaNotNull = JSONUtil.findAnnotation(info, NotNull.class) != null;
 
-                if (jpaRequired && inputFieldAnno != null && !inputFieldAnno.notNull())
+                if (jpaNotNull && inputFieldAnno != null && !inputFieldAnno.notNull())
                 {
                     throw new DomainQLException(javaType.getSimpleName() + "." + info.getJavaPropertyName() +
                         ": Required field disagreement between @NotNull and @GraphQLField required value");
                 }
 
-                final boolean isRequired = (inputFieldAnno != null && inputFieldAnno.notNull()) || jpaRequired;
+                final boolean isNotNull = (inputFieldAnno != null && inputFieldAnno.notNull()) || jpaNotNull;
 
                 inputBuilder.field(
                     GraphQLInputObjectField.newInputObjectField()
                         .name(inputFieldAnno != null && inputFieldAnno.value().length() > 0 ? inputFieldAnno.value() : info.getJsonName())
-                        .type(isRequired ? nonNull(graphQLFieldType) : graphQLFieldType)
+                        .type(isNotNull ? nonNull(graphQLFieldType) : graphQLFieldType)
                         .description(inputFieldAnno != null && inputFieldAnno.description().length() > 0 ? inputFieldAnno.description() : null)
                         .defaultValue(defaultValue)
                         .build()
@@ -850,13 +841,13 @@ public final class DomainQL
                 table.getPrimaryKey().getFields().get(0)
             );
 
-            final boolean isRequired = JSONUtil.findAnnotation(fkPropertyInfo, NotNull.class) != null;
+            final boolean isNotNull = JSONUtil.findAnnotation(fkPropertyInfo, NotNull.class) != null;
 
             final GraphQLOutputType fieldType = isOneToOne ? type : new GraphQLList(type);
             final GraphQLFieldDefinition fieldDef = GraphQLFieldDefinition.newFieldDefinition()
                 .name(backReferenceFieldName)
                 .description((isOneToOne ? "One-to-one object" : "Many-to-many objects") + " from '" + otherTable.getName() + "." + foreignKeyField.getName() + "'")
-                .type(isRequired ? GraphQLNonNull.nonNull(fieldType) : fieldType)
+                .type(isNotNull ? GraphQLNonNull.nonNull(fieldType) : fieldType)
                 .dataFetcher(
                     new BackReferenceFetcher(
                         dslContext,
@@ -913,7 +904,7 @@ public final class DomainQL
                 foreignKeyField
             );
 
-            final boolean isRequired = JSONUtil.findAnnotation(fkPropertyInfo, NotNull.class) != null;
+            final boolean isNotNull = JSONUtil.findAnnotation(fkPropertyInfo, NotNull.class) != null;
 
             final String javaName = fkPropertyInfo.getJavaPropertyName();
             if (javaName == null)
@@ -942,7 +933,7 @@ public final class DomainQL
                 final GraphQLFieldDefinition fieldDef = GraphQLFieldDefinition.newFieldDefinition()
                     .name(scalarFieldName)
                     .description("DB foreign key column '" + foreignKeyField.getName() + "'")
-                    .type(isRequired ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
+                    .type(isNotNull ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
                     .dataFetcher(new SvensonFetcher(findJsonName(classInfo, javaName)))
                     .build();
                 log.debug("-- fk scalar {}", fieldDef);
@@ -976,7 +967,7 @@ public final class DomainQL
                 final GraphQLFieldDefinition fieldDef = GraphQLFieldDefinition.newFieldDefinition()
                     .name(objectFieldName)
                     .description("Target of '" + foreignKeyField.getName() + "'")
-                    .type(isRequired ? GraphQLNonNull.nonNull(objectRef) : objectRef)
+                    .type(isNotNull ? GraphQLNonNull.nonNull(objectRef) : objectRef)
                     .dataFetcher(
                         new ReferenceFetcher(
                             dslContext,
@@ -1036,7 +1027,7 @@ public final class DomainQL
                 throw new DomainQLException(type.getSimpleName() + "." + info.getJavaPropertyName() + ": Missing @Column annotation");
             }
 
-            final boolean isRequired = JSONUtil.findAnnotation(info, NotNull.class) != null;
+            final boolean isNotNull = JSONUtil.findAnnotation(info, NotNull.class) != null;
 
             if (jpaColumnAnno != null && foreignKeyFields.contains(jpaColumnAnno.name()))
             {
@@ -1084,7 +1075,7 @@ public final class DomainQL
                             "DB column '" + jpaColumnAnno.name() + "'" :
                             type.getSimpleName() + "." + jsonName
                 )
-                .type(isRequired ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
+                .type(isNotNull ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
                 .dataFetcher(fetcherAnno == null ? new SvensonFetcher(jsonName) : createFetcher(fetcherAnno.value(), fetcherAnno.data(), jsonName))
                 .build();
 
@@ -1123,7 +1114,7 @@ public final class DomainQL
                     paramDesc.append(parameterType.getSimpleName());
                 }
 
-                final boolean isRequired = m.getAnnotation(NotNull.class) != null;
+                final boolean isNotNull = m.getAnnotation(NotNull.class) != null;
 
                 final Class<?> returnType = m.getReturnType();
 
@@ -1165,7 +1156,7 @@ public final class DomainQL
                             fieldAnno.description() :
                             javaType.getSimpleName() + "." + m.getName() + "(" + paramDesc.toString() + ")"
                     )
-                    .type(isRequired ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
+                    .type(isNotNull ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
                     .dataFetcher(new MethodFetcher(methodAccess, methodIndex, parameterNames, parameterTypes));
 
                 for (Parameter parameter : m.getParameters())

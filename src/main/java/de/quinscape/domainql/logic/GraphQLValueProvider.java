@@ -6,7 +6,6 @@ import de.quinscape.domainql.OutputType;
 import de.quinscape.domainql.TypeContext;
 import de.quinscape.domainql.TypeRegistry;
 import de.quinscape.domainql.generic.DomainObject;
-import de.quinscape.domainql.generic.GenericDomainObject;
 import de.quinscape.domainql.param.ParameterProvider;
 import de.quinscape.domainql.util.DegenerificationUtil;
 import de.quinscape.spring.jsview.util.JSONUtil;
@@ -15,7 +14,6 @@ import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLInputObjectField;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLInputType;
-import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
@@ -45,7 +43,7 @@ public class GraphQLValueProvider
 
     private final String description;
 
-    private final boolean isRequired;
+    private final boolean isNotNull;
 
     private final GraphQLInputType inputType;
 
@@ -59,7 +57,7 @@ public class GraphQLValueProvider
     public GraphQLValueProvider(
         String argumentName,
         String description,
-        boolean isRequired,
+        boolean isNotNull,
         GraphQLInputType inputType,
         Object defaultValue,
         TypeRegistry typeRegistry,
@@ -68,16 +66,16 @@ public class GraphQLValueProvider
     {
         this.argumentName = argumentName;
         this.description = description;
-        this.isRequired = isRequired;
+        this.isNotNull = isNotNull;
         this.inputType = inputType;
         this.defaultValue = defaultValue;
         this.typeRegistry = typeRegistry;
         this.parameterType = parameterType;
     }
 
-    public boolean isRequired()
+    public boolean isNotNull()
     {
-        return isRequired;
+        return isNotNull;
     }
 
 

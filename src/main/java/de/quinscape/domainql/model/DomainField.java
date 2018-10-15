@@ -14,7 +14,7 @@ public class DomainField
     private final String name;
     private final String description;
     private final FieldType type;
-    private final boolean required;
+    private final boolean isNotNull;
     private final int maxLength;
     private final String sqlType;
     private final List<ConfigValue> config;
@@ -32,8 +32,8 @@ public class DomainField
         @JSONParameter("type")
         FieldType type,
 
-        @JSONParameter("required")
-        boolean required,
+        @JSONParameter("isNotNull")
+        boolean isNotNull,
 
         @JSONParameter("maxLength")
         int maxLength,
@@ -52,7 +52,7 @@ public class DomainField
         this.name = name;
         this.description = description;
         this.type = type;
-        this.required = required;
+        this.isNotNull = isNotNull;
         this.maxLength = maxLength;
         this.sqlType = sqlType;
         this.config = config;
@@ -83,9 +83,9 @@ public class DomainField
 
     @JSONProperty(priority = 70)
     @NotNull
-    public boolean isRequired()
+    public boolean isNotNull()
     {
-        return required;
+        return isNotNull;
     }
 
 
@@ -130,7 +130,7 @@ public class DomainField
 
         DomainField that = (DomainField) o;
 
-        if (required != that.required)
+        if (isNotNull != that.isNotNull)
         {
             return false;
         }
@@ -159,7 +159,7 @@ public class DomainField
     {
         int result = name.hashCode();
         result = 31 * result + type.hashCode();
-        result = 31 * result + (required ? 1 : 0);
+        result = 31 * result + (isNotNull ? 1 : 0);
         result = 31 * result + maxLength;
         result = 31 * result + (sqlType != null ? sqlType.hashCode() : 0);
         result = 31 * result + (config != null ? config.hashCode() : 0);
@@ -179,7 +179,7 @@ public class DomainField
 
         private FieldType type = FieldType.STRING;
 
-        private boolean required;
+        private boolean isNotNull;
 
         private int maxLength;
 
@@ -210,7 +210,7 @@ public class DomainField
                 name,
                 description,
                 type,
-                required,
+                isNotNull,
                 maxLength,
                 sqlType,
                 config,
@@ -245,21 +245,21 @@ public class DomainField
         }
 
 
-        public boolean isRequired()
+        public boolean isNotNull()
         {
-            return required;
+            return isNotNull;
         }
 
 
         public Builder withRequired(boolean required)
         {
-            this.required = required;
+            this.isNotNull = required;
             return this;
         }
 
-        public Builder isRequired(boolean required)
+        public Builder isNotNull(boolean required)
         {
-            this.required = required;
+            this.isNotNull = required;
             return this;
         }
 
@@ -362,7 +362,7 @@ public class DomainField
             + "name = '" + name + '\''
             + ", description = '" + description + '\''
             + ", type = " + type
-            + ", required = " + required
+            + ", isNotNull = " + isNotNull
             + ", maxLength = " + maxLength
             + ", sqlType = '" + sqlType + '\''
             + ", config = " + config
