@@ -2,28 +2,29 @@ package de.quinscape.domainql;
 
 import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.generic.DomainObjectScalar;
-import de.quinscape.domainql.logic.CustomParameterProviderLogic;
-import de.quinscape.domainql.logic.DegenerifDBLogic;
-import de.quinscape.domainql.logic.DegenerifiedContainerLogic;
-import de.quinscape.domainql.logic.DegenerifiedInputLogic;
-import de.quinscape.domainql.logic.DegenerifyAndRenameLogic;
-import de.quinscape.domainql.logic.DegenerifyContainerLogic;
-import de.quinscape.domainql.logic.DegenerifyLogic;
-import de.quinscape.domainql.logic.DoubleDegenerificationLogic;
-import de.quinscape.domainql.logic.GenericDomainLogic;
-import de.quinscape.domainql.logic.ImplicitOverrideLogic;
-import de.quinscape.domainql.logic.ImplicitOverrideNonInputLogic;
-import de.quinscape.domainql.logic.ListReturningLogic;
-import de.quinscape.domainql.logic.LogicWithAnnotated;
-import de.quinscape.domainql.logic.LogicWithEnums;
-import de.quinscape.domainql.logic.LogicWithEnums2;
-import de.quinscape.domainql.logic.LogicWithGenerics;
-import de.quinscape.domainql.logic.LogicWithMirrorInput;
-import de.quinscape.domainql.logic.LogicWithWrongInjection;
-import de.quinscape.domainql.logic.LogicWithWrongInjection2;
-import de.quinscape.domainql.logic.NoMirrorLogic;
-import de.quinscape.domainql.logic.TestLogic;
-import de.quinscape.domainql.logic.TypeRepeatLogic;
+import de.quinscape.domainql.logicimpl.CustomParameterProviderLogic;
+import de.quinscape.domainql.logicimpl.DegenerifDBLogic;
+import de.quinscape.domainql.logicimpl.DegenerifiedContainerLogic;
+import de.quinscape.domainql.logicimpl.DegenerifiedInputLogic;
+import de.quinscape.domainql.logicimpl.DegenerifyAndRenameLogic;
+import de.quinscape.domainql.logicimpl.DegenerifyContainerLogic;
+import de.quinscape.domainql.logicimpl.DegenerifyLogic;
+import de.quinscape.domainql.logicimpl.DoubleDegenerificationLogic;
+import de.quinscape.domainql.logicimpl.GenericDomainLogic;
+import de.quinscape.domainql.logicimpl.GenericDomainOutputLogic;
+import de.quinscape.domainql.logicimpl.ImplicitOverrideLogic;
+import de.quinscape.domainql.logicimpl.ImplicitOverrideNonInputLogic;
+import de.quinscape.domainql.logicimpl.ListReturningLogic;
+import de.quinscape.domainql.logicimpl.LogicWithAnnotated;
+import de.quinscape.domainql.logicimpl.LogicWithEnums;
+import de.quinscape.domainql.logicimpl.LogicWithEnums2;
+import de.quinscape.domainql.logicimpl.LogicWithGenerics;
+import de.quinscape.domainql.logicimpl.LogicWithMirrorInput;
+import de.quinscape.domainql.logicimpl.LogicWithWrongInjection;
+import de.quinscape.domainql.logicimpl.LogicWithWrongInjection2;
+import de.quinscape.domainql.logicimpl.NoMirrorLogic;
+import de.quinscape.domainql.logicimpl.TestLogic;
+import de.quinscape.domainql.logicimpl.TypeRepeatLogic;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.testdomain.Public;
@@ -36,6 +37,7 @@ import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLOutputType;
+import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -672,7 +674,7 @@ public class AnotherDomainQLTest
         final GraphQLSchema schema = DomainQL.newDomainQL(null)
             .objectTypes(Public.PUBLIC)
             .logicBeans(Collections.singleton(new GenericDomainLogic()))
-            .withAdditionalScalar(DomainObject.class, new DomainObjectScalar())
+            .withAdditionalScalar(DomainObject.class, DomainObjectScalar.newDomainObjectScalar())
             .buildGraphQLSchema();
 
     }
@@ -686,6 +688,23 @@ public class AnotherDomainQLTest
             .logicBeans(Collections.singleton(new GenericDomainLogic()))
             .buildGraphQLSchema();
 
+    }
+
+    @Test
+    public void testGenericDomainObjectOutput()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .withAdditionalScalar(DomainObject.class, DomainObjectScalar.newDomainObjectScalar())
+            .logicBeans(Collections.singleton(new GenericDomainOutputLogic()))
+            .buildGraphQLSchema();
+
+        final GraphQLObjectType queryType = (GraphQLObjectType) schema.getType("QueryType");
+        final GraphQLFieldDefinition fieldDef = queryType.getFieldDefinition("queryDomainObject");
+
+        assertThat(fieldDef, is(notNullValue()));
+        assertThat(fieldDef.getType() instanceof GraphQLScalarType, is(true));
+        assertThat(fieldDef.getType().getName(), is("DomainObject"));
     }
 }
 

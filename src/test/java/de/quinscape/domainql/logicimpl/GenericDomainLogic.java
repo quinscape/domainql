@@ -1,12 +1,10 @@
-package de.quinscape.domainql.logic;
+package de.quinscape.domainql.logicimpl;
 
 import de.quinscape.domainql.annotation.GraphQLLogic;
 import de.quinscape.domainql.annotation.GraphQLMutation;
 import de.quinscape.domainql.generic.DomainObject;
-import de.quinscape.domainql.testdomain.tables.pojos.Foo;
 import de.quinscape.spring.jsview.util.JSONUtil;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 

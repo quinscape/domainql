@@ -4,20 +4,21 @@ package de.quinscape.domainql;
 import com.google.common.collect.ImmutableMap;
 import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.generic.DomainObjectScalar;
-import de.quinscape.domainql.logic.CustomFetcherLogic;
-import de.quinscape.domainql.logic.DegenerifiedContainerLogic;
-import de.quinscape.domainql.logic.DegenerifiedInputLogic;
-import de.quinscape.domainql.logic.DegenerifyAndRenameLogic;
-import de.quinscape.domainql.logic.DegenerifyContainerLogic;
-import de.quinscape.domainql.logic.DoubleDegenerificationLogic;
-import de.quinscape.domainql.logic.FullDirectiveLogic;
-import de.quinscape.domainql.logic.GenericDomainLogic;
-import de.quinscape.domainql.logic.GetterArgLogic;
-import de.quinscape.domainql.logic.LogicWithEnums;
-import de.quinscape.domainql.logic.LogicWithEnums2;
+import de.quinscape.domainql.logicimpl.CustomFetcherLogic;
+import de.quinscape.domainql.logicimpl.DegenerifiedContainerLogic;
+import de.quinscape.domainql.logicimpl.DegenerifiedInputLogic;
+import de.quinscape.domainql.logicimpl.DegenerifyAndRenameLogic;
+import de.quinscape.domainql.logicimpl.DegenerifyContainerLogic;
+import de.quinscape.domainql.logicimpl.DoubleDegenerificationLogic;
+import de.quinscape.domainql.logicimpl.FullDirectiveLogic;
+import de.quinscape.domainql.logicimpl.GenericDomainLogic;
+import de.quinscape.domainql.logicimpl.GenericDomainOutputLogic;
+import de.quinscape.domainql.logicimpl.GetterArgLogic;
+import de.quinscape.domainql.logicimpl.LogicWithEnums;
+import de.quinscape.domainql.logicimpl.LogicWithEnums2;
 import de.quinscape.domainql.beans.MyEnum;
-import de.quinscape.domainql.logic.TestLogic;
-import de.quinscape.domainql.logic.TypeConversionLogic;
+import de.quinscape.domainql.logicimpl.TestLogic;
+import de.quinscape.domainql.logicimpl.TypeConversionLogic;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.mock.TestProvider;
@@ -773,7 +774,7 @@ public class DomainQLExecutionTest
         final GraphQLSchema schema = DomainQL.newDomainQL(null)
             .objectTypes(Public.PUBLIC)
             .logicBeans(Collections.singleton(new GenericDomainLogic()))
-            .withAdditionalScalar(DomainObject.class, new DomainObjectScalar())
+            .withAdditionalScalar(DomainObject.class, DomainObjectScalar.newDomainObjectScalar())
             .withAdditionalInputType(Foo.class)
             .buildGraphQLSchema();
 
@@ -805,6 +806,39 @@ public class DomainQLExecutionTest
 
         assertThat(data, is("{\"_javaType\":\"de.quinscape.domainql.testdomain.tables.pojos.Foo\",\"_type\":\"=Foo (String)\",\"created\":\"=2018-10-15 16:03:58.078 (Timestamp)\",\"id\":\"=e7c103e7-f559-4896-ac44-702b8458f207 (String)\",\"name\":\"=GreenFoo (String)\",\"num\":\"=9384 (Integer)\"}"));
 
+    }
+
+
+    @Test
+    public void testGenericDomainObjectOutput()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .withAdditionalScalar(DomainObject.class, DomainObjectScalar.newDomainObjectScalar())
+            .logicBeans(Collections.singleton(new GenericDomainOutputLogic()))
+            .buildGraphQLSchema();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("query queryDomainObject\n" +
+                "{\n" +
+                "    queryDomainObject\n" +
+                "}")
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+        final List<GraphQLError> errors = executionResult.getErrors();
+        log.info(errors.toString());
+        assertThat(errors.size(), is(0));
+
+        log.info(JSONUtil.formatJSON(
+            JSONUtil.DEFAULT_GENERATOR.forValue(
+                executionResult.getData()
+            )
+        ));
     }
 
 }

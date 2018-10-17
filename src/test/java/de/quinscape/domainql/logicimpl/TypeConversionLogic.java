@@ -1,4 +1,4 @@
-package de.quinscape.domainql.logic;
+package de.quinscape.domainql.logicimpl;
 
 import de.quinscape.domainql.annotation.GraphQLLogic;
 import de.quinscape.domainql.annotation.GraphQLMutation;
