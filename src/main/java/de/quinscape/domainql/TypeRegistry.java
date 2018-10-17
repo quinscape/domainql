@@ -75,7 +75,8 @@ public class TypeRegistry
 
 
     public TypeRegistry(
-        DomainQL domainQL, Map<Class<?>, GraphQLScalarType> additionalScalarTypes
+        DomainQL domainQL, Map<Class<?>,
+        GraphQLScalarType> additionalScalarTypes
     )
     {
         this.domainQL = domainQL;
@@ -90,11 +91,7 @@ public class TypeRegistry
     {
         final Map<String, GraphQLScalarType> map = new HashMap<>();
 
-        final Collection<GraphQLScalarType> scalarTypes = new ArrayList<>(JAVA_TYPE_TO_GRAPHQL.values());
-
-        scalarTypes.add(new GraphQLCurrencyScalar());
-
-        for (GraphQLScalarType scalarType : scalarTypes)
+        for (GraphQLScalarType scalarType : scalarTypeByClass.values())
         {
             map.put(scalarType.getName(), scalarType);
         }
@@ -126,14 +123,14 @@ public class TypeRegistry
 
         if (Enum.class.isAssignableFrom(javaType))
         {
-            final InputType enumType = new InputType(javaType.getSimpleName(), typeContext, javaType);
+            final InputType enumType = new InputType(javaType.getSimpleName(), typeContext);
             inputTypes.put(typeContext, enumType);
             return enumType;
         }
 
         final String inputTypeName = getInputTypeName(typeContext.getTypeName());
 
-        final InputType newType = new InputType(inputTypeName, typeContext, javaType);
+        final InputType newType = new InputType(inputTypeName, typeContext);
 
         inputTypes.put(typeContext, newType);
 
@@ -193,6 +190,12 @@ public class TypeRegistry
     public OutputType register(TypeContext ctx, TypeContext parentContext)
     {
         final Class<?> javaType = ctx.getType();
+
+        if (javaType.getName().equals("de.quinscape.domainql.beans.AnnotatedBean"))
+        {
+            log.info("hit");
+        }
+
         DomainQL.ensurePojoType(javaType);
 
         final OutputType existing = outputTypes.get(ctx);

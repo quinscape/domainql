@@ -159,17 +159,27 @@ public final class DomainQL
 
     public static String getInputTypeName(Class<?> parameterType)
     {
-        final String nameFromType = parameterType.getSimpleName();
-        if (nameFromType.endsWith(INPUT_SUFFIX) || Enum.class.isAssignableFrom(parameterType))
+        if (Enum.class.isAssignableFrom(parameterType))
         {
-            return nameFromType;
+            return parameterType.getSimpleName();
+        }
+
+        final String nameFromType = parameterType.getSimpleName();
+        return getInputTypeName(nameFromType);
+    }
+
+
+    public static String getInputTypeName(String outputTypeName)
+    {
+        if (outputTypeName.endsWith(INPUT_SUFFIX) )
+        {
+            return outputTypeName;
         }
         else
         {
-            return nameFromType + INPUT_SUFFIX;
+            return outputTypeName + INPUT_SUFFIX;
         }
     }
-
 
 
     public static Class<?> findPojoTypeOf(Table<?> table)

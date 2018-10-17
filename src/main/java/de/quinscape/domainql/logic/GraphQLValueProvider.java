@@ -113,13 +113,6 @@ public class GraphQLValueProvider
             }
             value = convert(environment, inputType, (Map<String, Object>) value);
         }
-        else if (type instanceof GraphQLScalarType)
-        {
-            if (type.getName().equals("DomainObject"))
-            {
-                value = convertDomainObjectFields(environment.getGraphQLSchema(), parameterType, (DomainObject) value);
-            }
-        }
 
         return value;
     }
@@ -171,14 +164,7 @@ public class GraphQLValueProvider
                         }
                         else
                         {
-                            if (DomainObject.class.isAssignableFrom(nextType))
-                            {
-                                convertedValue = convertDomainObjectFields(environment.getGraphQLSchema(), nextType, (DomainObject) elementValue);
-                            }
-                            else
-                            {
-                                convertedValue = elementValue;
-                            }
+                            convertedValue = elementValue;
                         }
                         convertedList.add(convertedValue);
 
@@ -196,14 +182,7 @@ public class GraphQLValueProvider
                     }
                     else
                     {
-                        if (DomainObject.class.isAssignableFrom(propertyType))
-                        {
-                            converted = convertDomainObjectFields(environment.getGraphQLSchema(), propertyType, (DomainObject) orig);
-                        }
-                        else
-                        {
-                            converted = orig;
-                        }
+                        converted = orig;
                     }
                     JSONUtil.DEFAULT_UTIL.setProperty(pojoInstance, name, converted);
                 }
@@ -217,62 +196,6 @@ public class GraphQLValueProvider
         }
     }
 
-
-    private Object convertDomainObjectFields(
-        GraphQLSchema schema,
-        Class<?> targetType,
-        DomainObject domainObject
-    )
-    {
-        if (!targetType.isInterface() && targetType.isInstance(domainObject))
-        {
-            return domainObject;
-        }
-
-        try
-        {
-            final JSONBeanUtil util = JSONUtil.DEFAULT_UTIL;
-
-            final String domainType = domainObject.getDomainType();
-
-            final String inputTypeName = TypeRegistry.getInputTypeName(domainType);
-            final GraphQLInputObjectType graphQLInputType = (GraphQLInputObjectType) schema.getType(inputTypeName);
-            if (graphQLInputType == null)
-            {
-                throw new IllegalStateException("Could not find input type '" + inputTypeName + "'. You might need to add it as additional input type.");
-            }
-
-            final InputType inputType = typeRegistry.lookupInput(inputTypeName);
-
-            Class<?> javaType = inputType.getJavaType();
-
-            final Object convertedType = javaType.newInstance();
-
-            final JSONClassInfo classInfo = JSONUtil.getClassInfo(javaType);
-            for (GraphQLInputObjectField field : graphQLInputType.getFields())
-            {
-                final GraphQLInputType fieldType = field.getType();
-
-                final GraphQLUnmodifiedType unwrapped = GraphQLTypeUtil.unwrapAll(fieldType);
-                if (!(unwrapped instanceof GraphQLScalarType))
-                {
-                    throw new IllegalStateException(fieldType + " is not a scalar type");
-                }
-
-                final String name = field.getName();
-                final Object value = domainObject.getProperty(name);
-                final Object converted = ((GraphQLScalarType) unwrapped).getCoercing().parseValue(value);
-                util.setProperty(convertedType, name, converted);
-            }
-
-            return convertedType;
-        }
-        catch (InstantiationException | IllegalAccessException e)
-        {
-            throw new DomainQLException(e);
-        }
-
-    }
 
 
     public String getArgumentName()

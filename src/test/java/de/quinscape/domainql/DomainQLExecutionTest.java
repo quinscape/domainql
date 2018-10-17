@@ -46,6 +46,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.svenson.JSON;
+import org.svenson.util.JSONPathUtil;
 
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -284,7 +285,7 @@ public class DomainQLExecutionTest
 
         ExecutionResult executionResult = graphQL.execute(executionInput);
         assumeNoErrors(executionResult);
-        assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"mutateConverted\":\"qwertz:1970-01-01 01:00:03.0\"}"));
+        assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"mutateConverted\":\"qwertz:1970-01-01 01:00:03.6\"}"));
     }
 
     @Test
@@ -809,6 +810,8 @@ public class DomainQLExecutionTest
     }
 
 
+    private JSONPathUtil util = new JSONPathUtil(JSONUtil.OBJECT_SUPPORT);
+
     @Test
     public void testGenericDomainObjectOutput()
     {
@@ -834,11 +837,17 @@ public class DomainQLExecutionTest
         log.info(errors.toString());
         assertThat(errors.size(), is(0));
 
+
+        final Map<String,Object> data = (Map<String, Object>) util.getPropertyPath(executionResult.getData(), "queryDomainObject");
+
         log.info(JSONUtil.formatJSON(
             JSONUtil.DEFAULT_GENERATOR.forValue(
-                executionResult.getData()
+                data
             )
         ));
+
+        assertThat(data.get("created"), is("2018-01-01T12:34:56.123Z"));
+
     }
 
 }
