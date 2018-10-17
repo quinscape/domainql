@@ -17,6 +17,7 @@ import de.quinscape.domainql.logic.Mutation;
 import de.quinscape.domainql.logic.Query;
 import de.quinscape.domainql.param.ParameterProvider;
 import de.quinscape.domainql.param.ParameterProviderFactory;
+import de.quinscape.domainql.schema.DomainQLAware;
 import de.quinscape.domainql.util.DegenerificationUtil;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.introspection.Introspection;
@@ -1350,6 +1351,19 @@ public final class DomainQL
     public TypeRegistry getTypeRegistry()
     {
         return typeRegistry;
+    }
+
+
+
+    void register(GraphQLSchema schema)
+    {
+        for (GraphQLScalarType scalarType : getTypeRegistry().getScalarTypes())
+        {
+            if (scalarType instanceof DomainQLAware)
+            {
+                ((DomainQLAware) scalarType).registerSchema(this, schema);
+            }
+        }
     }
 }
 

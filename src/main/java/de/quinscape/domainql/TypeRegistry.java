@@ -389,6 +389,12 @@ public class TypeRegistry
     }
 
 
+    public Collection<GraphQLScalarType> getScalarTypes()
+    {
+        return Collections.unmodifiableCollection(scalarTypeByName.values());
+    }
+
+
     public Collection<InputType> getInputTypes()
     {
         return inputTypes.values();

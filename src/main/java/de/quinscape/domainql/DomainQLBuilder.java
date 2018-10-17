@@ -312,6 +312,8 @@ public class DomainQLBuilder
         domainQL.register(builder);
         final GraphQLSchema schema = builder.build();
 
+        domainQL.register(schema);
+
         return schema;
     }
 
