@@ -1,30 +1,23 @@
 package de.quinscape.domainql.logic;
 
-import de.quinscape.domainql.DomainQLException;
 import de.quinscape.domainql.InputType;
 import de.quinscape.domainql.OutputType;
 import de.quinscape.domainql.TypeContext;
 import de.quinscape.domainql.TypeRegistry;
-import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.param.ParameterProvider;
 import de.quinscape.domainql.util.DegenerificationUtil;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLEnumType;
-import graphql.schema.GraphQLInputObjectField;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLInputType;
-import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
-import graphql.schema.GraphQLTypeUtil;
-import graphql.schema.GraphQLUnmodifiedType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.svenson.info.JSONClassInfo;
 import org.svenson.info.JSONPropertyInfo;
 import org.svenson.info.JavaObjectPropertyInfo;
-import org.svenson.util.JSONBeanUtil;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

@@ -1,7 +1,6 @@
 package de.quinscape.domainql;
 
 import de.quinscape.domainql.annotation.GraphQLField;
-import de.quinscape.domainql.scalar.GraphQLCurrencyScalar;
 import de.quinscape.domainql.scalar.GraphQLDateScalar;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.domainql.util.DegenerificationUtil;
@@ -21,7 +20,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;

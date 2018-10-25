@@ -4,9 +4,6 @@ import com.google.common.collect.Maps;
 import de.quinscape.domainql.DomainQL;
 import de.quinscape.domainql.DomainQLException;
 import de.quinscape.domainql.InputType;
-import de.quinscape.domainql.TypeContext;
-import de.quinscape.domainql.TypeRegistry;
-import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.schema.Coercing;
 import graphql.schema.CoercingParseLiteralException;
 import graphql.schema.CoercingParseValueException;
@@ -14,20 +11,14 @@ import graphql.schema.CoercingSerializeException;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectField;
 import graphql.schema.GraphQLInputObjectType;
-import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import graphql.schema.GraphQLTypeUtil;
-import graphql.schema.GraphQLUnmodifiedType;
-import org.svenson.info.JSONClassInfo;
-import org.svenson.util.JSONBeanUtil;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class DomainObjectCoercing
     implements Coercing<DomainObject, Map<String, Object>>

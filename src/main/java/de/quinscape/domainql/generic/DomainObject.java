@@ -3,7 +3,6 @@ package de.quinscape.domainql.generic;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import org.svenson.JSONProperty;
 
-import javax.persistence.Column;
 import javax.validation.constraints.NotNull;
 import java.util.Set;
 
