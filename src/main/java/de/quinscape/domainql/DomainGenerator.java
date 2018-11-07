@@ -101,6 +101,11 @@ public final class DomainGenerator
 
             final String name = info.getJsonName();
 
+            if (name.equals("_type"))
+            {
+                continue;
+            }
+
             DomainField previousField = previousType != null ? previousType.getField(name) : null;
 
             fields.add(
@@ -108,9 +113,9 @@ public final class DomainGenerator
                     .withName(name)
                     .withDescription(previousField != null ? previousField.getDescription() : null)
                     .withType(FieldType.getFieldType(type))
-                    .withMaxLength(jpaColumnAnno.length())
+                    .withMaxLength(jpaColumnAnno != null ? jpaColumnAnno.length() : 0)
                     .isNotNull(isNotNull)
-                    .setUnique(hasDedicatedUniqueKey(table, jpaColumnAnno.name()))
+                    .setUnique(hasDedicatedUniqueKey(table, jpaColumnAnno != null ? jpaColumnAnno.name() : name))
                     .build()
             );
 
@@ -187,20 +192,20 @@ public final class DomainGenerator
         @Override
         public int compare(DomainField o1, DomainField o2)
         {
-            final Integer priorityA = priority.get(o1.getName());
+            Integer priorityA = priority.get(o1.getName());
             if (priorityA == null)
             {
-                throw new IllegalStateException("Could not find priority for " + o1.getName());
+                //throw new IllegalStateException("Could not find priority for " + o1.getName());
+                priorityA = 0;
             }
 
-            final Integer priorityB = priority.get(o2.getName());
+            Integer priorityB = priority.get(o2.getName());
 
             if (priorityB == null)
             {
-                throw new IllegalStateException("Could not find priority for " + o2.getName());
+                //throw new IllegalStateException("Could not find priority for " + o2.getName());
+                priorityB = 0;
             }
-
-
             return priorityA - priorityB;
         }
     }
