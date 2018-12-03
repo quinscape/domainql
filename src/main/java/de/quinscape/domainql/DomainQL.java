@@ -77,16 +77,13 @@ import static graphql.schema.GraphQLNonNull.*;
 /**
  * Annotation-based convention-over-configuration GraphQL Schema helper.
  */
-public final class DomainQL
+public class DomainQL
 {
     private final static Logger log = LoggerFactory.getLogger(DomainQL.class);
-
 
     //private final static Map<String, GraphQLScalarType> NAME_TO_GRAPHQL;
 
     public static final String INPUT_SUFFIX = "Input";
-
-
 
     private final Collection<ParameterProviderFactory> parameterProviderFactories;
 
@@ -149,8 +146,28 @@ public final class DomainQL
     }
 
 
+    /**
+     * Builds a graphql schema instance from the given DomainQL configuration.
+     *
+     * This is the same as calling {@link DomainQLBuilder#buildGraphQLSchema()} except that is allows access to the
+     * DomainQL instance involved on the creation side.
+     *
+     * @param domainQL      DomainQL instance
+     *
+     * @return GraphQL schema
+     */
+    public static GraphQLSchema buildGraphQLSchema(DomainQL domainQL)
+    {
+        final GraphQLSchema.Builder builder = GraphQLSchema.newSchema();
+        domainQL.register(builder);
+        final GraphQLSchema schema = builder.build();
 
+        domainQL.register(schema);
 
+        return schema;
+    }
+
+    
     public Set<GraphQLDirective> getAdditionalDirectives()
     {
         return additionalDirectives;

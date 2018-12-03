@@ -310,15 +310,9 @@ public class DomainQLBuilder
      */
     public GraphQLSchema buildGraphQLSchema()
     {
-        final DomainQL domainQL = this.build();
-        final GraphQLSchema.Builder builder = GraphQLSchema.newSchema();
-        domainQL.register(builder);
-        final GraphQLSchema schema = builder.build();
-
-        domainQL.register(schema);
-
-        return schema;
+        return DomainQL.buildGraphQLSchema(this.build());
     }
+
 
     public DomainQLBuilder objectTypes(Schema schema)
     {
