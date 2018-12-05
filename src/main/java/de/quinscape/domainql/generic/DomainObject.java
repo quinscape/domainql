@@ -20,16 +20,6 @@ public interface DomainObject
         return this.getClass().getSimpleName();
     }
 
-    default void setDomainType(String type)
-    {
-        final String correctType = this.getClass().getSimpleName();
-        if (!correctType.equals(type))
-        {
-            throw new IllegalStateException("Invalid type '" + type + "', must be '" + correctType + "'");
-        }
-    }
-
-
     default Object getProperty(String name)
     {
         return JSONUtil.DEFAULT_UTIL.getProperty(this, name);
@@ -43,6 +33,16 @@ public interface DomainObject
     default Set<String> propertyNames()
     {
         return JSONUtil.DEFAULT_UTIL.getAllPropertyNames(this);
+    }
+
+
+    default void setDomainType(String type)
+    {
+        final String correctType = this.getClass().getSimpleName();
+        if (!correctType.equals(type))
+        {
+            throw new IllegalStateException("Invalid type '" + type + "', must be '" + correctType + "'");
+        }
     }
 }
 

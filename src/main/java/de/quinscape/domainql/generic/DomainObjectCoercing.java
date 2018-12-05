@@ -123,10 +123,19 @@ public class DomainObjectCoercing
                 final String fieldName = fieldDefinition.getName();
                 final Object value = map.get(fieldName);
 
-                // domain object inputs have only scalar types
-                GraphQLScalarType scalarType = (GraphQLScalarType) GraphQLTypeUtil.unwrapAll(fieldDefinition.getType());
+                final Object converted;
+                if (value != null)
+                {
+                    // domain object inputs have only scalar types
+                    GraphQLScalarType scalarType = (GraphQLScalarType) GraphQLTypeUtil.unwrapAll(fieldDefinition.getType());
 
-                final Object converted = scalarType.getCoercing().parseValue(value);
+                    converted = scalarType.getCoercing().parseValue(value);
+                }
+                else
+                {
+                    converted = null;
+                }
+
                 convertedType.setProperty(fieldName, converted);
             }
             return convertedType;

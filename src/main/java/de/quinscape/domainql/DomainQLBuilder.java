@@ -310,7 +310,7 @@ public class DomainQLBuilder
      */
     public GraphQLSchema buildGraphQLSchema()
     {
-        return DomainQL.buildGraphQLSchema(this.build());
+        return this.build().getGraphQLSchema();
     }
 
 

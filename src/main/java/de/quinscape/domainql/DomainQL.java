@@ -1,6 +1,7 @@
 package de.quinscape.domainql;
 
 import com.esotericsoftware.reflectasm.MethodAccess;
+import com.google.common.collect.Maps;
 import de.quinscape.domainql.annotation.GraphQLFetcher;
 import de.quinscape.domainql.annotation.GraphQLField;
 import de.quinscape.domainql.config.Options;
@@ -93,7 +94,7 @@ public class DomainQL
 
     private final Set<Object> logicBeans;
 
-    private final Set<Table<?>> jooqTables;
+    private final Map<String, TableLookup> jooqTables;
 
     private final Map<ForeignKey<?, ?>, RelationConfiguration> relationConfigurations;
 
@@ -110,6 +111,8 @@ public class DomainQL
     private final boolean fullSupported;
 
     private final TypeRegistry typeRegistry;
+
+    private final GraphQLSchema graphQLSchema;
 
 
     DomainQL(
@@ -130,7 +133,6 @@ public class DomainQL
     {
         this.dslContext = dslContext;
         this.logicBeans = logicBeans;
-        this.jooqTables = jooqTables;
         this.relationConfigurations = relationConfigurations;
         this.defaultRelationConfiguration = defaultRelationConfiguration;
         this.additionalQueries = additionalQueries;
@@ -143,6 +145,18 @@ public class DomainQL
 
 
         this.typeRegistry = new TypeRegistry(this, additionalScalarTypes);
+
+        this.jooqTables = Maps.newHashMapWithExpectedSize(jooqTables.size());
+
+        for (Table<?> table : jooqTables)
+        {
+            final Class<?> pojoType = findPojoTypeOf(table);
+            this.jooqTables.put(
+                pojoType.getSimpleName(),
+                new TableLookup(pojoType, table)
+            );
+        }
+        graphQLSchema = this.buildGraphQLSchema();
     }
 
 
@@ -152,17 +166,15 @@ public class DomainQL
      * This is the same as calling {@link DomainQLBuilder#buildGraphQLSchema()} except that is allows access to the
      * DomainQL instance involved on the creation side.
      *
-     * @param domainQL      DomainQL instance
-     *
      * @return GraphQL schema
      */
-    public static GraphQLSchema buildGraphQLSchema(DomainQL domainQL)
+        GraphQLSchema buildGraphQLSchema()
     {
         final GraphQLSchema.Builder builder = GraphQLSchema.newSchema();
-        domainQL.register(builder);
+        this.register(builder);
         final GraphQLSchema schema = builder.build();
 
-        domainQL.register(schema);
+        this.register(schema);
 
         return schema;
     }
@@ -267,12 +279,12 @@ public class DomainQL
     }
 
 
-    private Set<ForeignKey<?, ?>> findBackReferences(Table<?> table, Set<Table<?>> tables)
+    private Set<ForeignKey<?, ?>> findBackReferences(Table<?> table, Collection<TableLookup> tables)
     {
         Set<ForeignKey<?, ?>> set = new LinkedHashSet<>();
-        for (Table<?> other : tables)
+        for (TableLookup other : tables)
         {
-            for (ForeignKey<?, ?> foreignKey : other.getReferences())
+            for (ForeignKey<?, ?> foreignKey : other.getTable().getReferences())
             {
                 if (foreignKey.getFields().size() == 1 &&
                     foreignKey.getKey().getTable().equals(table) &&
@@ -530,15 +542,12 @@ public class DomainQL
     private LogicBeanAnalyzer registerTypes(GraphQLSchema.Builder builder, Set<String> typesForJooqDomain)
     {
         // define types for the JOOQ Tables
-        for (Table<?> table : jooqTables)
+        for (TableLookup table : jooqTables.values())
         {
-            final Class<?> pojoType = ensurePojoType(
-                findPojoTypeOf(table)
-            );
 
+            final Class<?> pojoType = table.getPojoType();
             typeRegistry.register(new TypeContext(null, pojoType));
-
-            defineTypeForTable(builder, table, pojoType, typesForJooqDomain);
+            defineTypeForTable(builder, table.getTable(), pojoType, typesForJooqDomain);
         }
 
         for (Class<?> inputType : additionalInputTypes)
@@ -800,7 +809,7 @@ public class DomainQL
 
             buildForeignKeyFields(domainTypeBuilder, pojoType, classInfo, table);
 
-            buildBackReferenceFields(domainTypeBuilder, pojoType, table, jooqTables);
+            buildBackReferenceFields(domainTypeBuilder, pojoType, table, jooqTables.values());
 
             final GraphQLObjectType newObjectType = domainTypeBuilder.build();
 
@@ -818,8 +827,7 @@ public class DomainQL
 
     /**
      * Build all fields resulting from a foreign key pointing to the current object type.
-     *
-     * @param domainTypeBuilder     object builder
+     *  @param domainTypeBuilder     object builder
      * @param pojoType              pojo type to build the object for
      * @param table                 corresponding table
      * @param allTables                set of all tables
@@ -828,7 +836,7 @@ public class DomainQL
         GraphQLObjectType.Builder domainTypeBuilder,
         Class<?> pojoType,
         Table<?> table,
-        Set<Table<?>> allTables
+        Collection<TableLookup> allTables
     )
     {
         final Set<ForeignKey<?, ?>> backReferences = findBackReferences(table, allTables);
@@ -1345,9 +1353,14 @@ public class DomainQL
     }
 
 
-    public Set<Table<?>> getJooqTables()
+    public Table<?> getJooqTable(String domainType)
     {
-        return jooqTables;
+        return jooqTables.get(domainType).getTable();
+    }
+
+    public Class<?> getPojoType(String domainType)
+    {
+        return jooqTables.get(domainType).getPojoType();
     }
 
 
@@ -1391,6 +1404,12 @@ public class DomainQL
                 ((DomainQLAware) scalarType).registerSchema(this, schema);
             }
         }
+    }
+
+
+    public GraphQLSchema getGraphQLSchema()
+    {
+        return graphQLSchema;
     }
 }
 
