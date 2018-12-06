@@ -613,76 +613,114 @@ public class DomainQL
             {
                 continue;
             }
-            
-            log.debug("INPUT TYPE {} {}", name, javaType.getSimpleName());
 
-            final JSONClassInfo classInfo = JSONUtil.getClassInfo(javaType);
-
-            final GraphQLInputObjectType.Builder inputBuilder = GraphQLInputObjectType.newInputObject()
-                .name(name)
-                .description("Generated for " + javaType.getName());
-
-            for (JSONPropertyInfo info : classInfo.getPropertyInfos())
-            {
-                final Method getterMethod = ((JavaObjectPropertyInfo) info).getGetterMethod();
-
-                final GraphQLField inputFieldAnno = JSONUtil.findAnnotation(info, GraphQLField.class);
-                final Class<?> propertyType = info.getType();
-                GraphQLInputType graphQLFieldType = typeRegistry.getGraphQLScalarFor(propertyType, inputFieldAnno);
-                if (graphQLFieldType == null)
-                {
-                    if (List.class.isAssignableFrom(propertyType))
-                    {
-                        graphQLFieldType = (GraphQLInputType) getListType(typeContext, javaType, info, false);
-                    }
-                    else if (Enum.class.isAssignableFrom(propertyType))
-                    {
-                        graphQLFieldType = new GraphQLTypeReference(propertyType.getSimpleName());
-                    }
-                    else
-                    {
-                        final TypeContext fieldCtx = DegenerificationUtil.getType(inputType.getTypeContext(), inputType, getterMethod);
-                        final InputType fieldType = typeRegistry.lookupInput(fieldCtx);
-                        if (fieldType == null)
-                        {
-                            throw new IllegalStateException("Could not find input type for " + propertyType + ", ctx = " + fieldCtx);
-                        }
-                        graphQLFieldType = typeRef(fieldType.getName());
-                    }
-                }
-
-                final Object defaultValueFromAnno = inputFieldAnno != null ? inputFieldAnno.defaultValue() : null;
-                final Object defaultValue;
-                if (defaultValueFromAnno == null || String.class.isAssignableFrom(propertyType))
-                {
-                    defaultValue = defaultValueFromAnno;
-                }
-                else
-                {
-                    defaultValue = ConvertUtils.convert(defaultValueFromAnno, propertyType);
-                }
-
-                final boolean jpaNotNull = JSONUtil.findAnnotation(info, NotNull.class) != null;
-
-                if (jpaNotNull && inputFieldAnno != null && !inputFieldAnno.notNull())
-                {
-                    throw new DomainQLException(javaType.getSimpleName() + "." + info.getJavaPropertyName() +
-                        ": Required field disagreement between @NotNull and @GraphQLField required value");
-                }
-
-                final boolean isNotNull = (inputFieldAnno != null && inputFieldAnno.notNull()) || jpaNotNull;
-
-                inputBuilder.field(
-                    GraphQLInputObjectField.newInputObjectField()
-                        .name(inputFieldAnno != null && inputFieldAnno.value().length() > 0 ? inputFieldAnno.value() : info.getJsonName())
-                        .type(isNotNull ? nonNull(graphQLFieldType) : graphQLFieldType)
-                        .description(inputFieldAnno != null && inputFieldAnno.description().length() > 0 ? inputFieldAnno.description() : null)
-                        .defaultValue(defaultValue)
-                        .build()
-                );
-            }
-            builder.additionalType(inputBuilder.build());
+            final GraphQLInputObjectType inputObjectType = buildInputType(inputType, javaType, typeContext, name);
+            builder.additionalType(inputObjectType);
         }
+    }
+
+
+    private GraphQLInputObjectType buildInputType(
+        InputType inputType,
+        Class<?> javaType,
+        TypeContext typeContext,
+        String name
+    )
+    {
+        log.debug("INPUT TYPE {} {}", name, javaType.getSimpleName());
+
+        final JSONClassInfo classInfo = JSONUtil.getClassInfo(javaType);
+
+        final GraphQLInputObjectType.Builder inputBuilder = GraphQLInputObjectType.newInputObject()
+            .name(name)
+            .description("Generated for " + javaType.getName());
+
+        for (JSONPropertyInfo info : classInfo.getPropertyInfos())
+        {
+            final Method getterMethod = ((JavaObjectPropertyInfo) info).getGetterMethod();
+            final GraphQLField inputFieldAnno = JSONUtil.findAnnotation(info, GraphQLField.class);
+            final Class<?> propertyType = info.getType();
+            GraphQLInputType graphQLFieldType = typeRegistry.getGraphQLScalarFor(propertyType, inputFieldAnno);
+            final GraphQLInputObjectField inputField = buildInputField(
+                inputType,
+                javaType,
+                typeContext,
+                info,
+                getterMethod,
+                inputFieldAnno,
+                propertyType,
+                graphQLFieldType
+            );
+            inputBuilder.field(
+                inputField
+            );
+        }
+        return inputBuilder.build();
+    }
+
+
+    private GraphQLInputObjectField buildInputField(
+        InputType inputType,
+        Class<?> javaType,
+        TypeContext typeContext,
+        JSONPropertyInfo info,
+        Method getterMethod,
+        GraphQLField inputFieldAnno,
+        Class<?> propertyType,
+        GraphQLInputType graphQLFieldType
+    )
+    {
+        if (graphQLFieldType == null)
+        {
+            if (List.class.isAssignableFrom(propertyType))
+            {
+                graphQLFieldType = (GraphQLInputType) getListType(typeContext, javaType, info, false);
+            }
+            else if (Enum.class.isAssignableFrom(propertyType))
+            {
+                graphQLFieldType = new GraphQLTypeReference(propertyType.getSimpleName());
+            }
+            else
+            {
+                final TypeContext fieldCtx = DegenerificationUtil.getType(inputType.getTypeContext(), inputType, getterMethod);
+                final InputType fieldType = typeRegistry.lookupInput(fieldCtx);
+                if (fieldType == null)
+                {
+                    throw new IllegalStateException("Could not find input type for " + propertyType + ", ctx = " + fieldCtx);
+                }
+                graphQLFieldType = typeRef(fieldType.getName());
+            }
+        }
+
+        final Object defaultValueFromAnno = inputFieldAnno != null ? inputFieldAnno.defaultValue() : null;
+        final Object defaultValue;
+        if (defaultValueFromAnno == null || String.class.isAssignableFrom(propertyType))
+        {
+            defaultValue = defaultValueFromAnno;
+        }
+        else
+        {
+            defaultValue = ConvertUtils.convert(defaultValueFromAnno, propertyType);
+        }
+
+        final boolean jpaNotNull = JSONUtil.findAnnotation(info, NotNull.class) != null;
+
+        if (jpaNotNull && inputFieldAnno != null && !inputFieldAnno.notNull())
+        {
+            throw new DomainQLException(javaType.getSimpleName() + "." + info.getJavaPropertyName() +
+                ": Required field disagreement between @NotNull and @GraphQLField required value");
+        }
+
+        final boolean isNotNull = (inputFieldAnno != null && inputFieldAnno.notNull()) || jpaNotNull;
+
+        return GraphQLInputObjectField.newInputObjectField()
+            .name(inputFieldAnno != null && inputFieldAnno.value()
+                .length() > 0 ? inputFieldAnno.value() : info.getJsonName())
+            .type(isNotNull ? nonNull(graphQLFieldType) : graphQLFieldType)
+            .description(inputFieldAnno != null && inputFieldAnno.description()
+                .length() > 0 ? inputFieldAnno.description() : null)
+            .defaultValue(defaultValue)
+            .build();
     }
 
 
@@ -852,57 +890,76 @@ public class DomainQL
             final TargetField targetField = relationConfiguration.getTargetField();
             final TableField<?, ?> foreignKeyField = foreignKey.getFields().get(0);
 
-            final Table<?> otherTable = foreignKey.getTable();
-            final Class<?> otherPojoType = findPojoTypeOf(otherTable);
-
-
-            final boolean isOneToOne = targetField == TargetField.ONE;
-
-            final GraphQLOutputType type = outputTypeRef(otherPojoType);
-
-            final String backReferenceFieldName;
-            if (relationConfiguration.getRightSideName() != null)
-            {
-                backReferenceFieldName = relationConfiguration.getRightSideName();
-            }
-            else
-            {
-                final String otherName = Introspector.decapitalize(otherPojoType.getSimpleName());
-                backReferenceFieldName = isOneToOne ? otherName : options.getPluralizationFunction().apply(otherName);
-            }
-
-            final JSONPropertyInfo fkPropertyInfo = findPropertyInfoForField(
-                table,
+            final GraphQLFieldDefinition fieldDef = buildBackReferenceField(
                 pojoType,
-                table.getPrimaryKey().getFields().get(0)
+                table,
+                foreignKey,
+                relationConfiguration,
+                targetField,
+                foreignKeyField
             );
-
-            final boolean isNotNull = JSONUtil.findAnnotation(fkPropertyInfo, NotNull.class) != null;
-
-            final GraphQLOutputType fieldType = isOneToOne ? type : new GraphQLList(type);
-            final GraphQLFieldDefinition fieldDef = GraphQLFieldDefinition.newFieldDefinition()
-                .name(backReferenceFieldName)
-                .description((isOneToOne ? "One-to-one object" : "Many-to-many objects") + " from '" + otherTable.getName() + "." + foreignKeyField.getName() + "'")
-                .type(isNotNull ? GraphQLNonNull.nonNull(fieldType) : fieldType)
-                .dataFetcher(
-                    new BackReferenceFetcher(
-                        dslContext,
-                        fkPropertyInfo.getJsonName(),
-                        otherTable,
-                        otherPojoType,
-                        foreignKey,
-                        isOneToOne
-                    )
-                )
-                .build();
-
-
-            log.debug("-- fk {} {}", isOneToOne ? "backref" : "backrefs", fieldDef);
 
             domainTypeBuilder.field(
                 fieldDef
             );
         }
+    }
+
+
+    private GraphQLFieldDefinition buildBackReferenceField(
+        Class<?> pojoType,
+        Table<?> table,
+        ForeignKey<?, ?> foreignKey,
+        RelationConfiguration relationConfiguration,
+        TargetField targetField,
+        TableField<?, ?> foreignKeyField
+    )
+    {
+        final Table<?> otherTable = foreignKey.getTable();
+        final Class<?> otherPojoType = findPojoTypeOf(otherTable);
+
+        final boolean isOneToOne = targetField == TargetField.ONE;
+
+        final GraphQLOutputType type = outputTypeRef(otherPojoType);
+
+        final String backReferenceFieldName;
+        if (relationConfiguration.getRightSideName() != null)
+        {
+            backReferenceFieldName = relationConfiguration.getRightSideName();
+        }
+        else
+        {
+            final String otherName = Introspector.decapitalize(otherPojoType.getSimpleName());
+            backReferenceFieldName = isOneToOne ? otherName : options.getPluralizationFunction().apply(otherName);
+        }
+
+        final JSONPropertyInfo fkPropertyInfo = findPropertyInfoForField(
+            table,
+            pojoType,
+            table.getPrimaryKey().getFields().get(0)
+        );
+
+        final boolean isNotNull = JSONUtil.findAnnotation(fkPropertyInfo, NotNull.class) != null;
+
+        final GraphQLOutputType fieldType = isOneToOne ? type : new GraphQLList(type);
+        final GraphQLFieldDefinition.Builder backReferenceField = GraphQLFieldDefinition.newFieldDefinition()
+            .name(backReferenceFieldName)
+            .description((isOneToOne ? "One-to-one object" : "Many-to-many objects") + " from '" + otherTable.getName() + "." + foreignKeyField
+                .getName() + "'")
+            .type(isNotNull ? nonNull(fieldType) : fieldType)
+            .dataFetcher(
+                new BackReferenceFetcher(
+                    dslContext,
+                    fkPropertyInfo.getJsonName(),
+                    otherTable,
+                    otherPojoType,
+                    foreignKey,
+                    isOneToOne
+                )
+            );
+        final GraphQLFieldDefinition fieldDef = backReferenceField.build();
+        log.debug("-- fk {} {}", isOneToOne ? "backref" : "backrefs", fieldDef);
+        return fieldDef;
     }
 
 
@@ -1040,6 +1097,18 @@ public class DomainQL
     {
         final Class<?> javaType = outputType.getJavaType();
 
+        handlePropertyFields(domainTypeBuilder, outputType, foreignKeyFields, javaType);
+        handleParametrizedFields(domainTypeBuilder, outputType, javaType);
+    }
+
+
+    private void handlePropertyFields(
+        GraphQLObjectType.Builder domainTypeBuilder,
+        OutputType outputType,
+        Set<String> foreignKeyFields,
+        Class<?> javaType
+    )
+    {
         final JSONClassInfo classInfo = JSONUtil.getClassInfo(javaType);
 
         for (JSONPropertyInfo info : classInfo.getPropertyInfos())
@@ -1050,80 +1119,26 @@ public class DomainQL
                 continue;
             }
 
-            final Class<Object> type = info.getType();
-            final Column jpaColumnAnno = JSONUtil.findAnnotation(info, Column.class);
-            final GraphQLField fieldAnno = JSONUtil.findAnnotation(info, GraphQLField.class);
-            final GraphQLFetcher fetcherAnno = JSONUtil.findAnnotation(info, GraphQLFetcher.class);
-
-            final Method getterMethod = ((JavaObjectPropertyInfo) info).getGetterMethod();
-
-
-            if (options.isUseDatabaseFieldNames() && jpaColumnAnno == null)
+            final GraphQLFieldDefinition fieldDef = getPropertyFieldDefinition(outputType, foreignKeyFields, info);
+            if (fieldDef == null)
             {
-                throw new DomainQLException(type.getSimpleName() + "." + info.getJavaPropertyName() + ": Missing @Column annotation");
-            }
-
-            final boolean isNotNull = JSONUtil.findAnnotation(info, NotNull.class) != null;
-
-            if (jpaColumnAnno != null && foreignKeyFields.contains(jpaColumnAnno.name()))
-            {
-                // ignore foreign key fields
                 continue;
             }
-
-            final String name;
-            final String jsonName = info.getJsonName();
-
-            if (options.isUseDatabaseFieldNames())
-            {
-                name = jpaColumnAnno.name();
-            }
-            else
-            {
-                name = jsonName;
-            }
-
-            GraphQLType graphQLType;
-            if (List.class.isAssignableFrom(type))
-            {
-                graphQLType = getListType(outputType.getTypeContext(), type, info, true);
-            }
-            else
-            {
-                final GraphQLScalarType scalarType = typeRegistry.getGraphQLScalarFor(type, fieldAnno);
-                if (scalarType != null)
-                {
-                    graphQLType = scalarType;
-                }
-                else
-                {
-                    graphQLType = new GraphQLTypeReference(DegenerificationUtil.getType(outputType.getTypeContext(), outputType, getterMethod).getTypeName());
-                }
-            }
-
-            final GraphQLFieldDefinition fieldDef;
-            fieldDef = GraphQLFieldDefinition.newFieldDefinition()
-                .name(fieldAnno != null && fieldAnno.value().length() > 0 ? fieldAnno.value() : name)
-                .description(
-                    fieldAnno != null && fieldAnno.description().length() > 0 ?
-                        fieldAnno.description() :
-                        jpaColumnAnno != null ?
-                            "DB column '" + jpaColumnAnno.name() + "'" :
-                            type.getSimpleName() + "." + jsonName
-                )
-                .type(isNotNull ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
-                .dataFetcher(fetcherAnno == null ? new SvensonFetcher(jsonName) : createFetcher(fetcherAnno.value(), fetcherAnno.data(), jsonName))
-                .build();
-
-            log.debug("-- {}: {}", fieldDef.getName(), fieldDef.getType().getName());
 
             domainTypeBuilder.field(
                 fieldDef
             );
         }
+    }
 
+
+    private void handleParametrizedFields(
+        GraphQLObjectType.Builder domainTypeBuilder,
+        OutputType outputType,
+        Class<?> javaType
+    )
+    {
         MethodAccess methodAccess = null;
-
 
         for (Method m : javaType.getMethods())
         {
@@ -1136,119 +1151,14 @@ public class DomainQL
                     methodAccess = MethodAccess.get(javaType);
                 }
 
-                final int methodIndex = methodAccess.getIndex(m.getName(), parameterTypes);
-
-                final String propertyName = getPropertyName(m);
-                final StringBuilder paramDesc = new StringBuilder();
-                for (int i = 0; i < parameterTypes.length; i++)
-                {
-                    Class<?> parameterType = parameterTypes[i];
-                    if (i > 0)
-                    {
-                        paramDesc.append(",");
-                    }
-                    paramDesc.append(parameterType.getSimpleName());
-                }
-
-                final boolean isNotNull = m.getAnnotation(NotNull.class) != null;
-
-                final Class<?> returnType = m.getReturnType();
-
-                GraphQLType graphQLType;
-                if (List.class.isAssignableFrom(returnType))
-                {
-                    graphQLType = getListType(outputType.getTypeContext(), (Class<?>) returnType, m, propertyName, true);
-                }
-                else
-                {
-                    final GraphQLScalarType scalarType = typeRegistry.getGraphQLScalarFor(returnType, fieldAnno);
-                    if (scalarType != null)
-                    {
-                        graphQLType = scalarType;
-                    }
-                    else
-                    {
-                        graphQLType = outputTypeRef(returnType);
-                    }
-                }
-
-                List<String> parameterNames = new ArrayList<>();
-                for (Parameter parameter : m.getParameters())
-                {
-                    if (!parameter.isNamePresent())
-                    {
-                        throw new IllegalStateException("No method parameter names provided by compiler");
-                    }
-                    parameterNames.add(
-                        parameter.getName()
-                    );
-                }
-
-
-                final GraphQLFieldDefinition.Builder fieldBuilder = GraphQLFieldDefinition.newFieldDefinition()
-                    .name(fieldAnno.value().length() > 0 ? fieldAnno.value() : propertyName)
-                    .description(
-                        fieldAnno.description().length() > 0 ?
-                            fieldAnno.description() :
-                            javaType.getSimpleName() + "." + m.getName() + "(" + paramDesc.toString() + ")"
-                    )
-                    .type(isNotNull ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
-                    .dataFetcher(new MethodFetcher(methodAccess, methodIndex, parameterNames, parameterTypes));
-
-                for (Parameter parameter : m.getParameters())
-                {
-                    final Class<?> parameterType = parameter.getType();
-                    final GraphQLField paramFieldAnno = parameter.getAnnotation(GraphQLField.class);
-
-                    GraphQLInputType paramGQLType;
-                    if (List.class.isAssignableFrom(parameterType))
-                    {
-
-                        GraphQLType inputType;
-                        final Type genericParamType = parameter.getParameterizedType();
-                        if (!(genericParamType instanceof ParameterizedType))
-                        {
-                            throw new DomainQLException(parameterType.getName() + "." + propertyName +
-                                ": Property getter type must be parametrized.");
-                        }
-
-                        final Class<?> elementClass = (Class<?>) ((ParameterizedType) genericParamType).getActualTypeArguments()[0];
-
-                        paramGQLType = new GraphQLList(inputTypeRef(elementClass));
-                    }
-                    else
-                    {
-                        final GraphQLScalarType scalarType = typeRegistry.getGraphQLScalarFor(parameterType, paramFieldAnno);
-                        if (scalarType != null)
-                        {
-                            paramGQLType = scalarType;
-                        }
-                        else
-                        {
-                            paramGQLType = inputTypeRef(parameterType);
-                        }
-                    }
-
-                    final GraphQLArgument.Builder arg = GraphQLArgument.newArgument()
-                        .name(parameter.getName())
-                        .defaultValue(paramFieldAnno != null ? paramFieldAnno.defaultValue() : null)
-                        .type(
-                            paramFieldAnno != null && paramFieldAnno.notNull() ? GraphQLNonNull
-                                .nonNull(paramGQLType) : paramGQLType
-                        )
-                        ;
-
-                    log.debug("Method Argument {}: {}", parameter.getName(), paramGQLType);
-
-                    fieldBuilder.argument(
-                        arg.build()
-                    );
-
-                }
-
-
-                final GraphQLFieldDefinition fieldDef = fieldBuilder
-                    .build();
+                final GraphQLFieldDefinition fieldDef = createParametrizedField(
+                    outputType,
+                    javaType,
+                    methodAccess,
+                    m,
+                    parameterTypes,
+                    fieldAnno
+                );
 
                 log.debug("-- {}: {}", fieldDef.getName(), fieldDef.getType().getName());
 
@@ -1258,6 +1168,238 @@ public class DomainQL
 
             }
         }
+    }
+
+
+    private GraphQLFieldDefinition createParametrizedField(
+        OutputType outputType,
+        Class<?> javaType,
+        MethodAccess methodAccess,
+        Method m,
+        Class<?>[] parameterTypes,
+        GraphQLField fieldAnno
+    )
+    {
+        final int methodIndex = methodAccess.getIndex(m.getName(), parameterTypes);
+
+        final String propertyName = getPropertyName(m);
+
+        final boolean isNotNull = m.getAnnotation(NotNull.class) != null;
+
+        final Class<?> returnType = m.getReturnType();
+
+        GraphQLType graphQLType = getFieldType(outputType, m, fieldAnno, propertyName, returnType);
+
+        List<String> parameterNames = getParameterNames(m);
+
+        final GraphQLFieldDefinition.Builder fieldBuilder = GraphQLFieldDefinition.newFieldDefinition()
+            .name(fieldAnno.value().length() > 0 ? fieldAnno.value() : propertyName)
+            .description(
+                fieldAnno.description().length() > 0 ?
+                    fieldAnno.description() :
+                    javaType.getSimpleName() + "." + m.getName() + "(" + describeParameter(parameterTypes) + ")"
+            )
+            .type(isNotNull ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
+            .dataFetcher(new MethodFetcher(methodAccess, methodIndex, parameterNames, parameterTypes));
+
+        for (Parameter parameter : m.getParameters())
+        {
+            final Class<?> parameterType = parameter.getType();
+            final GraphQLField paramFieldAnno = parameter.getAnnotation(GraphQLField.class);
+
+            final GraphQLArgument arg = buildArgument(propertyName, parameter, parameterType, paramFieldAnno);
+            fieldBuilder.argument(arg);
+        }
+
+        return fieldBuilder
+            .build();
+    }
+
+    private List<String> getParameterNames(Method m)
+    {
+        List<String> parameterNames = new ArrayList<>();
+        for (Parameter parameter : m.getParameters())
+        {
+            if (!parameter.isNamePresent())
+            {
+                throw new IllegalStateException("No method parameter names provided by compiler");
+            }
+            parameterNames.add(
+                parameter.getName()
+            );
+        }
+        return parameterNames;
+    }
+
+
+    private GraphQLType getFieldType(
+        OutputType outputType,
+        Method m,
+        GraphQLField fieldAnno,
+        String propertyName,
+        Class<?> returnType
+    )
+    {
+        GraphQLType graphQLType;
+        if (List.class.isAssignableFrom(returnType))
+        {
+            graphQLType = getListType(outputType.getTypeContext(), returnType, m, propertyName, true);
+        }
+        else
+        {
+            final GraphQLScalarType scalarType = typeRegistry.getGraphQLScalarFor(returnType, fieldAnno);
+            if (scalarType != null)
+            {
+                graphQLType = scalarType;
+            }
+            else
+            {
+                graphQLType = outputTypeRef(returnType);
+            }
+        }
+        return graphQLType;
+    }
+
+
+    private String describeParameter(Class<?>[] parameterTypes)
+    {
+        final StringBuilder paramDesc = new StringBuilder();
+        for (int i = 0; i < parameterTypes.length; i++)
+        {
+            Class<?> parameterType = parameterTypes[i];
+            if (i > 0)
+            {
+                paramDesc.append(",");
+            }
+            paramDesc.append(parameterType.getSimpleName());
+        }
+        return paramDesc.toString();
+    }
+
+
+    private GraphQLArgument buildArgument(
+        String propertyName,
+        Parameter parameter,
+        Class<?> parameterType,
+        GraphQLField paramFieldAnno
+    )
+    {
+        GraphQLInputType paramGQLType;
+        if (List.class.isAssignableFrom(parameterType))
+        {
+
+            GraphQLType inputType;
+            final Type genericParamType = parameter.getParameterizedType();
+            if (!(genericParamType instanceof ParameterizedType))
+            {
+                throw new DomainQLException(parameterType.getName() + "." + propertyName +
+                    ": Property getter type must be parametrized.");
+            }
+
+            final Class<?> elementClass = (Class<?>) ((ParameterizedType) genericParamType).getActualTypeArguments()[0];
+
+            paramGQLType = new GraphQLList(inputTypeRef(elementClass));
+        }
+        else
+        {
+            final GraphQLScalarType scalarType = typeRegistry.getGraphQLScalarFor(parameterType, paramFieldAnno);
+            if (scalarType != null)
+            {
+                paramGQLType = scalarType;
+            }
+            else
+            {
+                paramGQLType = inputTypeRef(parameterType);
+            }
+        }
+
+        final GraphQLArgument.Builder arg = GraphQLArgument.newArgument()
+            .name(parameter.getName())
+            .defaultValue(paramFieldAnno != null ? paramFieldAnno.defaultValue() : null)
+            .type(
+                paramFieldAnno != null && paramFieldAnno.notNull() ? GraphQLNonNull
+                    .nonNull(paramGQLType) : paramGQLType
+            )
+            ;
+
+        log.debug("Method Argument {}: {}", parameter.getName(), paramGQLType);
+        return arg.build();
+    }
+
+
+    private GraphQLFieldDefinition getPropertyFieldDefinition(
+        OutputType outputType,
+        Set<String> foreignKeyFields,
+        JSONPropertyInfo info
+    )
+    {
+        final Class<Object> type = info.getType();
+        final Column jpaColumnAnno = JSONUtil.findAnnotation(info, Column.class);
+        final GraphQLField fieldAnno = JSONUtil.findAnnotation(info, GraphQLField.class);
+        final GraphQLFetcher fetcherAnno = JSONUtil.findAnnotation(info, GraphQLFetcher.class);
+
+        final Method getterMethod = ((JavaObjectPropertyInfo) info).getGetterMethod();
+
+
+        if (options.isUseDatabaseFieldNames() && jpaColumnAnno == null)
+        {
+            throw new DomainQLException(type.getSimpleName() + "." + info.getJavaPropertyName() + ": Missing @Column annotation");
+        }
+
+        final boolean isNotNull = JSONUtil.findAnnotation(info, NotNull.class) != null;
+
+        if (jpaColumnAnno != null && foreignKeyFields.contains(jpaColumnAnno.name()))
+        {
+            // ignore foreign key fields
+            return null;
+        }
+
+        final String name;
+        final String jsonName = info.getJsonName();
+
+        if (options.isUseDatabaseFieldNames())
+        {
+            name = jpaColumnAnno.name();
+        }
+        else
+        {
+            name = jsonName;
+        }
+
+        GraphQLType graphQLType;
+        if (List.class.isAssignableFrom(type))
+        {
+            graphQLType = getListType(outputType.getTypeContext(), type, info, true);
+        }
+        else
+        {
+            final GraphQLScalarType scalarType = typeRegistry.getGraphQLScalarFor(type, fieldAnno);
+            if (scalarType != null)
+            {
+                graphQLType = scalarType;
+            }
+            else
+            {
+                graphQLType = new GraphQLTypeReference(DegenerificationUtil.getType(outputType.getTypeContext(), outputType, getterMethod).getTypeName());
+            }
+        }
+
+        final GraphQLFieldDefinition fieldDef;
+        fieldDef = GraphQLFieldDefinition.newFieldDefinition()
+            .name(fieldAnno != null && fieldAnno.value().length() > 0 ? fieldAnno.value() : name)
+            .description(
+                fieldAnno != null && fieldAnno.description().length() > 0 ?
+                    fieldAnno.description() :
+                    jpaColumnAnno != null ?
+                        "DB column '" + jpaColumnAnno.name() + "'" :
+                        type.getSimpleName() + "." + jsonName
+            )
+            .type(isNotNull ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
+            .dataFetcher(fetcherAnno == null ? new SvensonFetcher(jsonName) : createFetcher(fetcherAnno.value(), fetcherAnno.data(), jsonName))
+            .build();
+
+        log.debug("-- {}: {}", fieldDef.getName(), fieldDef.getType().getName());
+        return fieldDef;
     }
 
 
@@ -1392,7 +1534,6 @@ public class DomainQL
     {
         return typeRegistry;
     }
-
 
 
     void register(GraphQLSchema schema)
