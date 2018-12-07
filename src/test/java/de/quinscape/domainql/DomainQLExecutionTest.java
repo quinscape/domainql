@@ -117,7 +117,7 @@ public class DomainQLExecutionTest
 
 
     {
-        log.info("QUERY TYPE: {}", schema.getQueryType());
+        //log.info("QUERY TYPE: {}", schema.getQueryType());
     }
 
     @Test
@@ -174,7 +174,7 @@ public class DomainQLExecutionTest
 
         final List<GraphQLError> errors = executionResult.getErrors();
 
-        log.info(errors.toString());
+        //log.info(errors.toString());
 
         assertThat(errors.size(), is(0));
         assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"walkForwardRef\":[{\"id\":\"id1\",\"target\":{\"id\":\"id2\"}}]}"));
@@ -204,7 +204,7 @@ public class DomainQLExecutionTest
         final List<GraphQLError> errors = executionResult.getErrors();
         if (errors.size() > 0)
         {
-            log.info("ERROR {}", errors);
+            log.error("ERROR {}", errors);
         }
         assertThat(errors.size(), is(0));
     }
@@ -316,7 +316,7 @@ public class DomainQLExecutionTest
             .logicBeans(Collections.singletonList(new GetterArgLogic()))
             .buildGraphQLSchema();
 
-        log.info(((GraphQLObjectType)schema.getType("GetterArgBean")).getFieldDefinition("modifiedValue").toString());
+        //log.info(((GraphQLObjectType)schema.getType("GetterArgBean")).getFieldDefinition("modifiedValue").toString());
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 
@@ -639,7 +639,7 @@ public class DomainQLExecutionTest
 
         final List<GraphQLError> errors = executionResult.getErrors();
 
-        log.info(errors.toString());
+        //log.info(errors.toString());
 
         assertThat(errors.size(), is(0));
         final Map<String,Object> data = executionResult.getData();
@@ -677,7 +677,7 @@ public class DomainQLExecutionTest
 
         final List<GraphQLError> errors = executionResult.getErrors();
 
-        log.info(errors.toString());
+        //log.info(errors.toString());
 
         assertThat(errors.size(), is(0));
         final Map<String,Object> data = executionResult.getData();
@@ -714,7 +714,7 @@ public class DomainQLExecutionTest
 
 
         final List<GraphQLError> errors = executionResult.getErrors();
-        log.info(errors.toString());
+        //log.info(errors.toString());
         assertThat(errors.size(), is(0));
 
         final Map<String,Object> m = (Map<String, Object>) ((Map<String,Object>)executionResult.getData()).get("queryContainer");
@@ -759,7 +759,7 @@ public class DomainQLExecutionTest
 
 
         final List<GraphQLError> errors = executionResult.getErrors();
-        log.info(errors.toString());
+        //log.info(errors.toString());
         assertThat(errors.size(), is(0));
 
         final String result = (String) ((Map<String, Object>) executionResult.getData()).get("mutationWithDD");
@@ -800,7 +800,7 @@ public class DomainQLExecutionTest
         ExecutionResult executionResult = graphQL.execute(executionInput);
 
         final List<GraphQLError> errors = executionResult.getErrors();
-        log.info(errors.toString());
+        //log.info(errors.toString());
         assertThat(errors.size(), is(0));
 
         final Object data = ((Map<String,Object>)executionResult.getData()).get("store");
@@ -834,17 +834,17 @@ public class DomainQLExecutionTest
         ExecutionResult executionResult = graphQL.execute(executionInput);
 
         final List<GraphQLError> errors = executionResult.getErrors();
-        log.info(errors.toString());
+        //log.info(errors.toString());
         assertThat(errors.size(), is(0));
 
 
         final Map<String,Object> data = (Map<String, Object>) util.getPropertyPath(executionResult.getData(), "queryDomainObject");
 
-        log.info(JSONUtil.formatJSON(
-            JSONUtil.DEFAULT_GENERATOR.forValue(
-                data
-            )
-        ));
+//        log.info(JSONUtil.formatJSON(
+//            JSONUtil.DEFAULT_GENERATOR.forValue(
+//                data
+//            )
+//        ));
 
         assertThat(data.get("created"), is("2018-01-01T12:34:56.123Z"));
 

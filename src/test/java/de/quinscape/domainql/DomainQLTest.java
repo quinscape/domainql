@@ -105,7 +105,7 @@ public class DomainQLTest
 
             final GraphQLType complexInput = schema.getType("ComplexInput");
 
-            log.info("ComplexInput = {}", complexInput);
+            //log.info("ComplexInput = {}", complexInput);
 
             assertThat(complexInput, is(notNullValue()));
 
@@ -203,7 +203,7 @@ public class DomainQLTest
             assertThat(targetSeven,is(notNullValue()));
             final List<GraphQLFieldDefinition> fieldDefs = targetSeven.getFieldDefinitions();
 
-            log.info("fieldDefs = {}", fieldDefs);
+            //log.info("fieldDefs = {}", fieldDefs);
 
             assertThat(fieldDefs.size(),is(3));
             assertThat(targetSeven.getFieldDefinition("name").getType(), is(nonNull(Scalars.GraphQLString)));

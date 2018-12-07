@@ -92,7 +92,7 @@ public class TestLogic
             .from(Tables.TARGET_SIX)
             .fetchInto(TargetSix.class);
 
-        log.info("targets: {}", targets);
+        //log.info("targets: {}", targets);
 
         return targets;
     }
@@ -104,7 +104,7 @@ public class TestLogic
             .from(Tables.TARGET_FIVE)
             .fetchOneInto(TargetFive.class);
 
-        log.info("target: {}", target);
+        //log.info("target: {}", target);
 
         return target;
     }

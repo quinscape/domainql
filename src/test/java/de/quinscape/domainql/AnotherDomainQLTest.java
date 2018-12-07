@@ -184,7 +184,7 @@ public class AnotherDomainQLTest
 
         GraphQLObjectType type = (GraphQLObjectType) schema.getType("SourceFour");
 
-        log.info(type.toString());
+        //log.info(type.toString());
 
     }
 
