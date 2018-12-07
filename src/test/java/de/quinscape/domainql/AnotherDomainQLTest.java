@@ -22,6 +22,7 @@ import de.quinscape.domainql.logicimpl.LogicWithGenerics;
 import de.quinscape.domainql.logicimpl.LogicWithMirrorInput;
 import de.quinscape.domainql.logicimpl.LogicWithWrongInjection;
 import de.quinscape.domainql.logicimpl.LogicWithWrongInjection2;
+import de.quinscape.domainql.logicimpl.MinimalLogic;
 import de.quinscape.domainql.logicimpl.NoMirrorLogic;
 import de.quinscape.domainql.logicimpl.TestLogic;
 import de.quinscape.domainql.logicimpl.TypeRepeatLogic;
@@ -705,6 +706,23 @@ public class AnotherDomainQLTest
         assertThat(fieldDef, is(notNullValue()));
         assertThat(fieldDef.getType() instanceof GraphQLScalarType, is(true));
         assertThat(fieldDef.getType().getName(), is("DomainObject"));
+    }
+
+    @Test
+    public void testFieldLookup()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new MinimalLogic()))
+            .build();
+        final GraphQLSchema schema = domainQL
+            .getGraphQLSchema();
+
+        //log.info(domainQL.getFieldLookup().toString());
+
+        assertThat(domainQL.lookupField("SourceFour", "id").getName(), is("id"));
+        assertThat(domainQL.lookupField("SourceFour", "targetId").getName(), is("target_id"));
+
     }
 }
 

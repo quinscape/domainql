@@ -40,6 +40,7 @@ import graphql.schema.GraphQLType;
 import graphql.schema.GraphQLTypeReference;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.jooq.DSLContext;
+import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Record;
 import org.jooq.Table;
@@ -65,6 +66,7 @@ import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -95,6 +97,7 @@ public class DomainQL
     private final Set<Object> logicBeans;
 
     private final Map<String, TableLookup> jooqTables;
+    private final Map<String, Field<?>> dbFieldLookup;
 
     private final Map<ForeignKey<?, ?>, RelationConfiguration> relationConfigurations;
 
@@ -146,19 +149,75 @@ public class DomainQL
 
         this.typeRegistry = new TypeRegistry(this, additionalScalarTypes);
 
-        this.jooqTables = Maps.newHashMapWithExpectedSize(jooqTables.size());
+        this.jooqTables = createTableLookup(jooqTables);
+        this.dbFieldLookup = createFieldLookup();
+
+
+        graphQLSchema = this.buildGraphQLSchema();
+    }
+
+
+    private Map<String, TableLookup> createTableLookup(Set<Table<?>> jooqTables)
+    {
+        final Map<String, TableLookup> lookupMap = Maps.newHashMapWithExpectedSize(jooqTables.size());
 
         for (Table<?> table : jooqTables)
         {
             final Class<?> pojoType = findPojoTypeOf(table);
-            this.jooqTables.put(
+            lookupMap.put(
                 pojoType.getSimpleName(),
                 new TableLookup(pojoType, table)
             );
         }
-        graphQLSchema = this.buildGraphQLSchema();
+        return Collections.unmodifiableMap(lookupMap);
     }
 
+
+    private Map<String, Field<?>> createFieldLookup()
+    {
+        final Map<String, Field<?>> map = new HashMap<>();
+
+        for (TableLookup lookup : jooqTables.values())
+        {
+            final Class<?> pojoType = lookup.getPojoType();
+            final Table<?> table = lookup.getTable();
+
+            map.putAll(createFieldLookupForType(pojoType, table));
+        }
+
+        return Collections.unmodifiableMap(map);
+    }
+
+
+    private Map<String, Field<?>> createFieldLookupForType(Class<?> pojoType, Table<?> table)
+    {
+        final JSONClassInfo classInfo = JSONUtil.getClassInfo(pojoType);
+        final Map<String, Field<?>> fieldsForType = Maps.newHashMapWithExpectedSize(classInfo.getPropertyInfos().size());
+
+        for (JSONPropertyInfo info : classInfo.getPropertyInfos())
+        {
+            final Column jpaColumnAnno = JSONUtil.findAnnotation(info, Column.class);
+            if (jpaColumnAnno != null)
+            {
+                final String fieldName = jpaColumnAnno.name();
+                final Field<?> field = table.recordType().field(fieldName);
+
+                fieldsForType.put(pojoType.getSimpleName() + ":" + info.getJsonName() , field);
+            }
+        }
+        return fieldsForType;
+    }
+
+
+    Map<String, Field<?>> getFieldLookup()
+    {
+        return dbFieldLookup;
+    }
+
+    public Field<?> lookupField(String domainType, String property)
+    {
+        return dbFieldLookup.get(domainType + ":" + property);
+    }
 
     /**
      * Builds a graphql schema instance from the given DomainQL configuration.
@@ -168,7 +227,7 @@ public class DomainQL
      *
      * @return GraphQL schema
      */
-        GraphQLSchema buildGraphQLSchema()
+    public GraphQLSchema buildGraphQLSchema()
     {
         final GraphQLSchema.Builder builder = GraphQLSchema.newSchema();
         this.register(builder);
