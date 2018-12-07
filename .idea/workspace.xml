@@ -2,12 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="10e81f3e-9475-49dc-a250-d341e7899a2c" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/util/DomainObjectUtil.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQLBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQLBuilder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/DomainObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/DomainObject.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/DomainObjectCoercing.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/DomainObjectCoercing.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -21,68 +16,28 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/DomainObjectCoercing.java">
+        <entry file="file://$PROJECT_DIR$/pom.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="674">
-              <caret line="135" column="37" selection-start-line="135" selection-start-column="37" selection-end-line="135" selection-end-column="37" />
+            <state relative-caret-position="277">
+              <caret line="375" column="45" selection-start-line="375" selection-start-column="45" selection-end-line="375" selection-end-column="45" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/DomainObject.java">
+        <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/preload/PreloadedGraphQLQueryProvider.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="555">
-              <caret line="46" selection-start-line="46" selection-end-line="46" />
-              <folding>
-                <element signature="e#526#527#0" expanded="true" />
-                <element signature="e#580#581#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="192">
+              <caret line="38" column="11" selection-start-line="38" selection-start-column="11" selection-end-line="38" selection-end-column="11" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/util/DomainObjectUtil.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="824">
-              <caret line="193" selection-start-line="193" selection-end-line="193" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/LogicBeanAnalyzer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="570">
-              <caret line="38" selection-start-line="38" selection-end-line="38" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/param/ParameterProviderFactory.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="7" column="17" selection-start-line="7" selection-start-column="17" selection-end-line="7" selection-end-column="17" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/param/DataFetchingEnvironmentProviderFactory.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="19" column="58" selection-start-line="19" selection-start-column="58" selection-end-line="19" selection-end-column="58" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/param/DataFetchingEnvironmentProvider.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="10" column="56" selection-start-line="10" selection-start-column="56" selection-end-line="10" selection-end-column="56" />
+            <state relative-caret-position="15">
+              <caret line="162" column="23" lean-forward="true" selection-start-line="162" selection-start-column="23" selection-end-line="162" selection-end-column="23" />
             </state>
           </provider>
         </entry>
@@ -90,17 +45,70 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/preload/PreloadedQueriesConverter.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1185">
-              <caret line="79" column="29" selection-start-line="79" selection-start-column="29" selection-end-line="79" selection-end-column="29" />
+            <state relative-caret-position="192">
+              <caret line="76" column="21" selection-start-line="76" selection-start-column="21" selection-end-line="76" selection-end-column="21" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/beans/AnnotatedBean.java">
+        <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/preload/PreloadedQuery.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="60">
-              <caret line="4" column="20" selection-start-line="4" selection-start-column="20" selection-end-line="4" selection-end-column="20" />
+            <state relative-caret-position="192">
+              <caret line="21" column="11" selection-start-line="21" selection-start-column="11" selection-end-line="21" selection-end-column="11" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/preload/PreloadedQueryException.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="330">
+              <caret line="22" column="11" selection-start-line="22" selection-start-column="11" selection-end-line="22" selection-end-column="11" />
+              <folding>
+                <element signature="e#287#288#0" expanded="true" />
+                <element signature="e#317#318#0" expanded="true" />
+                <element signature="e#393#394#0" expanded="true" />
+                <element signature="e#430#431#0" expanded="true" />
+                <element signature="e#490#491#0" expanded="true" />
+                <element signature="e#518#519#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="462">
+              <caret line="1380" column="51" lean-forward="true" selection-start-line="1380" selection-start-column="51" selection-end-line="1380" selection-end-column="51" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="jar://$MAVEN_REPOSITORY$/com/google/code/svenson/svenson/1.5.8/svenson-1.5.8-sources.jar!/org/svenson/TypeAnalyzer.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="445">
+              <caret line="44" column="22" selection-start-line="44" selection-start-column="22" selection-end-line="44" selection-end-column="22" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="jar://$MAVEN_REPOSITORY$/com/google/code/svenson/svenson/1.5.8/svenson-1.5.8-sources.jar!/org/svenson/info/ClassInfoHolder.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="407">
+              <caret line="36" column="32" selection-start-line="36" selection-start-column="32" selection-end-line="36" selection-end-column="32" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/preload/PreloadedQueries.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="276">
+              <caret line="36" column="35" selection-start-line="36" selection-start-column="35" selection-end-line="36" selection-end-column="35" />
             </state>
           </provider>
         </entry>
@@ -117,8 +125,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>converted = convert(</find>
-      <find>convert(</find>
       <find>scalarTypeByName</find>
       <find>JAVA_TYPE_TO_GRAPHQL</find>
       <find>GraphQLCurrencyScalar</find>
@@ -147,6 +153,8 @@
       <find>).append(</find>
       <find>additionalInputTypes</find>
       <find>new</find>
+      <find>.build</find>
+      <find>\.build</find>
     </findStrings>
     <replaceStrings>
       <replace>returnType</replace>
@@ -163,8 +171,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/../domainql-process/src/main/java/de/quinscape/specrunner/model/scope/ScopeDefinition.java" />
-        <option value="$PROJECT_DIR$/../domainql-process/src/main/java/de/quinscape/specrunner/model/scope/ScopeModel.java" />
         <option value="$PROJECT_DIR$/../domainql-process/src/main/java/de/quinscape/specrunner/model/scope/Computation.java" />
         <option value="$PROJECT_DIR$/../domainql-process/src/main/java/de/quinscape/specrunner/model/scope/Action.java" />
         <option value="$PROJECT_DIR$/../domainql-process/src/main/java/de/quinscape/specrunner/model/DefaultValue.java" />
@@ -197,9 +203,6 @@
         <option value="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/schema/SchemaDataProviderTest.java" />
         <option value="$PROJECT_DIR$/src/test/java/TestCase.java" />
         <option value="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/util/ConversionUtil.java" />
-        <option value="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/AnotherDomainQLTest.java" />
-        <option value="$PROJECT_DIR$/pom.xml" />
-        <option value="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/LogicBeanAnalyzer.java" />
         <option value="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/TypeRegistry.java" />
         <option value="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/GenericDomainObject.java" />
         <option value="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/DomainQLExecutionTest.java" />
@@ -209,11 +212,16 @@
         <option value="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/DomainObjectScalar.java" />
         <option value="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/logic/GraphQLValueProvider.java" />
         <option value="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/TableLookup.java" />
-        <option value="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQLBuilder.java" />
-        <option value="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java" />
         <option value="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/DomainObjectCoercing.java" />
         <option value="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/DomainObject.java" />
         <option value="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/util/DomainObjectUtil.java" />
+        <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch.md" />
+        <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/AnotherDomainQLTest.java" />
+        <option value="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/logicimpl/DegenerifyDBLogic.java" />
+        <option value="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQLBuilder.java" />
+        <option value="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java" />
+        <option value="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/LogicBeanAnalyzer.java" />
       </list>
     </option>
   </component>
@@ -235,6 +243,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -242,86 +252,10 @@
               <item name="domainql" type="b2602c69:ProjectViewProjectNode" />
               <item name="domainql" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="domainql" type="b2602c69:ProjectViewProjectNode" />
-              <item name="domainql" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="domainql" type="b2602c69:ProjectViewProjectNode" />
-              <item name="domainql" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="domainql" type="b2602c69:ProjectViewProjectNode" />
-              <item name="domainql" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="domainql" type="b2602c69:ProjectViewProjectNode" />
-              <item name="domainql" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="domainql" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="domainql" type="b2602c69:ProjectViewProjectNode" />
-              <item name="domainql" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="domainql" type="462c0819:PsiDirectoryNode" />
-              <item name="scalar" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="domainql" type="b2602c69:ProjectViewProjectNode" />
-              <item name="domainql" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="domainql" type="462c0819:PsiDirectoryNode" />
-              <item name="schema" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="domainql" type="b2602c69:ProjectViewProjectNode" />
-              <item name="domainql" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="domainql" type="462c0819:PsiDirectoryNode" />
-              <item name="util" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="domainql" type="b2602c69:ProjectViewProjectNode" />
-              <item name="domainql" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="domainql" type="b2602c69:ProjectViewProjectNode" />
-              <item name="domainql" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="domainql" type="b2602c69:ProjectViewProjectNode" />
-              <item name="domainql" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="domainql" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -540,23 +474,15 @@
       <workItem from="1539599826435" duration="6388000" />
       <workItem from="1539607084358" duration="10161000" />
       <workItem from="1543918375316" duration="2262000" />
-      <workItem from="1543995786858" duration="6650000" />
+      <workItem from="1543995786858" duration="7491000" />
+      <workItem from="1544093169388" duration="327000" />
+      <workItem from="1544093520968" duration="9418000" />
+      <workItem from="1544121999003" duration="875000" />
+      <workItem from="1544126432611" duration="9994000" />
     </task>
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="DomainQLExecutionTest_testGenericDomainObject - 2018.10.15 at 16h 47m 09s.xml">
-      <configuration name="DomainQLExecutionTest.testGenericDomainObject" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="DomainQLExecutionTest_testGenericDomainObject - 2018.10.15 at 16h 48m 07s.xml">
-      <configuration name="DomainQLExecutionTest.testGenericDomainObject" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="DomainQLExecutionTest_testGenericDomainObject - 2018.10.15 at 16h 48m 20s.xml">
-      <configuration name="DomainQLExecutionTest.testGenericDomainObject" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="DomainQLExecutionTest_testGenericDomainObject - 2018.10.15 at 16h 48m 48s.xml">
-      <configuration name="DomainQLExecutionTest.testGenericDomainObject" configurationId="JUnit" />
-    </history-entry>
     <history-entry file="All_in_domainql - 2018.10.15 at 16h 48m 56s.xml">
       <configuration name="All in domainql" configurationId="JUnit" />
     </history-entry>
@@ -575,22 +501,35 @@
     <history-entry file="All_in_domainql - 2018.10.15 at 17h 03m 42s.xml">
       <configuration name="All in domainql" configurationId="JUnit" />
     </history-entry>
+    <history-entry file="All_in_domainql - 2018.12.06 at 22h 57m 08s.xml">
+      <configuration name="All in domainql" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="All_in_domainql - 2018.12.06 at 23h 23m 08s.xml">
+      <configuration name="All in domainql" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="All_in_domainql - 2018.12.07 at 02h 49m 16s.xml">
+      <configuration name="All in domainql" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="All_in_domainql - 2018.12.07 at 03h 05m 41s.xml">
+      <configuration name="All in domainql" configurationId="JUnit" />
+    </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="87482000" />
+    <option name="totallyTimeSpent" value="108937000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="25" width="1920" height="1055" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.36474973" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.3796592" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="UI Designer" order="3" />
       <window_info id="Favorites" order="4" side_tool="true" />
+      <window_info anchor="bottom" id="Inspection Results" weight="0.32976446" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32869378" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.30975348" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.30942184" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39978564" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -601,7 +540,7 @@
       <window_info anchor="bottom" id="Terminal" order="10" />
       <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
       <window_info anchor="bottom" id="Messages" order="12" weight="0.32869378" />
-      <window_info anchor="bottom" id="GraphQL" order="13" weight="0.3290461" />
+      <window_info anchor="bottom" id="GraphQL" order="13" weight="0.32869378" />
       <window_info anchor="bottom" id="Docker" order="14" show_stripe_button="false" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -655,7 +594,7 @@
         </breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java</url>
-          <line>853</line>
+          <line>891</line>
           <properties />
           <option name="timeStamp" value="4" />
         </line-breakpoint>
@@ -677,12 +616,6 @@
           <line>369</line>
           <properties />
           <option name="timeStamp" value="15" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java</url>
-          <line>665</line>
-          <properties />
-          <option name="timeStamp" value="18" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/TypeContext.java</url>
@@ -762,227 +695,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/beans/NoMirrorBean.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="25" selection-start-line="2" selection-start-column="25" selection-end-line="2" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/logic/NoMirrorLogic.java" />
-    <entry file="jar://$MAVEN_REPOSITORY$/com/graphql-java/graphql-java/10.0/graphql-java-10.0-sources.jar!/graphql/Scalars.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="205">
-          <caret line="396" column="54" lean-forward="true" selection-start-line="396" selection-start-column="54" selection-end-line="396" selection-end-column="54" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/DomainObjectCreationException.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="17" column="5" selection-start-line="17" selection-start-column="5" selection-end-line="17" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/package-info.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="1" column="71" selection-start-line="1" selection-start-column="71" selection-end-line="1" selection-end-column="71" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/DomainObjectFactory.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="16" column="17" selection-start-line="16" selection-start-column="17" selection-end-line="16" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/com/google/code/svenson/svenson/1.5.8/svenson-1.5.8-sources.jar!/org/svenson/util/JSONBeanUtil.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="302">
-          <caret line="37" column="23" selection-start-line="37" selection-start-column="23" selection-end-line="37" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/com/graphql-java/graphql-java/10.0/graphql-java-10.0-sources.jar!/graphql/schema/GraphQLObjectType.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="302">
-          <caret line="83" column="34" selection-start-line="83" selection-start-column="34" selection-end-line="83" selection-end-column="34" />
-          <folding>
-            <element signature="e#3499#3500#0" expanded="true" />
-            <element signature="e#3554#3555#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/org/jooq/jooq-codegen/3.10.6/jooq-codegen-3.10.6-sources.jar!/org/jooq/util/DefaultGeneratorStrategy.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="854">
-          <caret line="171" column="24" selection-start-line="171" selection-start-column="24" selection-end-line="171" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/testdomain/tables/pojos/SourceFive.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-605" />
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/javax/persistence/javax.persistence-api/2.2/javax.persistence-api-2.2.jar!/javax/persistence/Column.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="14" column="18" selection-start-line="14" selection-start-column="18" selection-end-line="14" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/TestCase.java" />
-    <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/schema/SchemaDataProviderTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="930">
-          <caret line="62" column="68" selection-start-line="62" selection-start-column="68" selection-end-line="62" selection-end-column="68" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/com/google/code/svenson/svenson/1.5.8/svenson-1.5.8-sources.jar!/org/svenson/AbstractDynamicProperties.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="27" column="23" selection-start-line="27" selection-start-column="23" selection-end-line="27" selection-end-column="23" />
-          <folding>
-            <element signature="e#474#475#0" expanded="true" />
-            <element signature="e#512#513#0" expanded="true" />
-            <element signature="e#657#658#0" expanded="true" />
-            <element signature="e#694#695#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/logic/DomainQLMethod.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="177">
-          <caret line="101" selection-start-line="101" selection-end-line="101" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/scalar/GraphQLTimestampScalar.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="247">
-          <caret line="72" column="25" selection-start-line="72" selection-start-column="25" selection-end-line="72" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/util/ConversionUtil.java" />
-    <entry file="jar://$MAVEN_REPOSITORY$/com/graphql-java/graphql-java/10.0/graphql-java-10.0-sources.jar!/graphql/schema/Coercing.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="23" column="17" selection-start-line="23" selection-start-column="17" selection-end-line="23" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/com/graphql-java/graphql-java/10.0/graphql-java-10.0-sources.jar!/graphql/schema/GraphQLScalarType.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="205">
-          <caret line="43" column="11" selection-start-line="43" selection-start-column="11" selection-end-line="43" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/converter/Converter.java" />
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/InputType.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="13" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/de/quinscape/spring-jsview/0.2/spring-jsview-0.2-sources.jar!/de/quinscape/spring/jsview/util/JSONUtil.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="302">
-          <caret line="66" column="43" selection-start-line="66" selection-start-column="43" selection-end-line="66" selection-end-column="43" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="326" column="19" selection-start-line="326" selection-start-column="19" selection-end-line="326" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/GenericDomainObject.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="20" selection-start-line="20" selection-end-line="20" />
-          <folding>
-            <element signature="e#558#559#0" expanded="true" />
-            <element signature="e#629#630#0" expanded="true" />
-            <element signature="e#689#690#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/DomainQLExecutionTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="435">
-          <caret line="766" column="4" selection-start-line="766" selection-start-column="4" selection-end-line="766" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/resources/simplelogger.properties">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="11" column="1" selection-start-line="11" selection-start-column="1" selection-end-line="11" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/logic/GenericDomainLogic.java" />
-    <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/AnotherDomainQLTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" selection-start-line="2" selection-end-line="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/DomainObjectScalar.java">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/DomainObjectGeneratorStrategy.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="23" column="21" selection-start-line="23" selection-start-column="21" selection-end-line="23" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/logic/GraphQLValueProvider.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="355">
-          <caret line="249" column="30" lean-forward="true" selection-start-line="249" selection-start-column="30" selection-end-line="249" selection-end-column="30" />
-          <folding>
-            <element signature="e#9637#9638#0" expanded="true" />
-            <element signature="e#9672#9673#0" expanded="true" />
-            <element signature="e#9715#9716#0" expanded="true" />
-            <element signature="e#9749#9750#0" expanded="true" />
-            <element signature="e#9793#9794#0" expanded="true" />
-            <element signature="e#9828#9829#0" expanded="true" />
-            <element signature="e#9879#9880#0" expanded="true" />
-            <element signature="e#9911#9912#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQLImpl.java" />
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/scalar/GraphQLDateScalar.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="19" column="13" selection-start-line="19" selection-start-column="13" selection-end-line="19" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/util/ConfigUtil.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="18" column="28" selection-start-line="18" selection-start-column="28" selection-end-line="18" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/schema/FieldType.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="600">
@@ -1004,13 +716,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-17325">
-          <caret line="170" column="8" selection-start-line="170" selection-start-column="8" selection-end-line="170" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$MAVEN_REPOSITORY$/com/graphql-java/graphql-java/10.0/graphql-java-10.0-sources.jar!/graphql/schema/GraphQLSchema.java">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -1021,21 +726,30 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQLBuilder.java">
+    <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/testdomain/tables/pojos/Foo.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1425">
-          <caret line="98" column="22" selection-start-line="98" selection-start-column="22" selection-end-line="98" selection-end-column="22" />
+        <state relative-caret-position="-391">
           <folding>
-            <element signature="e#10229#10230#0" expanded="true" />
-            <element signature="e#10283#10284#0" expanded="true" />
+            <element signature="e#0#2700#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/LogicBeanAnalyzer.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/DomainObjectCoercing.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="570">
-          <caret line="38" selection-start-line="38" selection-end-line="38" />
+        <state relative-caret-position="2025">
+          <caret line="135" column="37" selection-start-line="135" selection-start-column="37" selection-end-line="135" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/DomainObject.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="555">
+          <caret line="46" selection-start-line="46" selection-end-line="46" />
+          <folding>
+            <element signature="e#526#527#0" expanded="true" />
+            <element signature="e#580#581#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1060,13 +774,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/preload/PreloadedQueriesConverter.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1185">
-          <caret line="79" column="29" selection-start-line="79" selection-start-column="29" selection-end-line="79" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/beans/AnnotatedBean.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="60">
@@ -1074,37 +781,284 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/DomainObjectCoercing.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="674">
-          <caret line="135" column="37" selection-start-line="135" selection-start-column="37" selection-end-line="135" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/generic/DomainObject.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="555">
-          <caret line="46" selection-start-line="46" selection-end-line="46" />
-          <folding>
-            <element signature="e#526#527#0" expanded="true" />
-            <element signature="e#580#581#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/testdomain/tables/pojos/Foo.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-391">
-          <folding>
-            <element signature="e#0#2700#0" expanded="true" />
-          </folding>
+    <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor />
+          <second_editor />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/util/DomainObjectUtil.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="824">
-          <caret line="193" selection-start-line="193" selection-end-line="193" />
+        <state relative-caret-position="719">
+          <caret line="188" column="27" selection-start-line="188" selection-start-column="27" selection-end-line="188" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQLException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="6" column="13" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQLExecutionException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" column="13" selection-end-line="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/logicimpl/DegenerifyDBLogic.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="10" column="19" selection-start-line="10" selection-start-column="19" selection-end-line="10" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/util/DegenerificationUtil.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="192">
+          <caret line="19" column="12" selection-start-line="19" selection-start-column="12" selection-end-line="19" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/logicimpl/DegenerifiedContainerLogic.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="8" column="13" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/logicimpl/DegenerifiedInputLogic.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="192">
+          <caret line="14" column="30" selection-start-line="14" selection-start-column="30" selection-end-line="14" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/logicimpl/DegenerifyAndRenameLogic.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="12" column="13" selection-start-line="12" selection-start-column="13" selection-end-line="12" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/architecture.svg">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/AnotherDomainQLTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="192">
+          <caret line="342" column="40" selection-start-line="342" selection-start-column="40" selection-end-line="342" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainGenerator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="192">
+          <caret line="97" column="34" selection-start-line="97" selection-start-column="34" selection-end-line="97" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQLBuilder.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="199">
+          <caret line="383" column="25" selection-start-line="383" selection-start-column="25" selection-end-line="383" selection-end-column="25" />
+          <folding>
+            <element signature="e#10229#10230#0" expanded="true" />
+            <element signature="e#10283#10284#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/DomainQLExecutionTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="192">
+          <caret line="807" column="86" selection-start-line="807" selection-start-column="86" selection-end-line="807" selection-end-column="86" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/logic/DomainQLMethod.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="199">
+          <caret line="126" column="38" selection-start-line="126" selection-start-column="38" selection-end-line="126" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/logicimpl/FullDirectiveLogic.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="14" column="26" selection-start-line="14" selection-start-column="26" selection-end-line="14" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/annotation/GraphQLMutation.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="418">
+          <caret line="31" column="76" selection-start-line="31" selection-start-column="76" selection-end-line="31" selection-end-column="76" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/annotation/GraphQLQuery.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="433">
+          <caret line="32" column="76" selection-start-line="32" selection-start-column="76" selection-end-line="32" selection-end-column="76" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/jsonb/JSONBScalar.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="192">
+          <caret line="18" column="24" selection-start-line="18" selection-start-column="24" selection-end-line="18" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/util/JSONHolder.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="6" column="60" selection-start-line="6" selection-start-column="60" selection-end-line="6" selection-end-column="60" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/util/JSONHolderTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="231">
+          <caret line="16" column="45" selection-start-line="16" selection-start-column="45" selection-end-line="16" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/LICENSE">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="199">
+          <caret line="78" column="61" selection-start-line="78" selection-start-column="61" selection-end-line="78" selection-end-column="61" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/de/quinscape/domainql/logicimpl/LogicWithGenerics.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="13" column="48" selection-start-line="13" selection-start-column="48" selection-end-line="13" selection-end-column="48" />
+          <folding>
+            <element signature="e#386#387#0" expanded="true" />
+            <element signature="e#432#433#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/logo.svg">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/OptionsBuilder.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="199">
+          <caret line="80" column="32" selection-start-line="80" selection-start-column="32" selection-end-line="80" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/preload/package-info.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" column="27" selection-start-line="1" selection-start-column="27" selection-end-line="1" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/jsonb/PGJSONBinding.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="192">
+          <caret line="68" column="53" selection-start-line="68" selection-start-column="53" selection-end-line="68" selection-end-column="53" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="277">
+          <caret line="375" column="45" selection-start-line="375" selection-start-column="45" selection-end-line="375" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/preload/PreloadedGraphQLQueryProvider.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="192">
+          <caret line="38" column="11" selection-start-line="38" selection-start-column="11" selection-end-line="38" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/preload/PreloadedQueries.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="276">
+          <caret line="36" column="35" selection-start-line="36" selection-start-column="35" selection-end-line="36" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/preload/PreloadedQueriesConverter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="192">
+          <caret line="76" column="21" selection-start-line="76" selection-start-column="21" selection-end-line="76" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/preload/PreloadedQuery.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="192">
+          <caret line="21" column="11" selection-start-line="21" selection-start-column="11" selection-end-line="21" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/relation.svg">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="244">
+            <caret line="194" column="45" selection-start-line="194" selection-start-column="45" selection-end-line="194" selection-end-column="45" />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/preload/PreloadedQueryException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="22" column="11" selection-start-line="22" selection-start-column="11" selection-end-line="22" selection-end-column="11" />
+          <folding>
+            <element signature="e#287#288#0" expanded="true" />
+            <element signature="e#317#318#0" expanded="true" />
+            <element signature="e#393#394#0" expanded="true" />
+            <element signature="e#430#431#0" expanded="true" />
+            <element signature="e#490#491#0" expanded="true" />
+            <element signature="e#518#519#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/com/google/code/svenson/svenson/1.5.8/svenson-1.5.8-sources.jar!/org/svenson/info/ClassInfoHolder.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="407">
+          <caret line="36" column="32" selection-start-line="36" selection-start-column="32" selection-end-line="36" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/com/google/code/svenson/svenson/1.5.8/svenson-1.5.8-sources.jar!/org/svenson/TypeAnalyzer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="445">
+          <caret line="44" column="22" selection-start-line="44" selection-start-column="22" selection-end-line="44" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="462">
+          <caret line="1380" column="51" lean-forward="true" selection-start-line="1380" selection-start-column="51" selection-end-line="1380" selection-end-column="51" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/LogicBeanAnalyzer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="162" column="23" lean-forward="true" selection-start-line="162" selection-start-column="23" selection-end-line="162" selection-end-column="23" />
         </state>
       </provider>
     </entry>
