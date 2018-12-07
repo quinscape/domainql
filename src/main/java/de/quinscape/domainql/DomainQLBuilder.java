@@ -381,7 +381,7 @@ public class DomainQLBuilder
     }
 
     /**
-     * Removes the registeration for the standard directives.
+     * Removes the registration for the standard directives.
      *
      * @return  this builder
      */

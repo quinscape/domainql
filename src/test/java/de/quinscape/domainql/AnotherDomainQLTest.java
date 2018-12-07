@@ -3,7 +3,7 @@ package de.quinscape.domainql;
 import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.generic.DomainObjectScalar;
 import de.quinscape.domainql.logicimpl.CustomParameterProviderLogic;
-import de.quinscape.domainql.logicimpl.DegenerifDBLogic;
+import de.quinscape.domainql.logicimpl.DegenerifyDBLogic;
 import de.quinscape.domainql.logicimpl.DegenerifiedContainerLogic;
 import de.quinscape.domainql.logicimpl.DegenerifiedInputLogic;
 import de.quinscape.domainql.logicimpl.DegenerifyAndRenameLogic;
@@ -203,7 +203,7 @@ public class AnotherDomainQLTest
 
 
     @Test
-    public void testObjectAndScalarScourceFields()
+    public void testObjectAndScalarSourceFields()
     {
         final GraphQLSchema schema = DomainQL.newDomainQL(null)
             .objectTypes(Public.PUBLIC)
@@ -518,7 +518,7 @@ public class AnotherDomainQLTest
     {
         final GraphQLSchema schema = DomainQL.newDomainQL(null)
             .objectTypes(Public.PUBLIC)
-            .logicBeans(Collections.singleton(new DegenerifDBLogic()))
+            .logicBeans(Collections.singleton(new DegenerifyDBLogic()))
             .buildGraphQLSchema();
 
 //        for (Map.Entry<String, GraphQLType> e : schema.getTypeMap().entrySet())

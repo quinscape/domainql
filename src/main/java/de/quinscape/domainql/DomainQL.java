@@ -983,7 +983,7 @@ public class DomainQL
             final List<? extends TableField<?, ?>> fields = foreignKey.getFields();
 
 
-            // we ingore foreign keys that are configured with NONE and keys with more than one field
+            // we ignore foreign keys that are configured with NONE and keys with more than one field
             final RelationConfiguration relationConfiguration = getRelationConfiguration(foreignKey);
             final SourceField sourceField = relationConfiguration.getSourceField();
             if (fields.size() != 1)
@@ -1445,7 +1445,7 @@ public class DomainQL
             final Class<?>[] parameterTypes = ctor.getParameterTypes();
             if (parameterTypes.length > 2)
             {
-                throw new DomainQLException("Fetcher constructor can take 2 most two parmeters");
+                throw new DomainQLException("Fetcher constructor can take 2 most two parameters");
             }
             for (Class<?> type : parameterTypes)
             {
@@ -1470,7 +1470,7 @@ public class DomainQL
         }
         catch (IllegalAccessException e)
         {
-            throw new DomainQLException("Cannot access contructor" + className + "(String,String).", e);
+            throw new DomainQLException("Cannot access constructor" + className + "(String,String).", e);
         }
         catch (InstantiationException e)
         {

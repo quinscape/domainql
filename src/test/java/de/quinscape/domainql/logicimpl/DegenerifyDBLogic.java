@@ -8,7 +8,7 @@ import de.quinscape.domainql.util.Paged;
 import java.util.Collections;
 
 @GraphQLLogic
-public class DegenerifDBLogic
+public class DegenerifyDBLogic
 {
     @GraphQLQuery
     public Paged<SourceOne> sourceOnes()
