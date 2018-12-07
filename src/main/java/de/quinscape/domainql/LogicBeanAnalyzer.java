@@ -95,38 +95,17 @@ public class LogicBeanAnalyzer
 
             final GraphQLQuery queryAnno = method.getDeclaredAnnotation(GraphQLQuery.class);
 
-
-
             final String locationInfo = logicBean.getClass().getName() + ":" + methodName;
             if (queryAnno != null)
             {
-
-
-                final GraphQLOutputType resultType = getGraphQLOutputType(locationInfo, method);
-                final String name = queryAnno.value().length() > 0 ? queryAnno.value() : methodName;
-                final int methodIndex = methodAccess.getIndex(methodName, parameterTypes);
-                log.debug("QUERY {}", name);
-
-                if (queryAnno.full() && !domainQL.isFullSupported())
-                {
-                    throw new IllegalStateException("Query " + name + " cannot declare full: DomainQL service not configured to support @full");
-                }
-
-                final List<ParameterProvider> parameterProviders = createParameterProviders(
-                    locationInfo,
-                    method
-                );
-
-
-                final Query query = new Query(
-                    name,
-                    queryAnno.description(),
-                    queryAnno.full(),
+                final Query query = buildQuery(
                     logicBean,
                     methodAccess,
-                    methodIndex,
-                    parameterProviders,
-                    queryAnno.full() ? Scalars.GraphQLBoolean : resultType
+                    method,
+                    methodName,
+                    parameterTypes,
+                    queryAnno,
+                    locationInfo
                 );
                 queries.add(
                     query
@@ -137,42 +116,104 @@ public class LogicBeanAnalyzer
             if (mutationAnno != null)
             {
 
-                final String name = mutationAnno.value().length() > 0 ? mutationAnno.value() : methodName;
-                final int methodIndex = methodAccess.getIndex(methodName, parameterTypes);
-
-                log.debug("MUTATION {}", name);
-
-                if (mutationAnno.full() && !domainQL.isFullSupported())
-                {
-                    throw new IllegalStateException("Mutation " + name + " cannot declare full: DomainQL service not configured to support @full");
-                }
-
-                final GraphQLOutputType resultType = getGraphQLOutputType(locationInfo, method);
-
-                if (resultType == null)
-                {
-                    throw new IllegalStateException("Could not find type for " + locationInfo + ", method = " + method);
-                }
-
-                final List<ParameterProvider> parameterProviders = createParameterProviders(
-                    locationInfo,
-                    method
-                );
-                final Mutation mutation = new Mutation(
-                    name.length() > 0 ? name : methodName,
-                    mutationAnno.description(),
-                    mutationAnno.full(),
+                final Mutation mutation = buildMutation(
                     logicBean,
                     methodAccess,
-                    methodIndex,
-                    parameterProviders,
-                    mutationAnno.full() ? Scalars.GraphQLBoolean : resultType
+                    method,
+                    methodName,
+                    parameterTypes,
+                    locationInfo,
+                    mutationAnno
                 );
                 mutations.add(
                     mutation
                 );
             }
         }
+    }
+
+
+    private Query buildQuery(
+        Object logicBean,
+        MethodAccess methodAccess,
+        Method method,
+        String methodName,
+        Class<?>[] parameterTypes,
+        GraphQLQuery queryAnno,
+        String locationInfo
+    )
+    {
+        final GraphQLOutputType resultType = getGraphQLOutputType(locationInfo, method);
+        final String name = queryAnno.value().length() > 0 ? queryAnno.value() : methodName;
+        final int methodIndex = methodAccess.getIndex(methodName, parameterTypes);
+        log.debug("QUERY {}", name);
+
+        if (queryAnno.full() && !domainQL.isFullSupported())
+        {
+            throw new IllegalStateException("Query " + name + " cannot declare full: DomainQL service not configured to support @full");
+        }
+
+        final List<ParameterProvider> parameterProviders = createParameterProviders(
+            locationInfo,
+            method
+        );
+
+
+        return new Query(
+            name,
+            queryAnno.description(),
+            queryAnno.full(),
+            logicBean,
+            methodAccess,
+            methodIndex,
+            parameterProviders,
+            queryAnno.full() ? Scalars.GraphQLBoolean : resultType
+        );
+    }
+
+
+    private Mutation buildMutation(
+        Object logicBean,
+        MethodAccess methodAccess,
+        Method method,
+        String methodName,
+        Class<?>[] parameterTypes,
+        String locationInfo,
+        GraphQLMutation mutationAnno
+    )
+    {
+        final String name = mutationAnno.value().length() > 0 ? mutationAnno.value() : methodName;
+        final int methodIndex = methodAccess.getIndex(methodName, parameterTypes);
+
+        log.debug("MUTATION {}", name);
+
+        if (mutationAnno.full() && !domainQL.isFullSupported())
+        {
+            throw new IllegalStateException("Mutation " + name +
+                " cannot declare full: DomainQL service not configured to support @full");
+        }
+
+        final GraphQLOutputType resultType = getGraphQLOutputType(locationInfo, method);
+
+        if (resultType == null)
+        {
+            throw new IllegalStateException("Could not find type for " + locationInfo + ", method = " + method);
+        }
+
+        final List<ParameterProvider> parameterProviders = createParameterProviders(
+            locationInfo,
+            method
+        );
+        return new Mutation(
+            name.length() > 0 ? name : methodName,
+            mutationAnno.description(),
+            mutationAnno.full(),
+            logicBean,
+            methodAccess,
+            methodIndex,
+            parameterProviders,
+            mutationAnno.full() ? Scalars.GraphQLBoolean : resultType
+        );
     }
 
 
@@ -264,138 +305,11 @@ public class LogicBeanAnalyzer
             for (int i = 0, parameterTypesLength = parameters.length; i < parameterTypesLength; i++)
             {
                 final Parameter parameter = parameters[i];
-                final Type genericParameterType = genericParameterTypes[i];
-                Class<?> parameterType = parameter.getType();
-                final Annotation[] parameterAnnotations = parameter.getDeclaredAnnotations();
+                ParameterProvider provider = createValueProvider(name, genericParameterTypes[i], parameter);
 
-                final GraphQLField argAnno = parameter.getDeclaredAnnotation(GraphQLField.class);
-                final ResolvedGenericType genericTypeAnno = parameter.getDeclaredAnnotation(ResolvedGenericType.class);
-
-                if ((argAnno == null || argAnno.value().length() == 0) && !parameter.isNamePresent())
-                {
-                    throw new IllegalStateException(name +
-                        ": Cannot determine Method parameter name due to metadata not provided by Java compiler and " +
-                        "no @GraphQLField annotation being defined. " +
-                        "Either you need to define @GraphQLField annotations for all logic parameters or you need " +
-                        "to enable parameter metadata in your java compiler. " +
-                        "For maven this is the property maven.compiler.parameters=true, for the javac command line " +
-                        "compiler it is the -parameters option.");
-                }
-
-                ParameterProvider provider = null;
-                for (ParameterProviderFactory factory : parameterProviderFactories)
-                {
-                    provider = invokeFactory(parameterType, parameterAnnotations, factory);
-
-                    if (provider != null)
-                    {
-                        break;
-                    }
-                }
-
-                if (provider != null)
-                {
-                    list.add(provider);
-                    log.debug("-- {}", provider);
-                }
-                else
-                {
-                    final TypeContext paramTypeContext = new TypeContext(
-                        null,
-                        parameterType,
-                        genericParameterType,
-                        genericTypeAnno
-                    );
-                    
-                    GraphQLInputType inputType = domainQL.getTypeRegistry().getGraphQLScalarFor(parameterType, argAnno);
-                    if (inputType == null)
-                    {
-                        if (List.class.isAssignableFrom(parameterType))
-                        {
-                            final Type genericReturnType = parameter.getParameterizedType();
-                            if (!(genericReturnType instanceof ParameterizedType))
-                            {
-                                throw new DomainQLException(parameter + ": List parameter type must be parametrized.");
-                            }
-
-                            final Class<?> elementClass = (Class<?>) ((ParameterizedType) genericReturnType)
-                                .getActualTypeArguments()[0];
-
-
-                            final GraphQLScalarType scalar = domainQL.getTypeRegistry().getGraphQLScalarFor(elementClass, argAnno);
-                            if (scalar != null)
-                            {
-                                inputType = new GraphQLList(scalar);
-                            }
-                            else
-                            {
-                                InputType newInputType = typeRegistry.registerInput(
-                                    // create new type context for the element of the generic list.
-                                    new TypeContext(paramTypeContext, elementClass)
-                                );
-                                inputType = new GraphQLList(new GraphQLTypeReference(newInputType.getName()));
-                            }
-                        }
-                        else
-                        {
-                            if (parameterType.isInterface())
-                            {
-                                throw new DomainQLException("Cannot handle " + parameterType);
-                            }
-
-
-                            final InputType parameterInputType = typeRegistry.registerInput(paramTypeContext);
-                            final String nameFromConfig = parameterInputType.getName();
-                            inputType = GraphQLTypeReference.typeRef(nameFromConfig);
-                        }
-                    }
-
-                    final boolean fieldAnnoPresent = argAnno != null;
-                    final NotNull notNullAnno = parameter.getAnnotation(NotNull.class);
-                    boolean jpaNotNull = notNullAnno != null;
-
-
-                    if (jpaNotNull && fieldAnnoPresent && !argAnno.notNull())
-                    {
-                        throw new DomainQLException(name +
-                            ": Required field disagreement between @NotNull and @GraphQLField required value");
-                    }
-
-                    final boolean isNotNull = jpaNotNull || (fieldAnnoPresent && argAnno.notNull());
-
-                    final String parameterName = fieldAnnoPresent && argAnno.value().length() > 0 ? argAnno
-                        .value() : parameter.getName();
-                    final String description = fieldAnnoPresent ? argAnno.description() : null;
-                    final Object defaultValue;
-
-                    final Object defaultValueFromAnno = fieldAnnoPresent ? argAnno.defaultValue() : null;
-                    if (String.class.isAssignableFrom(parameterType))
-                    {
-                        defaultValue = defaultValueFromAnno;
-                    }
-                    else
-                    {
-                        defaultValue = ConvertUtils.convert(defaultValueFromAnno, parameterType);
-                    }
-
-                    final GraphQLValueProvider graphQLValueProvider = new GraphQLValueProvider(
-                        parameterName,
-                        description,
-                        isNotNull,
-                        inputType,
-                        defaultValue,
-                        typeRegistry,
-                        parameterType
-                    );
-
-                    final String paramDesc = graphQLValueProvider.getDescription();
-                    log.debug("  {}", graphQLValueProvider.getArgumentName() + ": " + graphQLValueProvider
-                        .getInputType() + (StringUtils.hasText(paramDesc) ? " # " + paramDesc : ""));
-
-                    list.add(
-                        graphQLValueProvider
-                    );
-                }
+                list.add(
+                    provider
+                );
             }
             return list;
 //        }
@@ -403,6 +317,160 @@ public class LogicBeanAnalyzer
 //        {
 //            throw new DomainQLException(e);
 //        }
+    }
+
+
+    private ParameterProvider createValueProvider(String name, Type genericType, Parameter parameter)
+    {
+        final Type genericParameterType = genericType;
+        Class<?> parameterType = parameter.getType();
+        final Annotation[] parameterAnnotations = parameter.getDeclaredAnnotations();
+
+        final GraphQLField argAnno = parameter.getDeclaredAnnotation(GraphQLField.class);
+        final ResolvedGenericType genericTypeAnno = parameter.getDeclaredAnnotation(ResolvedGenericType.class);
+
+        if ((argAnno == null || argAnno.value().length() == 0) && !parameter.isNamePresent())
+        {
+            throw new IllegalStateException(name +
+                ": Cannot determine Method parameter name due to metadata not provided by Java compiler and " +
+                "no @GraphQLField annotation being defined. " +
+                "Either you need to define @GraphQLField annotations for all logic parameters or you need " +
+                "to enable parameter metadata in your java compiler. " +
+                "For maven this is the property maven.compiler.parameters=true, for the javac command line " +
+                "compiler it is the -parameters option.");
+        }
+
+        ParameterProvider provider = null;
+        for (ParameterProviderFactory factory : parameterProviderFactories)
+        {
+            provider = invokeFactory(parameterType, parameterAnnotations, factory);
+
+            if (provider != null)
+            {
+                break;
+            }
+        }
+
+        if (provider == null)
+        {
+            provider = createValueProvier(
+                name,
+                parameter,
+                genericParameterType,
+                parameterType,
+                argAnno,
+                genericTypeAnno
+            );
+        }
+        return provider;
+    }
+
+
+    private ParameterProvider createValueProvier(
+        String name,
+        Parameter parameter,
+        Type genericParameterType,
+        Class<?> parameterType,
+        GraphQLField argAnno,
+        ResolvedGenericType genericTypeAnno
+    )
+    {
+        ParameterProvider provider;
+        final TypeContext paramTypeContext = new TypeContext(
+            null,
+            parameterType,
+            genericParameterType,
+            genericTypeAnno
+        );
+
+        GraphQLInputType inputType = domainQL.getTypeRegistry().getGraphQLScalarFor(parameterType, argAnno);
+        if (inputType == null)
+        {
+            if (List.class.isAssignableFrom(parameterType))
+            {
+                final Type genericReturnType = parameter.getParameterizedType();
+                if (!(genericReturnType instanceof ParameterizedType))
+                {
+                    throw new DomainQLException(parameter + ": List parameter type must be parametrized.");
+                }
+
+                final Class<?> elementClass = (Class<?>) ((ParameterizedType) genericReturnType)
+                    .getActualTypeArguments()[0];
+
+
+                final GraphQLScalarType scalar = domainQL.getTypeRegistry().getGraphQLScalarFor(elementClass, argAnno);
+                if (scalar != null)
+                {
+                    inputType = new GraphQLList(scalar);
+                }
+                else
+                {
+                    InputType newInputType = typeRegistry.registerInput(
+                        // create new type context for the element of the generic list.
+                        new TypeContext(paramTypeContext, elementClass)
+                    );
+                    inputType = new GraphQLList(new GraphQLTypeReference(newInputType.getName()));
+                }
+            }
+            else
+            {
+                if (parameterType.isInterface())
+                {
+                    throw new DomainQLException("Cannot handle " + parameterType);
+                }
+
+
+                final InputType parameterInputType = typeRegistry.registerInput(paramTypeContext);
+                final String nameFromConfig = parameterInputType.getName();
+                inputType = GraphQLTypeReference.typeRef(nameFromConfig);
+            }
+        }
+
+        final boolean fieldAnnoPresent = argAnno != null;
+        final NotNull notNullAnno = parameter.getAnnotation(NotNull.class);
+        boolean jpaNotNull = notNullAnno != null;
+
+
+        if (jpaNotNull && fieldAnnoPresent && !argAnno.notNull())
+        {
+            throw new DomainQLException(name +
+                ": Required field disagreement between @NotNull and @GraphQLField required value");
+        }
+
+        final boolean isNotNull = jpaNotNull || (fieldAnnoPresent && argAnno.notNull());
+
+        final String parameterName = fieldAnnoPresent && argAnno.value().length() > 0 ? argAnno
+            .value() : parameter.getName();
+        final String description = fieldAnnoPresent ? argAnno.description() : null;
+        final Object defaultValue;
+
+        final Object defaultValueFromAnno = fieldAnnoPresent ? argAnno.defaultValue() : null;
+        if (String.class.isAssignableFrom(parameterType))
+        {
+            defaultValue = defaultValueFromAnno;
+        }
+        else
+        {
+            defaultValue = ConvertUtils.convert(defaultValueFromAnno, parameterType);
+        }
+
+        final GraphQLValueProvider graphQLValueProvider = new GraphQLValueProvider(
+            parameterName,
+            description,
+            isNotNull,
+            inputType,
+            defaultValue,
+            typeRegistry,
+            parameterType
+        );
+
+        final String paramDesc = graphQLValueProvider.getDescription();
+        log.debug("  {}", graphQLValueProvider.getArgumentName() + ": " + graphQLValueProvider
+            .getInputType() + (StringUtils.hasText(paramDesc) ? " # " + paramDesc : ""));
+
+
+        provider = graphQLValueProvider;
+        return provider;
     }
 
 
