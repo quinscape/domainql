@@ -3,10 +3,12 @@ package de.quinscape.domainql.util;
 import de.quinscape.domainql.DomainQL;
 import de.quinscape.domainql.generic.DomainObject;
 import org.jooq.DSLContext;
+import org.jooq.Field;
 import org.jooq.InsertQuery;
 import org.jooq.StoreQuery;
 import org.jooq.Table;
 import org.jooq.UpdateQuery;
+import org.jooq.impl.DSL;
 
 import static org.jooq.impl.DSL.*;
 
@@ -51,7 +53,7 @@ public final class DomainObjectUtil
                 )
         );
 
-        addFieldValues(insertQuery, domainObject);
+        addFieldValues(domainQL, insertQuery, domainObject);
 
         return insertQuery.execute();
     }
@@ -87,7 +89,7 @@ public final class DomainObjectUtil
                 )
         );
 
-        addFieldValues(updateQuery, domainObject);
+        addFieldValues(domainQL, updateQuery, domainObject);
 
         return updateQuery.execute();
     }
@@ -116,27 +118,27 @@ public final class DomainObjectUtil
 
         final String id = (String) domainObject.getProperty("id");
 
-        final int count = dslContext.selectCount()
-            .from(jooqTable)
-            .where(
-                field(
-                    name(
-                        "id"
+        final boolean exists = dslContext.fetchExists(
+            dslContext.select()
+                .from(jooqTable)
+                .where(
+                    field(
+                        name(
+                            "id"
+                        )
                     )
-                )
-                    .eq(id)
-            )
-            .execute();
+                        .eq(id)
+                ));
 
         // We use the basic non-DSL JOOQ api here
         final StoreQuery<?> query;
-        if (count == 0)
+        if (exists)
         {
-            return insert(dslContext, domainQL, domainObject);
+            return update(dslContext, domainQL, domainObject);
         }
         else
         {
-            return update(dslContext, domainQL, domainObject);
+            return insert(dslContext, domainQL, domainObject);
         }
     }
 
@@ -170,23 +172,32 @@ public final class DomainObjectUtil
     /**
      * Sets all domain object values in a JOOQ query.
      *
+     * @param domainQL
      * @param query        insert or update query
      * @param domainObject domain object
      */
-    private static void addFieldValues(StoreQuery<?> query, DomainObject domainObject)
+    private static void addFieldValues(
+        DomainQL domainQL,
+        StoreQuery<?> query,
+        DomainObject domainObject
+    )
     {
 
-        for (String name : domainObject.propertyNames())
+        for (String propertyName : domainObject.propertyNames())
         {
-            if (name.equals(DomainObject.DOMAIN_TYPE_PROPERTY))
+            if (propertyName.equals(DomainObject.DOMAIN_TYPE_PROPERTY))
             {
                 continue;
             }
 
-            final Object value = domainObject.getProperty(name);
-
+            final Object value = domainObject.getProperty(propertyName);
+            final Field fieldForProp = domainQL.lookupField(
+                domainObject.getDomainType(),
+                propertyName
+            );
+            
             query.addValue(
-                field(name),
+                fieldForProp,
                 value
             );
         }
