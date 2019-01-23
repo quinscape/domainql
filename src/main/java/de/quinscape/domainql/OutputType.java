@@ -44,10 +44,4 @@ public class OutputType
     {
         return isEnum;
     }
-
-
-    public OutputTypeType getType()
-    {
-        return null;
-    }
 }

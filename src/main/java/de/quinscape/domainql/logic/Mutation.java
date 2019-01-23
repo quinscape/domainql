@@ -20,10 +20,11 @@ public class Mutation
         MethodAccess methodAccess,
         int methodIndex,
         List<ParameterProvider> parameterProviders,
-        GraphQLOutputType resultType
+        GraphQLOutputType resultType,
+        Class<?> typeParam
     )
     {
-        super(name, description, full, logicBean, methodAccess, methodIndex, parameterProviders, resultType);
+        super(name, description, full, logicBean, methodAccess, methodIndex, parameterProviders, resultType, typeParam);
 
     }
 

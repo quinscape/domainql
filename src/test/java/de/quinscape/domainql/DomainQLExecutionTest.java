@@ -2,6 +2,7 @@ package de.quinscape.domainql;
 
 
 import com.google.common.collect.ImmutableMap;
+import de.quinscape.domainql.beans.ComplexInput;
 import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.generic.DomainObjectScalar;
 import de.quinscape.domainql.logicimpl.CustomFetcherLogic;
@@ -21,6 +22,7 @@ import de.quinscape.domainql.logicimpl.TestLogic;
 import de.quinscape.domainql.logicimpl.TypeConversionLogic;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
+import de.quinscape.domainql.logicimpl.TypeParamLogic;
 import de.quinscape.domainql.mock.TestProvider;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.domainql.testdomain.Public;
@@ -850,4 +852,161 @@ public class DomainQLExecutionTest
 
     }
 
+
+    @Test
+    public void testTypeParam()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new TypeParamLogic()))
+            .build();
+        final GraphQLSchema schema = domainQL
+            .getGraphQLSchema();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        {
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("query queryA($complex: ComplexInput!)\n" +
+                    "{\n" +
+                    "    queryTypeA(complexInput: $complex)\n" +
+                    "    {\n" +
+                    "        value\n" +
+                    "    }\n" +
+                    "}")
+                .variables(ImmutableMap.of("complex", JSONUtil.DEFAULT_PARSER.parse(Map.class,"{\n" +
+                    "    \"value\" : \"cvA\",\n" +
+                    "    \"num\" : 2984\n" +
+                    "}")))
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            final List<GraphQLError> errors = executionResult.getErrors();
+            //log.info(errors.toString());
+            assertThat(errors.size(), is(0));
+
+            Map data = executionResult.getData();
+            //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
+            assertThat(util.getPropertyPath(data, "queryTypeA.value"), is("cvA/2984"));
+        }
+
+        {
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("query queryB($complex: ComplexInput!)\n" +
+                    "{\n" +
+                    "    queryTypeB(complexInput: $complex)\n" +
+                    "    {\n" +
+                    "        value\n" +
+                    "    }\n" +
+                    "}")
+                .variables(ImmutableMap.of("complex", JSONUtil.DEFAULT_PARSER.parse(Map.class,"{\n" +
+                    "    \"value\" : \"cvB\",\n" +
+                    "    \"num\" : 1828\n" +
+                    "}")))
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            final List<GraphQLError> errors = executionResult.getErrors();
+            //log.info(errors.toString());
+            assertThat(errors.size(), is(0));
+
+            Map data = executionResult.getData();
+            //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
+            assertThat(util.getPropertyPath(data, "queryTypeB.value"), is("cvB/1828"));
+        }
+
+        {
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("query queryContainerTypeA($complex: ComplexInput!)\n" +
+                    "{\n" +
+                    "    queryContainerTypeA(complexInput: $complex)\n" +
+                    "    {\n" +
+                    "        value{\n" +
+                    "            value\n" +
+                    "        }\n" +
+                "            num\n" +
+                    "    }\n" +
+                    "}")
+                .variables(ImmutableMap.of("complex", JSONUtil.DEFAULT_PARSER.parse(Map.class,"{\n" +
+                    "    \"value\" : \"cvA\",\n" +
+                    "    \"num\" : 8283\n" +
+                    "}")))
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            final List<GraphQLError> errors = executionResult.getErrors();
+            log.info(errors.toString());
+            assertThat(errors.size(), is(0));
+
+            Map data = executionResult.getData();
+            //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
+            assertThat(util.getPropertyPath(data, "queryContainerTypeA.value.value"), is("cvA/8283"));
+            assertThat(util.getPropertyPath(data, "queryContainerTypeA.num"), is(123));
+        }
+
+        {
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("query queryContainerTypeB($complex: ComplexInput!)\n" +
+                    "{\n" +
+                    "    queryContainerTypeB(complexInput: $complex)\n" +
+                    "    {\n" +
+                    "        value{\n" +
+                    "            value\n" +
+                    "        }\n" +
+                "            num\n" +
+                    "    }\n" +
+                    "}")
+                .variables(ImmutableMap.of("complex", JSONUtil.DEFAULT_PARSER.parse(Map.class,"{\n" +
+                    "    \"value\" : \"cvB\",\n" +
+                    "    \"num\" : 2534\n" +
+                    "}")))
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            final List<GraphQLError> errors = executionResult.getErrors();
+            log.info(errors.toString());
+            assertThat(errors.size(), is(0));
+
+            Map data = executionResult.getData();
+            //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
+            assertThat(util.getPropertyPath(data, "queryContainerTypeB.value.value"), is("cvB/2534"));
+            assertThat(util.getPropertyPath(data, "queryContainerTypeB.num"), is(123));
+        }
+
+        {
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("query queryListTypeA($complex: ComplexInput!)\n" +
+                    "{\n" +
+                    "    queryListTypeA(complexInput: $complex)\n" +
+                    "    {\n" +
+                    "        value\n" +
+                    "    }\n" +
+                    "}")
+                .variables(ImmutableMap.of("complex", JSONUtil.DEFAULT_PARSER.parse(Map.class,"{\n" +
+                    "    \"value\" : \"lll\",\n" +
+                    "    \"num\" : 9284\n" +
+                    "}")))
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            final List<GraphQLError> errors = executionResult.getErrors();
+            log.info(errors.toString());
+            assertThat(errors.size(), is(0));
+
+            Map data = executionResult.getData();
+            //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
+            assertThat(util.getPropertyPath(data, "queryListTypeA[0].value"), is("lll..."));
+            assertThat(util.getPropertyPath(data, "queryListTypeA[1].value"), is("...9284"));
+        }
+    }
 }

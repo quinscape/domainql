@@ -25,6 +25,7 @@ import de.quinscape.domainql.logicimpl.LogicWithWrongInjection2;
 import de.quinscape.domainql.logicimpl.MinimalLogic;
 import de.quinscape.domainql.logicimpl.NoMirrorLogic;
 import de.quinscape.domainql.logicimpl.TestLogic;
+import de.quinscape.domainql.logicimpl.TypeParamLogic;
 import de.quinscape.domainql.logicimpl.TypeRepeatLogic;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
@@ -40,12 +41,14 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 import static de.quinscape.domainql.testdomain.Tables.*;
 import static graphql.schema.GraphQLNonNull.*;
@@ -723,6 +726,47 @@ public class AnotherDomainQLTest
         assertThat(domainQL.lookupField("SourceFour", "id").getName(), is("id"));
         assertThat(domainQL.lookupField("SourceFour", "targetId").getName(), is("target_id"));
 
+    }
+
+    @Test
+    public void testTypeParameters()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new TypeParamLogic()))
+            .build();
+        final GraphQLSchema schema = domainQL
+            .getGraphQLSchema();
+
+        //log.info(domainQL.getFieldLookup().toString());
+
+        final GraphQLObjectType queryType = schema.getQueryType();
+
+        GraphQLFieldDefinition queryA = queryType.getFieldDefinition("queryTypeA");
+        assertThat(queryA,is(notNullValue()));
+        assertThat(queryA.getType().getName(), is("TypeA"));
+
+        GraphQLFieldDefinition queryB = queryType.getFieldDefinition("queryTypeB");
+        assertThat(queryB,is(notNullValue()));
+        assertThat(queryB.getType().getName(), is("TypeB"));
+
+        GraphQLFieldDefinition queryContainerA = queryType.getFieldDefinition("queryContainerTypeA");
+        assertThat(queryContainerA,is(notNullValue()));
+        assertThat(queryContainerA.getType().getName(), is("ContainerTypeA"));
+
+        GraphQLFieldDefinition queryContainerB = queryType.getFieldDefinition("queryContainerTypeB");
+        assertThat(queryContainerB,is(notNullValue()));
+        assertThat(queryContainerB.getType().getName(), is("ContainerTypeB"));
+
+        GraphQLFieldDefinition queryListA = queryType.getFieldDefinition("queryListTypeA");
+        assertThat(queryListA,is(notNullValue()));
+        assertThat(queryListA.getType(),is(instanceOf(GraphQLList.class)));
+        assertThat(((GraphQLList)queryListA.getType()).getWrappedType().getName(), is("TypeA"));
+
+        GraphQLFieldDefinition queryListB = queryType.getFieldDefinition("queryListTypeB");
+        assertThat(queryListB,is(notNullValue()));
+        assertThat(queryListB.getType(),is(instanceOf(GraphQLList.class)));
+        assertThat(((GraphQLList)queryListB.getType()).getWrappedType().getName(), is("TypeB"));
     }
 }
 

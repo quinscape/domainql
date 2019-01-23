@@ -4,6 +4,7 @@ import com.esotericsoftware.reflectasm.MethodAccess;
 import de.quinscape.domainql.annotation.GraphQLField;
 import de.quinscape.domainql.annotation.GraphQLMutation;
 import de.quinscape.domainql.annotation.GraphQLQuery;
+import de.quinscape.domainql.annotation.GraphQLTypeParam;
 import de.quinscape.domainql.annotation.ResolvedGenericType;
 import de.quinscape.domainql.logic.GraphQLValueProvider;
 import de.quinscape.domainql.logic.Mutation;
@@ -28,16 +29,20 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * Analyzes annotated LogicBeans and finds queries and mutations.
  */
-public class LogicBeanAnalyzer
+class LogicBeanAnalyzer
 {
 
     private final static Logger log = LoggerFactory.getLogger(LogicBeanAnalyzer.class);
@@ -53,7 +58,7 @@ public class LogicBeanAnalyzer
 
     private final TypeRegistry typeRegistry;
 
-    public LogicBeanAnalyzer(
+    LogicBeanAnalyzer(
         DomainQL domainQL,
         Collection<ParameterProviderFactory> parameterProviderFactories,
         Collection<Object> logicBeans,
@@ -68,19 +73,19 @@ public class LogicBeanAnalyzer
     }
 
 
-    public Set<Query> getQueries()
+    Set<Query> getQueries()
     {
         return queries;
     }
 
 
-    public Set<Mutation> getMutations()
+    Set<Mutation> getMutations()
     {
         return mutations;
     }
 
 
-    public void discover(Object logicBean)
+    private void discover(Object logicBean)
     {
         final Class<?> cls = AopProxyUtils.ultimateTargetClass(logicBean);
         log.debug("Analyzing logic bean {}", cls.getName());
@@ -98,17 +103,16 @@ public class LogicBeanAnalyzer
             final String locationInfo = logicBean.getClass().getName() + ":" + methodName;
             if (queryAnno != null)
             {
-                final Query query = buildQuery(
-                    logicBean,
-                    methodAccess,
-                    method,
-                    methodName,
-                    parameterTypes,
-                    queryAnno,
-                    locationInfo
-                );
-                queries.add(
-                    query
+                queries.addAll(
+                    buildQueries(
+                        logicBean,
+                        methodAccess,
+                        method,
+                        methodName,
+                        parameterTypes,
+                        queryAnno,
+                        locationInfo
+                    )
                 );
             }
 
@@ -116,24 +120,24 @@ public class LogicBeanAnalyzer
             if (mutationAnno != null)
             {
 
-                final Mutation mutation = buildMutation(
-                    logicBean,
-                    methodAccess,
-                    method,
-                    methodName,
-                    parameterTypes,
-                    locationInfo,
-                    mutationAnno
-                );
-                mutations.add(
-                    mutation
+                mutations.addAll(
+                    buildMutations(
+                        logicBean,
+                        methodAccess,
+                        method,
+                        methodName,
+                        parameterTypes,
+                        locationInfo,
+                        mutationAnno
+                    )
                 );
             }
         }
     }
 
+    private final static String NAME_PATTERN_WILDCARD = "*";
 
-    private Query buildQuery(
+    private List<Query> buildQueries(
         Object logicBean,
         MethodAccess methodAccess,
         Method method,
@@ -143,7 +147,6 @@ public class LogicBeanAnalyzer
         String locationInfo
     )
     {
-        final GraphQLOutputType resultType = getGraphQLOutputType(locationInfo, method);
         final String name = queryAnno.value().length() > 0 ? queryAnno.value() : methodName;
         final int methodIndex = methodAccess.getIndex(methodName, parameterTypes);
         log.debug("QUERY {}", name);
@@ -158,21 +161,100 @@ public class LogicBeanAnalyzer
             method
         );
 
+        final Parameter typeParamAnnoParameter = findTypeParamAnnoParameter(method);
 
-        return new Query(
-            name,
-            queryAnno.description(),
-            queryAnno.full(),
-            logicBean,
-            methodAccess,
-            methodIndex,
-            parameterProviders,
-            queryAnno.full() ? Scalars.GraphQLBoolean : resultType
-        );
+        if (typeParamAnnoParameter != null)
+        {
+            if (!typeParamAnnoParameter.getType().equals(Class.class))
+            {
+                throw new IllegalStateException(locationInfo + ": @GrapQLTypeParam parameter must be of type Class<T>");
+            }
+
+            final GraphQLTypeParam typeParamAnno = typeParamAnnoParameter.getAnnotation(GraphQLTypeParam.class);
+
+            final Type actualTypeArgument =
+                ((ParameterizedType) typeParamAnnoParameter.getParameterizedType()).getActualTypeArguments()[0];
+
+            if (!(actualTypeArgument instanceof TypeVariable))
+            {
+                throw new IllegalStateException(locationInfo + ": @GrapQLTypeParam parameter must be declared as type variable ( e.g. Class<T> ) ");
+            }
+
+            final List<Query> list = new ArrayList<>();
+
+            final String namePattern = typeParamAnno.namePattern().length() == 0 ? methodName + NAME_PATTERN_WILDCARD : typeParamAnno.namePattern();
+            if (!namePattern.contains(NAME_PATTERN_WILDCARD))
+            {
+                throw new IllegalStateException(locationInfo + ": @GraphQLTypeParam: namePattern must contain a '*' wildcard");
+            }
+
+            for (Class typeParam : typeParamAnno.types())
+            {
+
+                final String varName = ((TypeVariable) actualTypeArgument).getName();
+                Map<String, Class<?>> map = new LinkedHashMap<>();
+                map.put(varName, typeParam);
+
+                final TypeContext newContext = new TypeContext(null, method.getReturnType(), map);
+                final GraphQLOutputType outputType = getGraphQLOutputType(
+                    locationInfo,
+                    method.getReturnType(),
+                    null,
+                    newContext
+                );
+                list.add(
+                    new Query(
+                        namePattern.replace(NAME_PATTERN_WILDCARD, typeParam.getSimpleName()),
+                        queryAnno.description(),
+                        queryAnno.full(),
+                        logicBean,
+                        methodAccess,
+                        methodIndex,
+                        parameterProviders,
+                        queryAnno.full() ? Scalars.GraphQLBoolean : outputType,
+                        typeParam
+                    )
+                );
+            }
+            return list;
+        }
+        else
+        {
+            final GraphQLOutputType resultType = getGraphQLOutputType(locationInfo, method);
+
+            return Collections.singletonList(
+                new Query(
+                    name,
+                    queryAnno.description(),
+                    queryAnno.full(),
+                    logicBean,
+                    methodAccess,
+                    methodIndex,
+                    parameterProviders,
+                    queryAnno.full() ? Scalars.GraphQLBoolean : resultType,
+                    null
+                )
+            );
+        }
     }
 
 
-    private Mutation buildMutation(
+    private Parameter findTypeParamAnnoParameter(Method method)
+    {
+        for (Parameter parameter : method.getParameters())
+        {
+            final GraphQLTypeParam anno = parameter.getAnnotation(GraphQLTypeParam.class);
+            if (anno != null)
+            {
+                return parameter;
+            }
+        }
+
+        return null;
+    }
+
+
+    private List<Mutation> buildMutations(
         Object logicBean,
         MethodAccess methodAccess,
         Method method,
@@ -192,28 +274,84 @@ public class LogicBeanAnalyzer
             throw new IllegalStateException("Mutation " + name +
                 " cannot declare full: DomainQL service not configured to support @full");
         }
-
-        final GraphQLOutputType resultType = getGraphQLOutputType(locationInfo, method);
-
-        if (resultType == null)
-        {
-            throw new IllegalStateException("Could not find type for " + locationInfo + ", method = " + method);
-        }
-
         final List<ParameterProvider> parameterProviders = createParameterProviders(
             locationInfo,
             method
         );
-        return new Mutation(
-            name.length() > 0 ? name : methodName,
-            mutationAnno.description(),
-            mutationAnno.full(),
-            logicBean,
-            methodAccess,
-            methodIndex,
-            parameterProviders,
-            mutationAnno.full() ? Scalars.GraphQLBoolean : resultType
-        );
+        final Parameter typeParamAnnoParameter = findTypeParamAnnoParameter(method);
+
+        if (typeParamAnnoParameter != null)
+        {
+            if (!typeParamAnnoParameter.getType().equals(Class.class))
+            {
+                throw new IllegalStateException(locationInfo + ": @GrapQLTypeParam parameter must be of type Class<T>");
+            }
+
+            final GraphQLTypeParam typeParamAnno = typeParamAnnoParameter.getAnnotation(GraphQLTypeParam.class);
+
+            final Type actualTypeArgument =
+                ((ParameterizedType) typeParamAnnoParameter.getParameterizedType()).getActualTypeArguments()[0];
+
+            if (!(actualTypeArgument instanceof TypeVariable))
+            {
+                throw new IllegalStateException(locationInfo + ": @GrapQLTypeParam parameter must be declared as type variable ( e.g. Class<T> ) ");
+            }
+
+            final List<Mutation> list = new ArrayList<>();
+
+            final String namePattern = typeParamAnno.namePattern().length() == 0 ? methodName + NAME_PATTERN_WILDCARD : typeParamAnno.namePattern();
+            if (!namePattern.contains(NAME_PATTERN_WILDCARD))
+            {
+                throw new IllegalStateException(locationInfo + ": @GraphQLTypeParam: namePattern must contain a '*' wildcard");
+            }
+
+            for (Class typeParam : typeParamAnno.types())
+            {
+                final String varName = ((TypeVariable) actualTypeArgument).getName();
+                Map<String, Class<?>> map = new LinkedHashMap<>();
+                map.put(varName, typeParam);
+
+                final TypeContext newContext = new TypeContext(null, method.getReturnType(), map);
+                final GraphQLOutputType outputType = getGraphQLOutputType(
+                    locationInfo,
+                    method.getReturnType(),
+                    null,
+                    newContext
+                );
+                list.add(
+                    new Mutation(
+                        namePattern.replace(NAME_PATTERN_WILDCARD, typeParam.getSimpleName()),
+                        mutationAnno.description(),
+                        mutationAnno.full(),
+                        logicBean,
+                        methodAccess,
+                        methodIndex,
+                        parameterProviders,
+                        mutationAnno.full() ? Scalars.GraphQLBoolean : outputType,
+                        typeParam
+                    )
+                );
+            }
+            return list;
+        }
+        else
+        {
+            final GraphQLOutputType resultType = getGraphQLOutputType(locationInfo, method);
+
+            return Collections.singletonList(
+                new Mutation(
+                    name,
+                    mutationAnno.description(),
+                    mutationAnno.full(),
+                    logicBean,
+                    methodAccess,
+                    methodIndex,
+                    parameterProviders,
+                    mutationAnno.full() ? Scalars.GraphQLBoolean : resultType,
+                    null
+                )
+            );
+        }
     }
 
 
@@ -221,9 +359,21 @@ public class LogicBeanAnalyzer
     {
         final Class<?> returnType = method.getReturnType();
 
+        final GraphQLField fieldAnno = method.getAnnotation(GraphQLField.class);
 
         final TypeContext ctx = new TypeContext(null, method);
 
+        return getGraphQLOutputType(locationInfo, returnType, fieldAnno, ctx);
+    }
+
+
+    private GraphQLOutputType getGraphQLOutputType(
+        String locationInfo,
+        Class<?> returnType,
+        GraphQLField fieldAnno,
+        TypeContext ctx
+    )
+    {
         final GraphQLOutputType resultType;
         if (returnType == null || returnType.equals(Void.TYPE))
         {
@@ -231,7 +381,6 @@ public class LogicBeanAnalyzer
         }
         else
         {
-            final GraphQLField fieldAnno = method.getAnnotation(GraphQLField.class);
 
             if (fieldAnno != null && fieldAnno.value().length() > 0)
             {
@@ -245,10 +394,9 @@ public class LogicBeanAnalyzer
             }
 
 
-            final Type[] actualTypeArguments = ctx.getActualTypeArguments();
             if (List.class.isAssignableFrom(returnType))
             {
-                if (actualTypeArguments == null)
+                if (!ctx.isParametrized())
                 {
                     throw new IllegalStateException(locationInfo + ": List return type must be parametrized.");
                 }
@@ -291,7 +439,6 @@ public class LogicBeanAnalyzer
     }
 
 
-
     private List<ParameterProvider> createParameterProviders(
         String name, Method method
     )
@@ -320,11 +467,43 @@ public class LogicBeanAnalyzer
     }
 
 
-    private ParameterProvider createValueProvider(String name, Type genericType, Parameter parameter)
+    private ParameterProvider createValueProvider(String name, Type genericParameterType, Parameter parameter)
     {
-        final Type genericParameterType = genericType;
         Class<?> parameterType = parameter.getType();
         final Annotation[] parameterAnnotations = parameter.getDeclaredAnnotations();
+
+
+        ParameterProvider provider = null;
+        for (ParameterProviderFactory factory : parameterProviderFactories)
+        {
+            provider = invokeFactory(parameterType, parameterAnnotations, factory);
+
+            if (provider != null)
+            {
+                break;
+            }
+        }
+
+        if (provider == null)
+        {
+            provider = createValueProvider(
+                name,
+                parameter,
+                genericParameterType,
+                parameterType
+            );
+        }
+        return provider;
+    }
+
+
+    private ParameterProvider createValueProvider(
+        String name,
+        Parameter parameter,
+        Type genericParameterType,
+        Class<?> parameterType
+    )
+    {
 
         final GraphQLField argAnno = parameter.getDeclaredAnnotation(GraphQLField.class);
         final ResolvedGenericType genericTypeAnno = parameter.getDeclaredAnnotation(ResolvedGenericType.class);
@@ -340,41 +519,6 @@ public class LogicBeanAnalyzer
                 "compiler it is the -parameters option.");
         }
 
-        ParameterProvider provider = null;
-        for (ParameterProviderFactory factory : parameterProviderFactories)
-        {
-            provider = invokeFactory(parameterType, parameterAnnotations, factory);
-
-            if (provider != null)
-            {
-                break;
-            }
-        }
-
-        if (provider == null)
-        {
-            provider = createValueProvier(
-                name,
-                parameter,
-                genericParameterType,
-                parameterType,
-                argAnno,
-                genericTypeAnno
-            );
-        }
-        return provider;
-    }
-
-
-    private ParameterProvider createValueProvier(
-        String name,
-        Parameter parameter,
-        Type genericParameterType,
-        Class<?> parameterType,
-        GraphQLField argAnno,
-        ResolvedGenericType genericTypeAnno
-    )
-    {
         ParameterProvider provider;
         final TypeContext paramTypeContext = new TypeContext(
             null,

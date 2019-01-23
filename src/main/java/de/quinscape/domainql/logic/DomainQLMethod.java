@@ -33,6 +33,8 @@ public abstract class DomainQLMethod
 
     protected final List<ParameterProvider> parameterProviders;
 
+    private final Class<?> typeParam;
+
 
     public DomainQLMethod(
         String name,
@@ -42,9 +44,11 @@ public abstract class DomainQLMethod
         MethodAccess methodAccess,
         int methodIndex,
         List<ParameterProvider> parameterProviders,
-        GraphQLOutputType resultType
+        GraphQLOutputType resultType,
+        Class<?> typeParam
     )
     {
+        this.typeParam = typeParam;
         if (name == null)
         {
             throw new IllegalArgumentException("name can't be null");
@@ -91,8 +95,11 @@ public abstract class DomainQLMethod
     }
 
     @Override
-    public Object get(DataFetchingEnvironment environment)
+    public Object get(DataFetchingEnvironment env)
     {
+
+        DomainQLDataFetchingEnvironment environment = new DomainQLDataFetchingEnvironment(env, typeParam);
+
         final Object[] paramValues = new Object[parameterProviders.size()];
 
         for (int i = 0; i < parameterProviders.size(); i++)

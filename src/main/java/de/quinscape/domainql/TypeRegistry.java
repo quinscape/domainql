@@ -132,23 +132,10 @@ public class TypeRegistry
 
         inputTypes.put(typeContext, newType);
 
-        final Type[] actualTypeArguments = typeContext.getActualTypeArguments();
-
-        if (actualTypeArguments != null)
+        final Collection<Class<?>> actualTypeArguments = typeContext.getTypeArguments();
+        for (Class<?> cls : actualTypeArguments)
         {
-            for (Type type : actualTypeArguments)
-            {
-                if (type instanceof TypeVariable)
-                {
-                    final Class<?> resolved = parentContext.resolveType(((TypeVariable) type).getName());
-                    registerInput(new TypeContext(typeContext, resolved));
-
-                }
-                else
-                {
-                    registerInput(new TypeContext(typeContext, (Class<?>) type));
-                }
-            }
+            registerInput(new TypeContext(typeContext, cls));
         }
 
         registerFields(
@@ -188,12 +175,7 @@ public class TypeRegistry
     public OutputType register(TypeContext ctx, TypeContext parentContext)
     {
         final Class<?> javaType = ctx.getType();
-
-        if (javaType.getName().equals("de.quinscape.domainql.beans.AnnotatedBean"))
-        {
-            log.info("hit");
-        }
-
+        
         DomainQL.ensurePojoType(javaType);
 
         final OutputType existing = outputTypes.get(ctx);
@@ -214,32 +196,11 @@ public class TypeRegistry
 
         outputTypes.put(ctx, newType);
 
-        final Type[] actualTypeArguments = ctx.getActualTypeArguments();
+        final Collection<Class<?>> actualTypeArguments = ctx.getTypeArguments();
 
-        if (actualTypeArguments != null)
+        for (Class<?> cls : actualTypeArguments)
         {
-            for (Type type : actualTypeArguments)
-            {
-                final Class<?> typeArg;
-                if (type instanceof TypeVariable)
-                {
-                    Class<?> resolved;
-                    if (parentContext == null || (resolved = parentContext.resolveType(
-                        ((TypeVariable) type).getName())) == null)
-                    {
-                        throw new IllegalStateException(
-                            "Error registering " + javaType.getName() + ": Type ist not a concrete class: " + Arrays
-                                .toString(actualTypeArguments));
-                    }
-                    typeArg = resolved;
-                }
-                else
-                {
-                    typeArg = (Class<?>) type;
-                }
-
-                register(new TypeContext(ctx, typeArg), ctx);
-            }
+            register(new TypeContext(ctx, cls), ctx);
         }
 
         registerFields(

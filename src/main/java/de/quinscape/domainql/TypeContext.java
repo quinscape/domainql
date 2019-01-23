@@ -1,5 +1,6 @@
 package de.quinscape.domainql;
 
+import com.google.common.collect.Maps;
 import de.quinscape.domainql.annotation.ResolvedGenericType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,13 +9,16 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 
 /**
  * Encapsulates a type reference which might be either a simple java type of a degenerified generic type based on a
  * raw type and concrete type variable substitutions.
- * 
  */
 public final class TypeContext
 {
@@ -25,35 +29,41 @@ public final class TypeContext
      */
     private final Class<?> type;
 
-    /**
-     * Actual type arguments (same indexes as {@link #typeVars})
-     */
-    private final Type[] actualTypeArguments;
-
-    /**
-     * Type variables (same indexes as {@link #actualTypeArguments})
-     */
-    private final TypeVariable[] typeVars;
+    private final Map<String, Class<?>> typeMap;
 
     /**
      * Name of the corresponding GraphQL type.
      */
     private final String typeName;
 
+
     /**
      * Parent type context.
      */
     private final TypeContext parent;
+
+    private final boolean degenerifyName;
 
 
     public TypeContext(TypeContext parent, Class<?> type)
     {
         this.parent = parent;
         this.type = type;
-        actualTypeArguments = null;
-        typeVars = null;
+        typeMap = Collections.emptyMap();
+        typeName = buildTypeName();
+        degenerifyName = false;
+    }
+
+
+    public TypeContext(TypeContext parent, Class<?> type, Map<String, Class<?>> typeMap)
+    {
+        this.parent = parent;
+        this.type = type;
+        this.typeMap = typeMap;
+        degenerifyName = true;
         typeName = buildTypeName();
     }
+
 
     public TypeContext(TypeContext parent, Class<?> type, Type genericType, ResolvedGenericType anno)
     {
@@ -66,14 +76,40 @@ public final class TypeContext
             final TypeVariable[] typeVars = ((Class) parameterizedType.getRawType()).getTypeParameters();
 
             this.type = type;
-            this.actualTypeArguments = actualTypeArguments;
-            this.typeVars = typeVars;
+
+            typeMap = new LinkedHashMap<>();
+            degenerifyName = true;
+
+            for (int i = 0; i < actualTypeArguments.length; i++)
+            {
+                final TypeVariable typeVar = typeVars[i];
+                final Type typeArg = actualTypeArguments[i];
+                Class<?> cls;
+                if (typeArg instanceof Class)
+                {
+                    cls = (Class<?>) typeArg;
+                }
+                else if (typeArg instanceof TypeVariable)
+                {
+                    cls = parent.resolveType(((TypeVariable) typeArg).getName());
+                }
+                else if (typeArg instanceof ParameterizedType)
+                {
+                    cls = (Class<?>) ((ParameterizedType) typeArg).getRawType();
+                }
+                else
+                {
+                    throw new IllegalStateException("Cannot handle non-concreate class type argument: " + this);
+                }
+
+                typeMap.put(typeVar.getName(), cls);
+            }
         }
         else
         {
             this.type = type;
-            this.actualTypeArguments = null;
-            this.typeVars = null;
+            typeMap = Collections.emptyMap();
+            degenerifyName = false;
         }
 
         //final ResolvedGenericType anno = method.getAnnotation(ResolvedGenericType.class);
@@ -88,6 +124,7 @@ public final class TypeContext
         }
     }
 
+
     public TypeContext(TypeContext parent, Method m)
     {
         this(
@@ -98,29 +135,17 @@ public final class TypeContext
         );
     }
 
+
     public Class<?> getFirstActualType()
     {
-        if (actualTypeArguments == null || actualTypeArguments.length == 0)
+        if (typeMap.isEmpty())
         {
             return null;
         }
         else
         {
-            final Type actualTypeArgument = actualTypeArguments[0];
-
-            if (!(actualTypeArgument instanceof Class))
-            {
-                throw new IllegalStateException("Argument is not a  class: " + actualTypeArguments);
-            }
-
-            return (Class<?>) actualTypeArgument;
+            return typeMap.values().iterator().next();
         }
-    }
-
-
-    public Type[] getActualTypeArguments()
-    {
-        return actualTypeArguments;
     }
 
 
@@ -132,30 +157,7 @@ public final class TypeContext
 
     public Class<?> resolveType(String name)
     {
-        if (typeVars == null || actualTypeArguments == null)
-        {
-            return null;
-        }
-
-        for (int i = 0; i < typeVars.length; i++)
-        {
-            TypeVariable typeVar = typeVars[i];
-            if (typeVar.getName().equals(name))
-            {
-                final Type typeArg = actualTypeArguments[i];
-
-                if (typeArg instanceof TypeVariable)
-                {
-                    return parent.resolveType(((TypeVariable) typeArg).getName());
-                }
-                else
-                {
-                    return (Class<?>) typeArg;
-                }
-
-            }
-        }
-        return null;
+        return typeMap.get(name);
     }
 
 
@@ -164,55 +166,30 @@ public final class TypeContext
         return typeName;
     }
 
+
     private String buildTypeName()
     {
-        if (typeVars == null || actualTypeArguments == null)
+        if (!degenerifyName)
         {
             return type.getSimpleName();
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append(type.getSimpleName());
-        for (Type actualTypeArgument : actualTypeArguments)
+        final String baseName = type.getSimpleName();
+
+        if (!baseName.equals("Object"))
         {
-            final Class<?> cls;
-            Class<?> resolved;
-            if (actualTypeArgument instanceof Class)
-            {
-                cls = (Class<?>) actualTypeArgument;
-            }
-            else if (actualTypeArgument instanceof ParameterizedType)
-            {
-                cls = (Class<?>) ((ParameterizedType) actualTypeArgument).getRawType();
-            }
-            else if (actualTypeArgument instanceof TypeVariable)
-            {
-                resolved = resolveTypeInternal(((TypeVariable) actualTypeArgument).getName());
-                if (resolved != null)
-                {
-                    cls = resolved;
-                }
-                else if (parent != null)
-                {
-                    cls = parent.resolveType(((TypeVariable) actualTypeArgument).getName());
-                    if (cls == null)
-                    {
-                        throw new IllegalStateException("Cannot handle non-concreate class type argument: " + this);
-                    }
-                }
-                else
-                {
-                    throw new IllegalStateException("Cannot handle non-concreate class type argument: " + this);
-                }
-            }
-            else
-            {
-                throw new IllegalStateException("Cannot handle non-concreate class type argument: " + this);
-            }
+            sb.append(baseName);
+        }
+        for (Class<?> cls : typeMap.values())
+        {
             sb.append(cls.getSimpleName());
         }
 
-        return sb.toString();
+        final String name = sb.toString();
+
+
+        return name;
     }
 
 
@@ -258,29 +235,21 @@ public final class TypeContext
     @Override
     public int hashCode()
     {
-        return 17 + typeName.hashCode() * 37;
+        return Objects.hashCode(typeName);
     }
 
 
-    @Override
-    public String toString()
-    {
-        return super.toString() + ": "
-            + "type = " + type
-            + ", actualTypeArguments = " + Arrays.toString(actualTypeArguments)
-            + ", typeVars = " + Arrays.toString(typeVars)
-            + ", typeName = '" + typeName + '\''
-            ;
-    }
+
 
 
     /**
      * Returns a clear text java-ish description of the type context
+     *
      * @return clear text java-ish description of the type context
      */
     public String describe()
     {
-        if (actualTypeArguments == null)
+        if (typeMap.isEmpty())
         {
             return type.getSimpleName();
         }
@@ -290,35 +259,37 @@ public final class TypeContext
         buff.append(type.getSimpleName())
             .append('<');
 
-        for (int i = 0; i < actualTypeArguments.length; i++)
+        for (Class<?> cls : typeMap.values())
         {
-            if (i > 0)
-            {
-                buff.append(",");
-            }
-
-
-            Type actualTypeArgument = actualTypeArguments[i];
-
-            if (actualTypeArgument instanceof TypeVariable)
-            {
-                final Class<?> cls = resolveTypeInternal(((TypeVariable) actualTypeArgument).getName());
-                buff.append(cls.getSimpleName());
-            }
-            else if (actualTypeArgument instanceof Class)
-            {
-                buff.append(((Class) actualTypeArgument).getSimpleName());
-            }
-            else
-            {
-                buff.append(
-                    actualTypeArgument.getTypeName()
-                );
-            }
+            buff.append(cls.getSimpleName());
         }
 
         buff.append('>');
 
         return buff.toString();
+    }
+
+
+    public boolean isParametrized()
+    {
+        return !typeMap.isEmpty();
+    }
+
+
+    @Override
+    public String toString()
+    {
+        return super.toString() + ": "
+            + "type = " + type
+            + ", typeMap = " + typeMap
+            + ", typeName = '" + typeName + '\''
+            + ", parent = " + parent
+            ;
+    }
+
+
+    public Collection<Class<?>> getTypeArguments()
+    {
+        return typeMap.values();
     }
 }

@@ -6,6 +6,7 @@ import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.param.DataFetchingEnvironmentProviderFactory;
 import de.quinscape.domainql.param.ParameterProviderFactory;
+import de.quinscape.domainql.param.TypeParameterProviderFactory;
 import de.quinscape.domainql.scalar.GraphQLCurrencyScalar;
 import graphql.Directives;
 import graphql.schema.GraphQLDirective;
@@ -77,6 +78,7 @@ public class DomainQLBuilder
 
         // add default factory
         parameterProviderFactories.add(new DataFetchingEnvironmentProviderFactory());
+        parameterProviderFactories.add(new TypeParameterProviderFactory());
 
         additionalScalarTypes.put(Long.TYPE, new GraphQLCurrencyScalar());
     }
