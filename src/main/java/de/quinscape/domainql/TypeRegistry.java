@@ -102,13 +102,6 @@ public class TypeRegistry
     public InputType registerInput(TypeContext typeContext)
     {
 
-        return registerInput(typeContext, null);
-    }
-
-
-    public InputType registerInput(TypeContext typeContext, TypeContext parentContext)
-    {
-
         final Class<?> javaType = typeContext.getType();
         DomainQL.ensurePojoType(javaType);
 
@@ -164,15 +157,8 @@ public class TypeRegistry
         }
     }
 
+
     public OutputType register(TypeContext ctx)
-    {
-        return register(ctx, null);
-    }
-
-
-
-
-    public OutputType register(TypeContext ctx, TypeContext parentContext)
     {
         final Class<?> javaType = ctx.getType();
         
@@ -200,7 +186,7 @@ public class TypeRegistry
 
         for (Class<?> cls : actualTypeArguments)
         {
-            register(new TypeContext(ctx, cls), ctx);
+            register(new TypeContext(ctx, cls));
         }
 
         registerFields(
@@ -309,11 +295,11 @@ public class TypeRegistry
                 boolean isInput = complexType instanceof InputType;
                 if (isInput)
                 {
-                    registerInput(ctx, parentContext);
+                    registerInput(ctx);
                 }
                 else
                 {
-                    register(ctx, parentContext);
+                    register(ctx);
                 }
             }
         }
@@ -332,11 +318,11 @@ public class TypeRegistry
                     boolean isInput = complexType instanceof InputType;
                     if (isInput)
                     {
-                        registerInput(ctx, parentContext);
+                        registerInput(ctx);
                     }
                     else
                     {
-                        register(ctx, parentContext);
+                        register(ctx);
                     }
                 }
             }

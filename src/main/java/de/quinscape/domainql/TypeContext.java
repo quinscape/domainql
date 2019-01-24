@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.TreeMap;
 
 /**
  * Encapsulates a type reference which might be either a simple java type of a degenerified generic type based on a
@@ -112,7 +111,6 @@ public final class TypeContext
             degenerifyName = false;
         }
 
-        //final ResolvedGenericType anno = method.getAnnotation(ResolvedGenericType.class);
         this.parent = parent;
         if (anno != null && anno.value().length() > 0)
         {
@@ -181,34 +179,13 @@ public final class TypeContext
         {
             sb.append(baseName);
         }
+        
         for (Class<?> cls : typeMap.values())
         {
             sb.append(cls.getSimpleName());
         }
-
-        final String name = sb.toString();
-
-
-        return name;
+        return sb.toString();
     }
-
-
-    private Class<?> resolveTypeInternal(String name)
-    {
-        Class<?> cls = resolveType(name);
-        if (cls == null && parent != null)
-        {
-            return parent.resolveType(name);
-        }
-        return cls;
-    }
-
-
-    public TypeContext getParent()
-    {
-        return parent;
-    }
-
 
     @Override
     public boolean equals(Object o)

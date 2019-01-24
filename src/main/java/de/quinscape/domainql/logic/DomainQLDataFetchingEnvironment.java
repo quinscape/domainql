@@ -2,7 +2,7 @@ package de.quinscape.domainql.logic;
 
 import graphql.execution.ExecutionContext;
 import graphql.execution.ExecutionId;
-import graphql.execution.ExecutionTypeInfo;
+import graphql.execution.ExecutionStepInfo;
 import graphql.language.Field;
 import graphql.language.FragmentDefinition;
 import graphql.schema.DataFetchingEnvironment;
@@ -11,6 +11,7 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
+import org.dataloader.DataLoader;
 
 import java.util.List;
 import java.util.Map;
@@ -103,9 +104,9 @@ public class DomainQLDataFetchingEnvironment
 
 
     @Override
-    public ExecutionTypeInfo getFieldTypeInfo()
+    public ExecutionStepInfo getExecutionStepInfo()
     {
-        return env.getFieldTypeInfo();
+        return env.getExecutionStepInfo();
     }
 
 
@@ -148,6 +149,13 @@ public class DomainQLDataFetchingEnvironment
     public ExecutionContext getExecutionContext()
     {
         return env.getExecutionContext();
+    }
+
+
+    @Override
+    public <K, V> DataLoader<K, V> getDataLoader(String s)
+    {
+        return env.getDataLoader(s);
     }
 
     /// DOMAINQL SPECIFIC METHODS

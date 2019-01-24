@@ -119,7 +119,6 @@ class LogicBeanAnalyzer
             final GraphQLMutation mutationAnno = method.getDeclaredAnnotation(GraphQLMutation.class);
             if (mutationAnno != null)
             {
-
                 mutations.addAll(
                     buildMutations(
                         logicBean,
@@ -427,9 +426,6 @@ class LogicBeanAnalyzer
                 {
                     throw new DomainQLException("Cannot handle " + returnType);
                 }
-
-                log.info("LogicBeanAnalyzer.watch: {}", ctx.getType());
-
 
                 final OutputType outputType = typeRegistry.register(ctx);
                 resultType = new GraphQLTypeReference(outputType.getName());

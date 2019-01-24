@@ -26,6 +26,7 @@ import de.quinscape.domainql.logicimpl.MinimalLogic;
 import de.quinscape.domainql.logicimpl.NoMirrorLogic;
 import de.quinscape.domainql.logicimpl.TestLogic;
 import de.quinscape.domainql.logicimpl.TypeParamLogic;
+import de.quinscape.domainql.logicimpl.TypeParamMutationLogic;
 import de.quinscape.domainql.logicimpl.TypeRepeatLogic;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
@@ -41,6 +42,7 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.GraphQLType;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -758,6 +760,13 @@ public class AnotherDomainQLTest
         assertThat(queryContainerB,is(notNullValue()));
         assertThat(queryContainerB.getType().getName(), is("ContainerTypeB"));
 
+        final GraphQLObjectType type = (GraphQLObjectType) schema.getType(queryContainerB.getType().getName());
+        assertThat(type.getDescription(), is("Generated for Container<TypeB>"));
+        assertThat(type.getFieldDefinitions().size(), is(2));
+        assertThat(type.getFieldDefinitions().get(0).getName(), is("value"));
+        assertThat(type.getFieldDefinitions().get(0).getType().getName(), is("TypeB"));
+
+
         GraphQLFieldDefinition queryListA = queryType.getFieldDefinition("queryListTypeA");
         assertThat(queryListA,is(notNullValue()));
         assertThat(queryListA.getType(),is(instanceOf(GraphQLList.class)));
@@ -767,6 +776,54 @@ public class AnotherDomainQLTest
         assertThat(queryListB,is(notNullValue()));
         assertThat(queryListB.getType(),is(instanceOf(GraphQLList.class)));
         assertThat(((GraphQLList)queryListB.getType()).getWrappedType().getName(), is("TypeB"));
+    }
+
+    @Test
+    public void testTypeParametersForMutations()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new TypeParamMutationLogic()))
+            .build();
+        final GraphQLSchema schema = domainQL
+            .getGraphQLSchema();
+
+        //log.info(domainQL.getFieldLookup().toString());
+
+        final GraphQLObjectType mutationType = schema.getMutationType();
+
+        GraphQLFieldDefinition mutationA = mutationType.getFieldDefinition("mutateTypeA");
+        assertThat(mutationA,is(notNullValue()));
+        assertThat(mutationA.getType().getName(), is("TypeA"));
+
+        GraphQLFieldDefinition mutationB = mutationType.getFieldDefinition("mutateTypeB");
+        assertThat(mutationB,is(notNullValue()));
+        assertThat(mutationB.getType().getName(), is("TypeB"));
+
+        GraphQLFieldDefinition mutationContainerA = mutationType.getFieldDefinition("mutateContainerTypeA");
+        assertThat(mutationContainerA,is(notNullValue()));
+        assertThat(mutationContainerA.getType().getName(), is("ContainerTypeA"));
+
+        GraphQLFieldDefinition mutationContainerB = mutationType.getFieldDefinition("mutateContainerTypeB");
+        assertThat(mutationContainerB,is(notNullValue()));
+        assertThat(mutationContainerB.getType().getName(), is("ContainerTypeB"));
+
+        final GraphQLObjectType type = (GraphQLObjectType) schema.getType(mutationContainerB.getType().getName());
+        assertThat(type.getDescription(), is("Generated for Container<TypeB>"));
+        assertThat(type.getFieldDefinitions().size(), is(2));
+        assertThat(type.getFieldDefinitions().get(0).getName(), is("value"));
+        assertThat(type.getFieldDefinitions().get(0).getType().getName(), is("TypeB"));
+
+
+        GraphQLFieldDefinition mutationListA = mutationType.getFieldDefinition("mutateListTypeA");
+        assertThat(mutationListA,is(notNullValue()));
+        assertThat(mutationListA.getType(),is(instanceOf(GraphQLList.class)));
+        assertThat(((GraphQLList)mutationListA.getType()).getWrappedType().getName(), is("TypeA"));
+
+        GraphQLFieldDefinition mutationListB = mutationType.getFieldDefinition("mutateListTypeB");
+        assertThat(mutationListB,is(notNullValue()));
+        assertThat(mutationListB.getType(),is(instanceOf(GraphQLList.class)));
+        assertThat(((GraphQLList)mutationListB.getType()).getWrappedType().getName(), is("TypeB"));
     }
 }
 
