@@ -40,6 +40,7 @@ import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.GraphQLType;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -938,6 +939,14 @@ public class DomainQLExecutionTest
         final GraphQLSchema schema = domainQL
             .getGraphQLSchema();
 
+        final GraphQLObjectType typeA = (GraphQLObjectType) schema.getType("TypeA");
+        final GraphQLObjectType typeB = (GraphQLObjectType) schema.getType("TypeB");
+        assertThat(typeA,is(notNullValue()));
+        assertThat(typeB,is(notNullValue()));
+        assertThat(typeA.getFieldDefinition("value"),is(notNullValue()));
+        assertThat(typeB.getFieldDefinition("value"),is(notNullValue()));
+
+
         final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 
          ExecutionInput executionInput = ExecutionInput.newExecutionInput()
@@ -977,6 +986,13 @@ public class DomainQLExecutionTest
         final GraphQLSchema schema = domainQL
             .getGraphQLSchema();
 
+        final GraphQLObjectType typeA = (GraphQLObjectType) schema.getType("TypeA");
+        final GraphQLObjectType typeB = (GraphQLObjectType) schema.getType("TypeB");
+        assertThat(typeA,is(notNullValue()));
+        assertThat(typeB,is(notNullValue()));
+        assertThat(typeA.getFieldDefinition("value"),is(notNullValue()));
+        assertThat(typeB.getFieldDefinition("value"),is(notNullValue()));
+        
         final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         {
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
@@ -1112,9 +1128,12 @@ public class DomainQLExecutionTest
         final GraphQLSchema schema = domainQL
             .getGraphQLSchema();
 
-
-        log.info("TypeA {}", schema.getType("TypeA"));
-
+        final GraphQLObjectType typeA = (GraphQLObjectType) schema.getType("TypeA");
+        final GraphQLObjectType typeB = (GraphQLObjectType) schema.getType("TypeB");
+        assertThat(typeA,is(notNullValue()));
+        assertThat(typeB,is(notNullValue()));
+        assertThat(typeA.getFieldDefinition("value"),is(notNullValue()));
+        assertThat(typeB.getFieldDefinition("value"),is(notNullValue()));
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 
