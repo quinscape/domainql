@@ -41,31 +41,48 @@ public final class TypeContext
      */
     private final TypeContext parent;
 
-    private final boolean degenerifyName;
-
-
     public TypeContext(TypeContext parent, Class<?> type)
     {
         this.parent = parent;
         this.type = type;
         typeMap = Collections.emptyMap();
-        typeName = buildTypeName();
-        degenerifyName = false;
+        typeName = buildTypeName(false);
     }
 
 
     public TypeContext(TypeContext parent, Class<?> type, Map<String, Class<?>> typeMap)
     {
         this.parent = parent;
-        this.type = type;
         this.typeMap = typeMap;
-        degenerifyName = true;
-        typeName = buildTypeName();
+
+        if (type.equals(Object.class))
+        {
+            // this case only happens for parameterized queries/mutations that return the parameter type directly
+            // (e.g. public <T> T query(...) )
+
+            // in this case we simply replace the base type Object.class with the first value from the type map and
+            // build a non-degenerified name so we don't repeat the parameterized type in its name
+
+            if (typeMap.size() != 1)
+            {
+                throw new IllegalStateException("Invalid type Object.class without singular type mapping");
+            }
+
+            this.type = typeMap.values().iterator().next();
+            typeName = buildTypeName(false);
+        }
+        else
+        {
+            this.type = type;
+            typeName = buildTypeName(true);
+        }
+
     }
 
 
     public TypeContext(TypeContext parent, Class<?> type, Type genericType, ResolvedGenericType anno)
     {
+        final boolean degenerifyName;
         if (genericType instanceof ParameterizedType)
         {
             final ParameterizedType parameterizedType = (ParameterizedType) genericType;
@@ -118,7 +135,7 @@ public final class TypeContext
         }
         else
         {
-            this.typeName = buildTypeName();
+            this.typeName = buildTypeName(degenerifyName);
         }
     }
 
@@ -165,7 +182,7 @@ public final class TypeContext
     }
 
 
-    private String buildTypeName()
+    private String buildTypeName(boolean degenerifyName)
     {
         if (!degenerifyName)
         {
@@ -174,12 +191,8 @@ public final class TypeContext
 
         StringBuilder sb = new StringBuilder();
         final String baseName = type.getSimpleName();
+        sb.append(baseName);
 
-        if (!baseName.equals("Object"))
-        {
-            sb.append(baseName);
-        }
-        
         for (Class<?> cls : typeMap.values())
         {
             sb.append(cls.getSimpleName());
