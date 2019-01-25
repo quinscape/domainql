@@ -27,6 +27,7 @@ import de.quinscape.domainql.logicimpl.NoMirrorLogic;
 import de.quinscape.domainql.logicimpl.TestLogic;
 import de.quinscape.domainql.logicimpl.TypeParamLogic;
 import de.quinscape.domainql.logicimpl.TypeParamMutationLogic;
+import de.quinscape.domainql.logicimpl.TypeParamWithNamePatternLogic;
 import de.quinscape.domainql.logicimpl.TypeRepeatLogic;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
@@ -824,6 +825,29 @@ public class AnotherDomainQLTest
         assertThat(mutationListB,is(notNullValue()));
         assertThat(mutationListB.getType(),is(instanceOf(GraphQLList.class)));
         assertThat(((GraphQLList)mutationListB.getType()).getWrappedType().getName(), is("TypeB"));
+    }
+
+    @Test
+    public void testTypeParameterWithPattern()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new TypeParamWithNamePatternLogic()))
+            .build();
+        final GraphQLSchema schema = domainQL
+            .getGraphQLSchema();
+
+        //log.info(domainQL.getFieldLookup().toString());
+
+        final GraphQLObjectType queryType = schema.getQueryType();
+
+        GraphQLFieldDefinition queryA = queryType.getFieldDefinition("TypeAQuery");
+        assertThat(queryA,is(notNullValue()));
+        assertThat(queryA.getType().getName(), is("TypeA"));
+
+        GraphQLFieldDefinition queryB = queryType.getFieldDefinition("TypeBQuery");
+        assertThat(queryB,is(notNullValue()));
+        assertThat(queryB.getType().getName(), is("TypeB"));
     }
 }
 
