@@ -522,7 +522,7 @@ public class DomainQL
 
     public static boolean isNormalProperty(JSONPropertyInfo info)
     {
-        return !Class.class.isAssignableFrom(info.getType()) && ((JavaObjectPropertyInfo) info).getGetterMethod() != null;
+        return !Class.class.isAssignableFrom(info.getType()) && ((JavaObjectPropertyInfo) info).getGetterMethod() != null && !info.isIgnore();
     }
 
 

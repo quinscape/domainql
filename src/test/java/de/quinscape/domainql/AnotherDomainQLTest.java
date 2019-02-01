@@ -12,6 +12,7 @@ import de.quinscape.domainql.logicimpl.DegenerifyLogic;
 import de.quinscape.domainql.logicimpl.DoubleDegenerificationLogic;
 import de.quinscape.domainql.logicimpl.GenericDomainLogic;
 import de.quinscape.domainql.logicimpl.GenericDomainOutputLogic;
+import de.quinscape.domainql.logicimpl.IgnoredPropsLogic;
 import de.quinscape.domainql.logicimpl.ImplicitOverrideLogic;
 import de.quinscape.domainql.logicimpl.ImplicitOverrideNonInputLogic;
 import de.quinscape.domainql.logicimpl.ListReturningLogic;
@@ -51,6 +52,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static de.quinscape.domainql.testdomain.Tables.*;
@@ -848,6 +850,31 @@ public class AnotherDomainQLTest
         GraphQLFieldDefinition queryB = queryType.getFieldDefinition("TypeBQuery");
         assertThat(queryB,is(notNullValue()));
         assertThat(queryB.getType().getName(), is("TypeB"));
+    }
+
+
+    @Test
+    public void testIgnoredProps()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new IgnoredPropsLogic()))
+            .build();
+        final GraphQLSchema schema = domainQL
+            .getGraphQLSchema();
+
+        //log.info(domainQL.getFieldLookup().toString());
+
+        final GraphQLObjectType queryType = schema.getQueryType();
+
+        GraphQLFieldDefinition queryB = queryType.getFieldDefinition("igPropBean");
+        assertThat(queryB,is(notNullValue()));
+
+        final GraphQLObjectType type = (GraphQLObjectType) schema.getType("IgnoredPropsBean");
+        final List<GraphQLFieldDefinition> fieldDefinitions = type.getFieldDefinitions();
+        assertThat(fieldDefinitions.size(), is(1));
+        assertThat(fieldDefinitions.get(0).getName(), is("value"));
+
     }
 }
 
