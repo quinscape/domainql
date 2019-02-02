@@ -18,6 +18,7 @@ import de.quinscape.domainql.logicimpl.GetterArgLogic;
 import de.quinscape.domainql.logicimpl.LogicWithEnums;
 import de.quinscape.domainql.logicimpl.LogicWithEnums2;
 import de.quinscape.domainql.beans.MyEnum;
+import de.quinscape.domainql.logicimpl.NullForComplexValueLogic;
 import de.quinscape.domainql.logicimpl.TestLogic;
 import de.quinscape.domainql.logicimpl.TypeConversionLogic;
 import de.quinscape.domainql.config.SourceField;
@@ -140,7 +141,7 @@ public class DomainQLExecutionTest
 
         ExecutionResult executionResult = graphQL.execute(executionInput);
 
-        assertThat(executionResult.getErrors().size(), is(0));
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
         assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"queryTruth\":true}"));
     }
 
@@ -162,8 +163,7 @@ public class DomainQLExecutionTest
         ExecutionResult executionResult = graphQL.execute(executionInput);
 
 
-        assumeNoErrors(executionResult);
-
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
         assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"mutateString\":\"<<xxx>>\"}"));
     }
 
@@ -182,11 +182,7 @@ public class DomainQLExecutionTest
 
         ExecutionResult executionResult = graphQL.execute(executionInput);
 
-        final List<GraphQLError> errors = executionResult.getErrors();
-
-        //log.info(errors.toString());
-
-        assertThat(errors.size(), is(0));
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
         assertThat(
             JSON.defaultJSON().forValue(executionResult.getData()),
             is("{\"walkForwardRef\":[{\"id\":\"id1\",\"target\":{\"id\":\"id2\"}}]}")
@@ -208,23 +204,13 @@ public class DomainQLExecutionTest
         ExecutionResult executionResult = graphQL.execute(executionInput);
 
 
-        assumeNoErrors(executionResult);
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
         assertThat(
             JSON.defaultJSON().forValue(executionResult.getData()),
             is("{\"walkBackOne\":{\"id\":\"target-id\",\"sourceFive\":{\"id\":\"src-id\"}}}")
         );
     }
 
-
-    private void assumeNoErrors(ExecutionResult executionResult)
-    {
-        final List<GraphQLError> errors = executionResult.getErrors();
-        if (errors.size() > 0)
-        {
-            log.error("ERROR {}", errors);
-        }
-        assertThat(errors.size(), is(0));
-    }
 
 
     @Test
@@ -240,7 +226,7 @@ public class DomainQLExecutionTest
 
         ExecutionResult executionResult = graphQL.execute(executionInput);
 
-        assertThat(executionResult.getErrors().size(), is(0));
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
         assertThat(
             JSON.defaultJSON().forValue(executionResult.getData()),
             is("{\"walkBackMany\":[{\"id\":\"target-id\",\"sourceSixes\":[{\"id\":\"source-id\"}," +
@@ -261,7 +247,7 @@ public class DomainQLExecutionTest
             .build();
 
         ExecutionResult executionResult = graphQL.execute(executionInput);
-        assumeNoErrors(executionResult);
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
         assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"extraQuery\":\"extra:foo\"}"));
     }
 
@@ -281,7 +267,7 @@ public class DomainQLExecutionTest
             .build();
 
         ExecutionResult executionResult = graphQL.execute(executionInput);
-        assumeNoErrors(executionResult);
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
         assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"extraMutation\":\"mutated:xxx\"}"));
     }
 
@@ -310,7 +296,7 @@ public class DomainQLExecutionTest
             .build();
 
         ExecutionResult executionResult = graphQL.execute(executionInput);
-        assumeNoErrors(executionResult);
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
         assertThat(
             JSON.defaultJSON().forValue(executionResult.getData()),
             is("{\"mutateConverted\":\"qwertz:1970-01-01 01:00:03.6\"}")
@@ -334,7 +320,7 @@ public class DomainQLExecutionTest
             .build();
 
         ExecutionResult executionResult = graphQL.execute(executionInput);
-        assumeNoErrors(executionResult);
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
         assertThat(
             JSON.defaultJSON().forValue(executionResult.getData()),
             is("{\"beanWithFetcher\":{\"value\":\"test:Value From Logic\"}}")
@@ -367,7 +353,7 @@ public class DomainQLExecutionTest
                 .build();
 
             ExecutionResult executionResult = graphQL.execute(executionInput);
-            assumeNoErrors(executionResult);
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
             assertThat(
                 JSON.defaultJSON().forValue(executionResult.getData()),
                 is("{\"getterArgBean\":{\"modifiedValue\":\"Value From GetterArgLogic:aaa:12\"}}")
@@ -388,7 +374,7 @@ public class DomainQLExecutionTest
                 .build();
 
             ExecutionResult executionResult = graphQL.execute(executionInput);
-            assumeNoErrors(executionResult);
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
             assertThat(
                 JSON.defaultJSON().forValue(executionResult.getData()),
                 is("{\"getterArgBean\":{\"modifiedValue\":\"Value From GetterArgLogic:bbb:1111\"}}")
@@ -409,7 +395,7 @@ public class DomainQLExecutionTest
                 .build();
 
             ExecutionResult executionResult = graphQL.execute(executionInput);
-            assumeNoErrors(executionResult);
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
             assertThat(
                 JSON.defaultJSON().forValue(executionResult.getData()),
                 is("{\"getterArgBean\":{\"introduced\":{\"name\":\"ccc\"}}}")
@@ -443,7 +429,7 @@ public class DomainQLExecutionTest
                     .build();
 
                 ExecutionResult executionResult = graphQL.execute(executionInput);
-                assumeNoErrors(executionResult);
+                assertThat(executionResult.getErrors(), is(Collections.emptyList()));
                 assertThat(
                     JSON.defaultJSON().forValue(executionResult.getData()),
                     is("{\"queryWithEnumArg\":\"(C)\"}")
@@ -465,7 +451,7 @@ public class DomainQLExecutionTest
                     .build();
 
                 ExecutionResult executionResult = graphQL.execute(executionInput);
-                assumeNoErrors(executionResult);
+                assertThat(executionResult.getErrors(), is(Collections.emptyList()));
                 assertThat(
                     JSON.defaultJSON().forValue(executionResult.getData()),
                     is("{\"queryWithObjectArgWithEnum\":\"BeanWithEnum: anotherEnum = X\"}")
@@ -486,7 +472,7 @@ public class DomainQLExecutionTest
                     .build();
 
                 ExecutionResult executionResult = graphQL.execute(executionInput);
-                assumeNoErrors(executionResult);
+                assertThat(executionResult.getErrors(), is(Collections.emptyList()));
                 assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"enumMutation\":\"B\"}"));
             }
 
@@ -506,7 +492,7 @@ public class DomainQLExecutionTest
                     .build();
 
                 ExecutionResult executionResult = graphQL.execute(executionInput);
-                assumeNoErrors(executionResult);
+                assertThat(executionResult.getErrors(), is(Collections.emptyList()));
                 assertThat(
                     JSON.defaultJSON().forValue(executionResult.getData()),
                     is("{\"objectWithEnumMutation\":{\"anotherEnum\":\"Z\"}}")
@@ -540,7 +526,7 @@ public class DomainQLExecutionTest
                 .build();
 
             ExecutionResult executionResult = graphQL.execute(executionInput);
-            assumeNoErrors(executionResult);
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
             assertThat(JSON.defaultJSON().forValue(executionResult.getData()), is("{\"fullQuery\":true}"));
 
             assertThat(
@@ -644,8 +630,7 @@ public class DomainQLExecutionTest
         ExecutionResult executionResult = graphQL.execute(executionInput);
 
 
-        final List<GraphQLError> errors = executionResult.getErrors();
-        assertThat(errors.size(), is(0));
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
 
         final Map<String, Object> m = (Map<String, Object>) ((Map<String, Object>) executionResult.getData()).get(
             "getPayload");
@@ -703,11 +688,7 @@ public class DomainQLExecutionTest
 
         ExecutionResult executionResult = graphQL.execute(executionInput);
 
-        final List<GraphQLError> errors = executionResult.getErrors();
-
-        //log.info(errors.toString());
-
-        assertThat(errors.size(), is(0));
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
         final Map<String, Object> data = executionResult.getData();
 
         assertThat(data.get("mutationWithDegenerifiedInput"), is("AAA:100|BBB:101|"));
@@ -742,11 +723,7 @@ public class DomainQLExecutionTest
 
         ExecutionResult executionResult = graphQL.execute(executionInput);
 
-        final List<GraphQLError> errors = executionResult.getErrors();
-
-        //log.info(errors.toString());
-
-        assertThat(errors.size(), is(0));
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
         final Map<String, Object> data = executionResult.getData();
 
         assertThat(data.get("containerQuery"), is("CCC:102:333"));
@@ -781,9 +758,7 @@ public class DomainQLExecutionTest
         ExecutionResult executionResult = graphQL.execute(executionInput);
 
 
-        final List<GraphQLError> errors = executionResult.getErrors();
-        //log.info(errors.toString());
-        assertThat(errors.size(), is(0));
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
 
         final Map<String, Object> m = (Map<String, Object>) ((Map<String, Object>) executionResult.getData()).get(
             "queryContainer");
@@ -827,9 +802,7 @@ public class DomainQLExecutionTest
         ExecutionResult executionResult = graphQL.execute(executionInput);
 
 
-        final List<GraphQLError> errors = executionResult.getErrors();
-        //log.info(errors.toString());
-        assertThat(errors.size(), is(0));
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
 
         final String result = (String) ((Map<String, Object>) executionResult.getData()).get("mutationWithDD");
 
@@ -868,9 +841,7 @@ public class DomainQLExecutionTest
 
         ExecutionResult executionResult = graphQL.execute(executionInput);
 
-        final List<GraphQLError> errors = executionResult.getErrors();
-        //log.info(errors.toString());
-        assertThat(errors.size(), is(0));
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
 
         final Object data = ((Map<String, Object>) executionResult.getData()).get("store");
 
@@ -908,9 +879,7 @@ public class DomainQLExecutionTest
 
         ExecutionResult executionResult = graphQL.execute(executionInput);
 
-        final List<GraphQLError> errors = executionResult.getErrors();
-        //log.info(errors.toString());
-        assertThat(errors.size(), is(0));
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
 
 
         final Map<String, Object> data = (Map<String, Object>) util.getPropertyPath(
@@ -949,7 +918,7 @@ public class DomainQLExecutionTest
 
         final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 
-         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
             // language=GraphQL
             .query("query queryA($complex: ComplexInput!)\n" +
                 "{\n" +
@@ -966,9 +935,7 @@ public class DomainQLExecutionTest
 
         ExecutionResult executionResult = graphQL.execute(executionInput);
 
-        final List<GraphQLError> errors = executionResult.getErrors();
-        //log.info(errors.toString());
-        assertThat(errors.size(), is(0));
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
 
         Map data = executionResult.getData();
         //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
@@ -992,130 +959,122 @@ public class DomainQLExecutionTest
         assertThat(typeB,is(notNullValue()));
         assertThat(typeA.getFieldDefinition("value"),is(notNullValue()));
         assertThat(typeB.getFieldDefinition("value"),is(notNullValue()));
-        
+
         final GraphQL graphQL = GraphQL.newGraphQL(schema).build();
         {
-        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
-            // language=GraphQL
-            .query("query queryB($complex: ComplexInput)\n" +
-                "{\n" +
-                "    queryTypeB(complexInput: $complex)\n" +
-                "    {\n" +
-                "        value\n" +
-                "    }\n" +
-                "}")
-            .variables(ImmutableMap.of("complex", JSONUtil.DEFAULT_PARSER.parse(Map.class, "{\n" +
-                "    \"value\" : \"cvB\",\n" +
-                "    \"num\" : 1828\n" +
-                "}")))
-            .build();
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("query queryB($complex: ComplexInput)\n" +
+                    "{\n" +
+                    "    queryTypeB(complexInput: $complex)\n" +
+                    "    {\n" +
+                    "        value\n" +
+                    "    }\n" +
+                    "}")
+                .variables(ImmutableMap.of("complex", JSONUtil.DEFAULT_PARSER.parse(Map.class, "{\n" +
+                    "    \"value\" : \"cvB\",\n" +
+                    "    \"num\" : 1828\n" +
+                    "}")))
+                .build();
 
-        ExecutionResult executionResult = graphQL.execute(executionInput);
+            ExecutionResult executionResult = graphQL.execute(executionInput);
 
-        final List<GraphQLError> errors = executionResult.getErrors();
-        log.info(errors.toString());
-        assertThat(errors.size(), is(0));
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
 
-        Map data = executionResult.getData();
-        //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
-        assertThat(util.getPropertyPath(data, "queryTypeB.value"), is("cvB/1828"));
+            Map data = executionResult.getData();
+            //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
+            assertThat(util.getPropertyPath(data, "queryTypeB.value"), is("cvB/1828"));
+        }
+
+
+        {
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("query queryContainerTypeA($complex: ComplexInput)\n" +
+                    "{\n" +
+                    "    queryContainerTypeA(complexInput: $complex)\n" +
+                    "    {\n" +
+                    "        value{\n" +
+                    "            value\n" +
+                    "        }\n" +
+                    "            num\n" +
+                    "    }\n" +
+                    "}")
+                .variables(ImmutableMap.of("complex", JSONUtil.DEFAULT_PARSER.parse(Map.class, "{\n" +
+                    "    \"value\" : \"cvA\",\n" +
+                    "    \"num\" : 8283\n" +
+                    "}")))
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+            Map data = executionResult.getData();
+            //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
+            assertThat(util.getPropertyPath(data, "queryContainerTypeA.value.value"), is("cvA/8283"));
+            assertThat(util.getPropertyPath(data, "queryContainerTypeA.num"), is(123));
+        }
+
+
+        {
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("query queryContainerTypeB($complex: ComplexInput!)\n" +
+                    "{\n" +
+                    "    queryContainerTypeB(complexInput: $complex)\n" +
+                    "    {\n" +
+                    "        value{\n" +
+                    "            value\n" +
+                    "        }\n" +
+                    "            num\n" +
+                    "    }\n" +
+                    "}")
+                .variables(ImmutableMap.of("complex", JSONUtil.DEFAULT_PARSER.parse(Map.class, "{\n" +
+                    "    \"value\" : \"cvB\",\n" +
+                    "    \"num\" : 2534\n" +
+                    "}")))
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+            Map data = executionResult.getData();
+            //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
+            assertThat(util.getPropertyPath(data, "queryContainerTypeB.value.value"), is("cvB/2534"));
+            assertThat(util.getPropertyPath(data, "queryContainerTypeB.num"), is(123));
+        }
+
+
+        {
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("query queryListTypeA($complex: ComplexInput!)\n" +
+                    "{\n" +
+                    "    queryListTypeA(complexInput: $complex)\n" +
+                    "    {\n" +
+                    "        value\n" +
+                    "    }\n" +
+                    "}")
+                .variables(ImmutableMap.of("complex", JSONUtil.DEFAULT_PARSER.parse(Map.class, "{\n" +
+                    "    \"value\" : \"lll\",\n" +
+                    "    \"num\" : 9284\n" +
+                    "}")))
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+            Map data = executionResult.getData();
+            //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
+            assertThat(util.getPropertyPath(data, "queryListTypeA[0].value"), is("lll..."));
+            assertThat(util.getPropertyPath(data, "queryListTypeA[1].value"), is("...9284"));
+        }
+
+
     }
-
-
-    {
-        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
-            // language=GraphQL
-            .query("query queryContainerTypeA($complex: ComplexInput)\n" +
-                "{\n" +
-                "    queryContainerTypeA(complexInput: $complex)\n" +
-                "    {\n" +
-                "        value{\n" +
-                "            value\n" +
-                "        }\n" +
-                "            num\n" +
-                "    }\n" +
-                "}")
-            .variables(ImmutableMap.of("complex", JSONUtil.DEFAULT_PARSER.parse(Map.class, "{\n" +
-                "    \"value\" : \"cvA\",\n" +
-                "    \"num\" : 8283\n" +
-                "}")))
-            .build();
-
-        ExecutionResult executionResult = graphQL.execute(executionInput);
-
-        final List<GraphQLError> errors = executionResult.getErrors();
-        log.info(errors.toString());
-        assertThat(errors.size(), is(0));
-
-        Map data = executionResult.getData();
-        //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
-        assertThat(util.getPropertyPath(data, "queryContainerTypeA.value.value"), is("cvA/8283"));
-        assertThat(util.getPropertyPath(data, "queryContainerTypeA.num"), is(123));
-    }
-
-
-    {
-        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
-            // language=GraphQL
-            .query("query queryContainerTypeB($complex: ComplexInput!)\n" +
-                "{\n" +
-                "    queryContainerTypeB(complexInput: $complex)\n" +
-                "    {\n" +
-                "        value{\n" +
-                "            value\n" +
-                "        }\n" +
-                "            num\n" +
-                "    }\n" +
-                "}")
-            .variables(ImmutableMap.of("complex", JSONUtil.DEFAULT_PARSER.parse(Map.class, "{\n" +
-                "    \"value\" : \"cvB\",\n" +
-                "    \"num\" : 2534\n" +
-                "}")))
-            .build();
-
-        ExecutionResult executionResult = graphQL.execute(executionInput);
-
-        final List<GraphQLError> errors = executionResult.getErrors();
-        log.info(errors.toString());
-        assertThat(errors.size(), is(0));
-
-        Map data = executionResult.getData();
-        //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
-        assertThat(util.getPropertyPath(data, "queryContainerTypeB.value.value"), is("cvB/2534"));
-        assertThat(util.getPropertyPath(data, "queryContainerTypeB.num"), is(123));
-    }
-
-
-    {
-        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
-            // language=GraphQL
-            .query("query queryListTypeA($complex: ComplexInput!)\n" +
-                "{\n" +
-                "    queryListTypeA(complexInput: $complex)\n" +
-                "    {\n" +
-                "        value\n" +
-                "    }\n" +
-                "}")
-            .variables(ImmutableMap.of("complex", JSONUtil.DEFAULT_PARSER.parse(Map.class, "{\n" +
-                "    \"value\" : \"lll\",\n" +
-                "    \"num\" : 9284\n" +
-                "}")))
-            .build();
-
-        ExecutionResult executionResult = graphQL.execute(executionInput);
-
-        final List<GraphQLError> errors = executionResult.getErrors();
-        log.info(errors.toString());
-        assertThat(errors.size(), is(0));
-
-        Map data = executionResult.getData();
-        //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
-        assertThat(util.getPropertyPath(data, "queryListTypeA[0].value"), is("lll..."));
-        assertThat(util.getPropertyPath(data, "queryListTypeA[1].value"), is("...9284"));
-    }
-
-
-}
 
 
     @Test
@@ -1155,9 +1114,7 @@ public class DomainQLExecutionTest
 
             ExecutionResult executionResult = graphQL.execute(executionInput);
 
-            final List<GraphQLError> errors = executionResult.getErrors();
-            log.info(errors.toString());
-            assertThat(errors.size(), is(0));
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
 
             Map data = executionResult.getData();
             //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
@@ -1182,9 +1139,7 @@ public class DomainQLExecutionTest
 
             ExecutionResult executionResult = graphQL.execute(executionInput);
 
-            final List<GraphQLError> errors = executionResult.getErrors();
-            //log.info(errors.toString());
-            assertThat(errors.size(), is(0));
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
 
             Map data = executionResult.getData();
             //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
@@ -1212,9 +1167,7 @@ public class DomainQLExecutionTest
 
             ExecutionResult executionResult = graphQL.execute(executionInput);
 
-            final List<GraphQLError> errors = executionResult.getErrors();
-            log.info(errors.toString());
-            assertThat(errors.size(), is(0));
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
 
             Map data = executionResult.getData();
             //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
@@ -1243,9 +1196,7 @@ public class DomainQLExecutionTest
 
             ExecutionResult executionResult = graphQL.execute(executionInput);
 
-            final List<GraphQLError> errors = executionResult.getErrors();
-            log.info(errors.toString());
-            assertThat(errors.size(), is(0));
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
 
             Map data = executionResult.getData();
             //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
@@ -1271,9 +1222,7 @@ public class DomainQLExecutionTest
 
             ExecutionResult executionResult = graphQL.execute(executionInput);
 
-            final List<GraphQLError> errors = executionResult.getErrors();
-            log.info(errors.toString());
-            assertThat(errors.size(), is(0));
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
 
             Map data = executionResult.getData();
             //log.info(JSONUtil.DEFAULT_GENERATOR.forValue(data));
