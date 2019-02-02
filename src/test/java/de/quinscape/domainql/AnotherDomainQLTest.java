@@ -25,6 +25,7 @@ import de.quinscape.domainql.logicimpl.LogicWithWrongInjection;
 import de.quinscape.domainql.logicimpl.LogicWithWrongInjection2;
 import de.quinscape.domainql.logicimpl.MinimalLogic;
 import de.quinscape.domainql.logicimpl.NoMirrorLogic;
+import de.quinscape.domainql.logicimpl.NullForComplexValueLogic;
 import de.quinscape.domainql.logicimpl.TestLogic;
 import de.quinscape.domainql.logicimpl.TypeParamLogic;
 import de.quinscape.domainql.logicimpl.TypeParamMutationLogic;
@@ -876,5 +877,6 @@ public class AnotherDomainQLTest
         assertThat(fieldDefinitions.get(0).getName(), is("value"));
 
     }
+
 }
 

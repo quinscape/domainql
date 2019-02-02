@@ -1230,4 +1230,33 @@ public class DomainQLExecutionTest
             assertThat(util.getPropertyPath(data, "mutateListTypeA[1].value"), is("...9284"));
         }
     }
+
+
+    @Test
+    public void testNullForComplexValue()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new NullForComplexValueLogic()))
+            .build();
+        final GraphQLSchema schema = domainQL
+            .getGraphQLSchema();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        //log.info(domainQL.getFieldLookup().toString());
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            .query(
+                // language=GraphQL
+                "{\n" +
+                "    logicWithComplexInput\n" +
+                "}")
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+
+    }
 }

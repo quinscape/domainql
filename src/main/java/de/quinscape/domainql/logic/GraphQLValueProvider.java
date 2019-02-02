@@ -115,13 +115,18 @@ public class GraphQLValueProvider
         DataFetchingEnvironment environment, InputType inputType, Map<String, Object> complexValue
     )
     {
+        if (complexValue == null)
+        {
+            return null;
+        }
+
         Class<?> pojoClass = inputType.getJavaType();
+        if (pojoClass.isInstance(complexValue))
+        {
+            return complexValue;
+        }
         try
         {
-            if (pojoClass.isInstance(complexValue))
-            {
-                return complexValue;
-            }
 
             final Object pojoInstance = pojoClass.newInstance();
             final JSONClassInfo classInfo = JSONUtil.getClassInfo(pojoClass);
