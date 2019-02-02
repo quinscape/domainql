@@ -59,8 +59,8 @@ public class SchemaDataProviderTest
         final Object sourceTwoType = findNamed(types, "SourceTwo");
 
         assertThat(sourceTwoType, is(notNullValue()));
-        assertThat(pathUtil.getPropertyPath(sourceTwoType, "fields[1].name"), is("id"));
-        assertThat(pathUtil.getPropertyPath(sourceTwoType, "fields[2].name"), is("targetId"));
+        assertThat(pathUtil.getPropertyPath(sourceTwoType, "fields[0].name"), is("id"));
+        assertThat(pathUtil.getPropertyPath(sourceTwoType, "fields[1].name"), is("targetId"));
 
         final Object stringType = findNamed(types, "String");
         assertThat(stringType, is(notNullValue()));

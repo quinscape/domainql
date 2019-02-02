@@ -198,6 +198,11 @@ public class DomainQL
 
         for (JSONPropertyInfo info : classInfo.getPropertyInfos())
         {
+            if (!isNormalProperty(info))
+            {
+                continue;
+            }
+
             final Column jpaColumnAnno = JSONUtil.findAnnotation(info, Column.class);
             if (jpaColumnAnno != null)
             {
@@ -295,7 +300,7 @@ public class DomainQL
     {
         for (JSONPropertyInfo info : classInfo.getPropertyInfos())
         {
-            if (info.getJavaPropertyName().equals(javaName))
+            if (isNormalProperty(info) && info.getJavaPropertyName().equals(javaName))
             {
                 return info.getJsonName();
             }
@@ -375,18 +380,21 @@ public class DomainQL
     }
 
 
-    private JSONPropertyInfo findPropertyInfoForField(Table<?> table, Class<?> pojoType, TableField<?, ?> tableField)
+    private JSONPropertyInfo findPropertyInfoForField(Class<?> pojoType, TableField<?, ?> tableField)
     {
         final JSONClassInfo classInfo = JSONUtil.getClassInfo(pojoType);
 
         for (JSONPropertyInfo info : classInfo.getPropertyInfos())
         {
-            if (info.isReadOnly())
+//            if (info.isReadOnly())
+//            {
+//                continue;
+//            }
+            if (!isNormalProperty(info))
             {
                 continue;
             }
 
-            final Class<Object> type = info.getType();
             final Column jpaColumnAnno = getColumnAnnotation(pojoType, info);
 
             final String fieldName = tableField.getName();
@@ -522,7 +530,7 @@ public class DomainQL
 
     public static boolean isNormalProperty(JSONPropertyInfo info)
     {
-        return !Class.class.isAssignableFrom(info.getType()) && ((JavaObjectPropertyInfo) info).getGetterMethod() != null && !info.isIgnore();
+        return !info.isReadOnly() && !Class.class.isAssignableFrom(info.getType()) && ((JavaObjectPropertyInfo) info).getGetterMethod() != null && !info.isIgnore();
     }
 
 
@@ -776,6 +784,11 @@ public class DomainQL
 
         for (JSONPropertyInfo info : classInfo.getPropertyInfos())
         {
+            if (!isNormalProperty(info))
+            {
+                continue;
+            }
+
             final Method getterMethod = ((JavaObjectPropertyInfo) info).getGetterMethod();
             final GraphQLField inputFieldAnno = JSONUtil.findAnnotation(info, GraphQLField.class);
             final Class<?> propertyType = info.getType();
@@ -1086,7 +1099,6 @@ public class DomainQL
         }
 
         final JSONPropertyInfo fkPropertyInfo = findPropertyInfoForField(
-            table,
             pojoType,
             table.getPrimaryKey().getFields().get(0)
         );
@@ -1144,7 +1156,6 @@ public class DomainQL
             }
             final TableField<?, ?> foreignKeyField = fields.get(0);
             final JSONPropertyInfo fkPropertyInfo = findPropertyInfoForField(
-                table,
                 pojoType,
                 foreignKeyField
             );
