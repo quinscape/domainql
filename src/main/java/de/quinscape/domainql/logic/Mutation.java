@@ -1,6 +1,7 @@
 package de.quinscape.domainql.logic;
 
 import com.esotericsoftware.reflectasm.MethodAccess;
+import de.quinscape.domainql.DomainQL;
 import de.quinscape.domainql.param.ParameterProvider;
 import graphql.schema.GraphQLOutputType;
 
@@ -13,6 +14,7 @@ public class Mutation
     extends DomainQLMethod
 {
     public Mutation(
+        DomainQL domainQL,
         String name,
         String description,
         boolean full,
@@ -24,7 +26,7 @@ public class Mutation
         Class<?> typeParam
     )
     {
-        super(name, description, full, logicBean, methodAccess, methodIndex, parameterProviders, resultType, typeParam);
+        super(domainQL, name, description, full, logicBean, methodAccess, methodIndex, parameterProviders, resultType, typeParam);
 
     }
 

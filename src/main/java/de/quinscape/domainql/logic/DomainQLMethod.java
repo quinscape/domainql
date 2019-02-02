@@ -1,6 +1,7 @@
 package de.quinscape.domainql.logic;
 
 import com.esotericsoftware.reflectasm.MethodAccess;
+import de.quinscape.domainql.DomainQL;
 import de.quinscape.domainql.DomainQLExecutionContext;
 import de.quinscape.domainql.DomainQLExecutionException;
 import de.quinscape.domainql.param.ParameterProvider;
@@ -33,10 +34,13 @@ public abstract class DomainQLMethod
 
     protected final List<ParameterProvider> parameterProviders;
 
-    private final Class<?> typeParam;
+    protected final DomainQL domainQL;
+
+    protected final Class<?> typeParam;
 
 
     public DomainQLMethod(
+        DomainQL domainQL,
         String name,
         String description,
         boolean full,
@@ -48,6 +52,7 @@ public abstract class DomainQLMethod
         Class<?> typeParam
     )
     {
+        this.domainQL = domainQL;
         this.typeParam = typeParam;
         if (name == null)
         {
@@ -98,7 +103,7 @@ public abstract class DomainQLMethod
     public Object get(DataFetchingEnvironment env)
     {
 
-        DomainQLDataFetchingEnvironment environment = new DomainQLDataFetchingEnvironment(env, typeParam);
+        DomainQLDataFetchingEnvironment environment = new DomainQLDataFetchingEnvironment(domainQL, env, typeParam);
 
         final Object[] paramValues = new Object[parameterProviders.size()];
 

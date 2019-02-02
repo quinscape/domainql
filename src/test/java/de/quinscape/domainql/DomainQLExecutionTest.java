@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import de.quinscape.domainql.beans.ComplexInput;
 import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.generic.DomainObjectScalar;
+import de.quinscape.domainql.logicimpl.AccessDomainQLLogic;
 import de.quinscape.domainql.logicimpl.CustomFetcherLogic;
 import de.quinscape.domainql.logicimpl.DegenerifiedContainerLogic;
 import de.quinscape.domainql.logicimpl.DegenerifiedInputLogic;
@@ -1257,6 +1258,36 @@ public class DomainQLExecutionTest
 
         assertThat(executionResult.getErrors(), is(Collections.emptyList()));
 
+
+    }
+
+    @Test
+    public void testAccessDomainQLByEnv()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new AccessDomainQLLogic()))
+            .build();
+        final GraphQLSchema schema = domainQL
+            .getGraphQLSchema();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        //log.info(domainQL.getFieldLookup().toString());
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            .query(
+                // language=GraphQL
+                "{\n" +
+                "    accessDomainQLLogic\n" +
+                "}")
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+        Map<String,Object> data = executionResult.getData();
+        assertThat(data.get("accessDomainQLLogic"), is(true));
 
     }
 }

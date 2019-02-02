@@ -1,5 +1,6 @@
 package de.quinscape.domainql.logic;
 
+import de.quinscape.domainql.DomainQL;
 import graphql.execution.ExecutionContext;
 import graphql.execution.ExecutionId;
 import graphql.execution.ExecutionStepInfo;
@@ -22,12 +23,19 @@ import java.util.Map;
 public class DomainQLDataFetchingEnvironment
     implements DataFetchingEnvironment
 {
+    private final DomainQL domainQL;
+
     private final DataFetchingEnvironment env;
 
     private final Class<?> typeParam;
 
-    public DomainQLDataFetchingEnvironment(DataFetchingEnvironment env, Class<?> typeParam)
+    public DomainQLDataFetchingEnvironment(
+        DomainQL domainQL,
+        DataFetchingEnvironment env,
+        Class<?> typeParam
+    )
     {
+        this.domainQL = domainQL;
         this.env = env;
         this.typeParam = typeParam;
     }
@@ -159,6 +167,13 @@ public class DomainQLDataFetchingEnvironment
     }
 
     /// DOMAINQL SPECIFIC METHODS
+
+
+    public DomainQL getDomainQL()
+    {
+        return domainQL;
+    }
+
 
     public Class<?> getTypeParam()
     {

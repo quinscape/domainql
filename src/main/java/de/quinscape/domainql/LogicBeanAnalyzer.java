@@ -203,6 +203,7 @@ class LogicBeanAnalyzer
                 );
                 list.add(
                     new Query(
+                        domainQL,
                         namePattern.replace(NAME_PATTERN_WILDCARD, typeParam.getSimpleName()),
                         queryAnno.description(),
                         queryAnno.full(),
@@ -223,6 +224,7 @@ class LogicBeanAnalyzer
 
             return Collections.singletonList(
                 new Query(
+                    domainQL,
                     name,
                     queryAnno.description(),
                     queryAnno.full(),
@@ -319,6 +321,7 @@ class LogicBeanAnalyzer
                 );
                 list.add(
                     new Mutation(
+                        domainQL,
                         namePattern.replace(NAME_PATTERN_WILDCARD, typeParam.getSimpleName()),
                         mutationAnno.description(),
                         mutationAnno.full(),
@@ -339,6 +342,7 @@ class LogicBeanAnalyzer
 
             return Collections.singletonList(
                 new Mutation(
+                    domainQL,
                     name,
                     mutationAnno.description(),
                     mutationAnno.full(),
