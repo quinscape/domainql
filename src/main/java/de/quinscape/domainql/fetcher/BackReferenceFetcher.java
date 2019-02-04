@@ -10,6 +10,8 @@ import org.jooq.SelectConditionStep;
 import org.jooq.Table;
 import org.jooq.TableField;
 
+import java.util.List;
+
 /**
  * Fetches single to multiple objects via a foreign key back-reference.
  */
@@ -44,9 +46,47 @@ public class BackReferenceFetcher
     {
         final Object id = JSONUtil.DEFAULT_UTIL.getProperty(environment.getSource(), jsonName);
 
-        final TableField<?, Object> fkField = (TableField<?, Object>) foreignKey.getFields().get(0);
+        // XXX: support multi-field keys
+
+        final List<? extends TableField<?, ?>> fkFields = foreignKey.getFields();
+        if (fkFields.size() != 1)
+        {
+            throw new UnsupportedOperationException("Multi-key back-references not implented yet: Cannot query " + foreignKey);
+        }
+
+        final TableField<?, Object> fkField = (TableField<?, Object>) fkFields.get(0);
 
         final SelectConditionStep<Record> step = dslContext.select().from(table).where(fkField.eq(id));
         return oneToOne ? step.fetchSingleInto(pojoType) : step.fetchInto(pojoType);
+    }
+
+
+    public String getJsonName()
+    {
+        return jsonName;
+    }
+
+
+    public Table<?> getTable()
+    {
+        return table;
+    }
+
+
+    public Class<?> getPojoType()
+    {
+        return pojoType;
+    }
+
+
+    public ForeignKey<?, ?> getForeignKey()
+    {
+        return foreignKey;
+    }
+
+
+    public boolean isOneToOne()
+    {
+        return oneToOne;
     }
 }
