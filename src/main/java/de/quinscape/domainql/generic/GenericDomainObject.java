@@ -42,14 +42,6 @@ public final class GenericDomainObject
         return (String) getProperty(DOMAIN_TYPE_PROPERTY);
     }
 
-
-    @Override
-    public void setDomainType(String domainType)
-    {
-        setProperty(DOMAIN_TYPE_PROPERTY, domainType);
-    }
-
-
     @Override
     public void setProperty(String name, Object value)
     {

@@ -34,15 +34,5 @@ public interface DomainObject
     {
         return JSONUtil.DEFAULT_UTIL.getAllPropertyNames(this);
     }
-
-
-    default void setDomainType(String type)
-    {
-        final String correctType = this.getClass().getSimpleName();
-        if (!correctType.equals(type))
-        {
-            throw new IllegalStateException("Invalid type '" + type + "', must be '" + correctType + "'");
-        }
-    }
 }
 
