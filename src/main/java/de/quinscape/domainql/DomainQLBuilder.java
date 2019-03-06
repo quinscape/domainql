@@ -91,8 +91,7 @@ public class DomainQLBuilder
 
 
     /**
-     * Builds the configured DomainQL helper. Use {@link DomainQL#register(GraphQLSchema.Builder)} to register
-     * the helper with an external graphql schema builder.
+     * Builds the configured DomainQL helper. 
      *
      * @return  DomainQL helper
      */
@@ -303,12 +302,6 @@ public class DomainQLBuilder
 
     /**
      * Directly build a GraphQL schema from a DomainQL definition.
-     * <p>
-     *     The alternative to this method is to use {@link #build()} to build a DomainQL object and then call {@link DomainQL#register(GraphQLSchema.Builder)} to register
-     *     the DomainQL objects on an external builder.
-     * </p>
-     *
-     * @return graphql ql schema
      */
     public GraphQLSchema buildGraphQLSchema()
     {

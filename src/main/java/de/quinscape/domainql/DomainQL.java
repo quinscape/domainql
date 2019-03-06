@@ -118,6 +118,8 @@ public class DomainQL
 
     private final GraphQLSchema graphQLSchema;
 
+    private final List<GenericTypeReference> genericTypes;
+
 
     DomainQL(
         DSLContext dslContext,
@@ -153,6 +155,7 @@ public class DomainQL
         this.jooqTables = createTableLookup(jooqTables);
         this.dbFieldLookup = createFieldLookup();
 
+        genericTypes = new ArrayList<>();
 
         graphQLSchema = this.buildGraphQLSchema();
     }
@@ -239,7 +242,42 @@ public class DomainQL
     public GraphQLSchema buildGraphQLSchema()
     {
         final GraphQLSchema.Builder builder = GraphQLSchema.newSchema();
-        this.register(builder);
+        Set<String> typesForJooqDomain = new HashSet<>();
+        final LogicBeanAnalyzer analyzer = registerTypes(builder, typesForJooqDomain);
+
+        defineEnumTypes(builder);
+
+        final Map<String, GraphQLInputObjectType> graphQlInputTypes = defineInputTypes(builder);
+        final Map<String, GraphQLObjectType> graphQLOutputTypes = defineOutputTypes(
+            builder,
+            typesForJooqDomain
+        );
+
+        defineQueriesAndMutations(
+            builder,
+            analyzer,
+            graphQlInputTypes,
+            graphQLOutputTypes
+        );
+        builder.additionalDirectives(
+            additionalDirectives
+        );
+
+        if (fullSupported)
+        {
+            builder.additionalDirective(
+                GraphQLDirective.newDirective()
+                    .name("full")
+                    .description(
+                        "Escape-hatch to make GraphQL get out of your way and return the complete DomainQL query or " +
+                            "mutation response as-is with standard JSONification")
+                    .validLocations(
+                        Introspection.DirectiveLocation.FIELD
+                    )
+                    .build()
+            );
+        }
+
         final GraphQLSchema schema = builder.build();
 
         this.register(schema);
@@ -429,9 +467,13 @@ public class DomainQL
             }
 
             GraphQLObjectType.Builder domainTypeBuilder = GraphQLObjectType.newObject();
+            final TypeContext typeContext = outputType.getTypeContext();
             domainTypeBuilder
                 .name(name)
-                .description("Generated for " + outputType.getTypeContext().describe());
+                .description("Generated for " + typeContext.describe());
+
+
+            registerGenericTypeReference(typeContext);
 
             log.debug("DECLARE LOGIC TYPE {}", name);
 
@@ -447,6 +489,16 @@ public class DomainQL
         return graphQLTypes;
     }
 
+
+    private void registerGenericTypeReference(TypeContext typeContext)
+    {
+        final GenericTypeReference ref = GenericTypeReference.create(  typeRegistry, typeContext);
+        final boolean isParametrized = ref != null;
+        if (isParametrized)
+        {
+            genericTypes.add(ref);
+        }
+    }
 
     private void defineQueriesAndMutations(
         GraphQLSchema.Builder builder,
@@ -633,47 +685,6 @@ public class DomainQL
     public static DomainQLBuilder newDomainQL(DSLContext dslContext)
     {
         return new DomainQLBuilder(dslContext);
-    }
-
-
-    protected void register(GraphQLSchema.Builder builder)
-    {
-        Set<String> typesForJooqDomain = new HashSet<>();
-        final LogicBeanAnalyzer analyzer = registerTypes(builder, typesForJooqDomain);
-
-        defineEnumTypes(builder);
-
-        final Map<String, GraphQLInputObjectType> graphQlInputTypes = defineInputTypes(builder);
-        final Map<String, GraphQLObjectType> graphQLOutputTypes = defineOutputTypes(
-            builder,
-            typesForJooqDomain
-        );
-
-        defineQueriesAndMutations(
-            builder,
-            analyzer,
-            graphQlInputTypes,
-            graphQLOutputTypes
-        );
-        builder.additionalDirectives(
-            additionalDirectives
-        );
-
-        if (fullSupported)
-        {
-            builder.additionalDirective(
-                GraphQLDirective.newDirective()
-                    .name("full")
-                    .description(
-                        "Escape-hatch to make GraphQL get out of your way and return the complete DomainQL query or " +
-                            "mutation response as-is with standard JSONification")
-                    .validLocations(
-                        Introspection.DirectiveLocation.FIELD
-                    )
-                    .build()
-            );
-        }
-
     }
 
 
@@ -1706,6 +1717,12 @@ public class DomainQL
     public TypeRegistry getTypeRegistry()
     {
         return typeRegistry;
+    }
+
+
+    public List<GenericTypeReference> getGenericTypes()
+    {
+        return genericTypes;
     }
 
 
