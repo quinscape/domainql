@@ -1732,7 +1732,7 @@ public class DomainQL
         {
             if (scalarType instanceof DomainQLAware)
             {
-                ((DomainQLAware) scalarType).registerSchema(this, schema);
+                ((DomainQLAware) scalarType).setDomainQL(this);
             }
         }
     }

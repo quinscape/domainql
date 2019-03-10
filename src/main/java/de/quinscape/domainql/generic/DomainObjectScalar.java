@@ -41,8 +41,8 @@ public class DomainObjectScalar
         return new DomainObjectScalar(new DelayedCoercing<>());
     }
 
-    public void registerSchema(DomainQL domainQL, GraphQLSchema schema)
+    public void setDomainQL(DomainQL domainQL)
     {
-        this.coercing.setTarget(new DomainObjectCoercing(domainQL, schema));
+        this.coercing.setTarget(new DomainObjectCoercing(domainQL));
     }
 }

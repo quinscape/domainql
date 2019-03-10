@@ -1,9 +1,17 @@
 package de.quinscape.domainql.schema;
 
 import de.quinscape.domainql.DomainQL;
-import graphql.schema.GraphQLSchema;
 
+/**
+ * Implemented by GraphQL scalar implementations that need to know about the GraphQL schema and the meta data contained
+ * in the current DomainQL instance.
+ */
 public interface DomainQLAware
 {
-    void registerSchema(DomainQL domainQL, GraphQLSchema schema);
+    /**
+     * Provides the current DomainQL instance.
+     *
+     * @param domainQL DomainQL instance
+     */
+    void setDomainQL(DomainQL domainQL);
 }

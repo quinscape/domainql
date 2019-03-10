@@ -25,13 +25,10 @@ public class DomainObjectCoercing
 {
     private final DomainQL domainQL;
 
-    private final GraphQLSchema schema;
 
-
-    public DomainObjectCoercing(DomainQL domainQL, GraphQLSchema schema)
+    public DomainObjectCoercing(DomainQL domainQL)
     {
         this.domainQL = domainQL;
-        this.schema = schema;
     }
 
 
@@ -47,6 +44,7 @@ public class DomainObjectCoercing
 
         final String domainType = domainObject.getDomainType();
 
+        final GraphQLSchema schema = domainQL.getGraphQLSchema();
         final GraphQLType type = schema.getType(domainType);
         if (!(type instanceof GraphQLObjectType))
         {
@@ -100,6 +98,7 @@ public class DomainObjectCoercing
         final String domainType = (String) map.get("_type");
         final String inputTypeName = DomainQL.getInputTypeName(domainType);
 
+        final GraphQLSchema schema = domainQL.getGraphQLSchema();
         final GraphQLType gqlType = schema.getType(inputTypeName);
         if (!(gqlType instanceof GraphQLInputObjectType))
         {
