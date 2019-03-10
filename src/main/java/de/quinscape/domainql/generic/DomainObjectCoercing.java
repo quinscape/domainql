@@ -20,7 +20,7 @@ import graphql.schema.GraphQLTypeUtil;
 import java.util.List;
 import java.util.Map;
 
-public class DomainObjectCoercing
+public final class DomainObjectCoercing
     implements Coercing<DomainObject, Map<String, Object>>
 {
     private final DomainQL domainQL;

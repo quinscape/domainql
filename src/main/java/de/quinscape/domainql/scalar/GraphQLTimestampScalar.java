@@ -18,9 +18,11 @@ import java.util.TimeZone;
 public class GraphQLTimestampScalar
     extends graphql.schema.GraphQLScalarType
 {
+    public static String NAME = "Timestamp";
+
     public GraphQLTimestampScalar()
     {
-        super("Timestamp", "SQL timestamp equivalent", new Coercing<Timestamp, String>(){
+        super(NAME, "SQL timestamp equivalent", new Coercing<Timestamp, String>(){
             @Override
             public String serialize(Object dataFetcherResult) throws CoercingSerializeException
             {

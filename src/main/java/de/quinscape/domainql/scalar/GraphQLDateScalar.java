@@ -20,9 +20,12 @@ import java.util.concurrent.TimeUnit;
 public class GraphQLDateScalar
     extends GraphQLScalarType
 {
+
+    public static String NAME = "Date";
+
     public GraphQLDateScalar()
     {
-        super("Date", "SQL date equivalent", new Coercing<Date, String>(){
+        super(NAME, "SQL date equivalent", new Coercing<Date, String>(){
             @Override
             public String serialize(Object dataFetcherResult) throws CoercingSerializeException
             {

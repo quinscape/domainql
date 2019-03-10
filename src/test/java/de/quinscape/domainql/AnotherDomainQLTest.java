@@ -1,7 +1,10 @@
 package de.quinscape.domainql;
 
+import de.quinscape.domainql.beans.GenericScalarLogic;
 import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.generic.DomainObjectScalar;
+import de.quinscape.domainql.generic.GenericScalar;
+import de.quinscape.domainql.generic.GenericScalarType;
 import de.quinscape.domainql.logicimpl.CustomParameterProviderLogic;
 import de.quinscape.domainql.logicimpl.DegenerifyDBLogic;
 import de.quinscape.domainql.logicimpl.DegenerifiedContainerLogic;
@@ -870,6 +873,28 @@ public class AnotherDomainQLTest
         assertThat(fieldDefinitions.size(), is(1));
         assertThat(fieldDefinitions.get(0).getName(), is("value"));
 
+    }
+
+
+    @Test
+    public void testGenericScalar()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .withAdditionalScalar(GenericScalar.class, GenericScalarType.newGenericScalar())
+            .logicBeans(Collections.singleton(new GenericScalarLogic()))
+            .buildGraphQLSchema();
+
+        final GraphQLObjectType queryType = (GraphQLObjectType) schema.getType("MutationType");
+        final GraphQLFieldDefinition fieldDef = queryType.getFieldDefinition("genericScalarLogic");
+
+        final GraphQLArgument arg = fieldDef.getArgument("value");
+        assertThat(arg, is(notNullValue()));
+        assertThat(arg.getType().getName(), is("GenericScalar"));
+
+        assertThat(fieldDef, is(notNullValue()));
+        assertThat(fieldDef.getType() instanceof GraphQLScalarType, is(true));
+        assertThat(fieldDef.getType().getName(), is("GenericScalar"));
     }
 
 }

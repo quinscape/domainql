@@ -3,8 +3,11 @@ package de.quinscape.domainql;
 
 import com.google.common.collect.ImmutableMap;
 import de.quinscape.domainql.beans.ComplexInput;
+import de.quinscape.domainql.beans.GenericScalarLogic;
 import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.generic.DomainObjectScalar;
+import de.quinscape.domainql.generic.GenericScalar;
+import de.quinscape.domainql.generic.GenericScalarType;
 import de.quinscape.domainql.logicimpl.AccessDomainQLLogic;
 import de.quinscape.domainql.logicimpl.CustomFetcherLogic;
 import de.quinscape.domainql.logicimpl.DegenerifiedContainerLogic;
@@ -1288,6 +1291,68 @@ public class DomainQLExecutionTest
 
         Map<String,Object> data = executionResult.getData();
         assertThat(data.get("accessDomainQLLogic"), is(true));
+
+    }
+
+    @Test
+    public void testGenericScalar()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .logicBeans(Collections.singleton(new GenericScalarLogic()))
+            .withAdditionalScalar(GenericScalar.class, GenericScalarType.newGenericScalar())
+            .buildGraphQLSchema();
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        {
+            Map<String, Object> scalarJSON = JSONUtil.DEFAULT_PARSER.parse(Map.class, "{\n" +
+                "    \"type\" : \"Int\",\n" +
+                "    \"value\" : 29378\n" +
+                "}");
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("mutation genericScalarLogic($value: GenericScalar!)\n" +
+                    "{\n" +
+                    "    genericScalarLogic(value: $value)\n" +
+                    "}")
+                .variables(ImmutableMap.of("value", scalarJSON))
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+            final Map<String, Object> data = (Map<String, Object>) ((Map<String, Object>) executionResult.getData()).get("genericScalarLogic");
+
+            assertThat(data.get("type"), is ("Int"));
+            assertThat(data.get("value"), is (29379));
+
+        }
+
+        {
+            Map<String, Object> scalarJSON = JSONUtil.DEFAULT_PARSER.parse(Map.class, "{\n" +
+                "    \"type\" : \"Timestamp\",\n" +
+                "    \"value\" : \"1970-01-01T01:00:00.000Z\"\n" +
+                "}");
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("mutation genericScalarLogic($value: GenericScalar!)\n" +
+                    "{\n" +
+                    "    genericScalarLogic(value: $value)\n" +
+                    "}")
+                .variables(ImmutableMap.of("value", scalarJSON))
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+            final Map<String, Object> data = (Map<String, Object>) ((Map<String, Object>) executionResult.getData()).get("genericScalarLogic");
+
+            assertThat(data.get("type"), is ("Timestamp"));
+            assertThat(data.get("value"), is ("1970-01-01T02:00:00.000Z"));
+
+        }
 
     }
 }
