@@ -595,7 +595,7 @@ class LogicBeanAnalyzer
         }
         else
         {
-            defaultValue = ConvertUtils.convert(defaultValueFromAnno, parameterType);
+            defaultValue = defaultValueFromAnno != null ? ConvertUtils.convert(defaultValueFromAnno, parameterType) : null;
         }
 
         final GraphQLValueProvider graphQLValueProvider = new GraphQLValueProvider(
