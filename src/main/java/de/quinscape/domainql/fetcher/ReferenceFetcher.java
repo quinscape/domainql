@@ -65,4 +65,16 @@ public class ReferenceFetcher
     {
         return pojoType;
     }
+
+
+    @Override
+    public String toString()
+    {
+        return super.toString() + ": "
+            + "dslContext = " + dslContext
+            + ", jsonName = '" + jsonName + '\''
+            + ", table = " + table
+            + ", pojoType = " + pojoType
+            ;
+    }
 }

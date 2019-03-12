@@ -89,4 +89,18 @@ public class BackReferenceFetcher
     {
         return oneToOne;
     }
+
+
+    @Override
+    public String toString()
+    {
+        return super.toString() + ": "
+            + "dslContext = " + dslContext
+            + ", jsonName = '" + jsonName + '\''
+            + ", table = " + table
+            + ", pojoType = " + pojoType
+            + ", foreignKey = " + foreignKey
+            + ", oneToOne = " + oneToOne
+            ;
+    }
 }
