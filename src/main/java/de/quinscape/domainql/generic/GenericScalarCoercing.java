@@ -63,7 +63,7 @@ public final class GenericScalarCoercing
     {
         if (!(input instanceof Map))
         {
-            throw new CoercingParseValueException("Cannot coerce " + input + " to DomainObject");
+            throw new CoercingParseValueException("Cannot coerce " + input + " to GenericScalar, must be map with 'type' and 'value' property");
         }
 
         final Map<String,Object> genericScalarMap = (Map) input;
