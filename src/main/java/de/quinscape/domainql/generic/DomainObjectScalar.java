@@ -2,7 +2,6 @@ package de.quinscape.domainql.generic;
 
 import de.quinscape.domainql.DomainQL;
 import de.quinscape.domainql.schema.DomainQLAware;
-import graphql.schema.GraphQLSchema;
 
 import java.util.Map;
 
