@@ -1,5 +1,6 @@
 package de.quinscape.domainql.generic;
 
+import de.quinscape.domainql.fetcher.FetcherContext;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import org.svenson.JSONProperty;
 
@@ -34,5 +35,9 @@ public interface DomainObject
     {
         return JSONUtil.DEFAULT_UTIL.getAllPropertyNames(this);
     }
+
+    FetcherContext getFetcherContext();
+
+    void setFetcherContext(FetcherContext fetcherContext);
 }
 

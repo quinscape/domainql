@@ -22,7 +22,7 @@ public class GenericDomainLogic
         for (String name : domainObject.propertyNames())
         {
             final Object value = domainObject.getProperty(name);
-            map.put(name, "=" + value + " (" + value.getClass().getSimpleName() + ")");
+            map.put(name, "=" + value + ( value != null ? " (" + value.getClass().getSimpleName() + ")" : ""));
         }
         return JSONUtil.DEFAULT_GENERATOR.forValue(map);
     }

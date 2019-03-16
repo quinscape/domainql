@@ -4,7 +4,7 @@
 package de.quinscape.domainql.testdomain.tables.pojos;
 
 
-import de.quinscape.domainql.generic.DomainObject;
+import de.quinscape.domainql.generic.GeneratedDomainObject;
 
 import java.io.Serializable;
 
@@ -33,9 +33,9 @@ import javax.validation.constraints.Size;
 @Table(name = "source_four", schema = "public", indexes = {
     @Index(name = "pk_source_four", unique = true, columnList = "id ASC")
 })
-public class SourceFour implements DomainObject, Serializable {
+public class SourceFour extends GeneratedDomainObject implements Serializable {
 
-    private static final long serialVersionUID = -1546207431;
+    private static final long serialVersionUID = -262199186;
 
     private String id;
     private String targetId;

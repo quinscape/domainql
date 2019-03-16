@@ -9,9 +9,9 @@ import de.quinscape.domainql.config.RelationConfiguration;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.fetcher.BackReferenceFetcher;
+import de.quinscape.domainql.fetcher.FieldFetcher;
 import de.quinscape.domainql.fetcher.MethodFetcher;
 import de.quinscape.domainql.fetcher.ReferenceFetcher;
-import de.quinscape.domainql.fetcher.SvensonFetcher;
 import de.quinscape.domainql.logic.DomainQLMethod;
 import de.quinscape.domainql.logic.GraphQLValueProvider;
 import de.quinscape.domainql.logic.Mutation;
@@ -1201,7 +1201,7 @@ public class DomainQL
                     .name(scalarFieldName)
                     .description("DB foreign key column '" + foreignKeyField.getName() + "'")
                     .type(isNotNull ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
-                    .dataFetcher(new SvensonFetcher(findJsonName(classInfo, javaName)))
+                    .dataFetcher(new FieldFetcher(pojoType.getSimpleName(), findJsonName(classInfo, javaName)))
                     .build();
                 log.debug("-- fk scalar {}", fieldDef);
                 domainTypeBuilder.field(
@@ -1238,6 +1238,7 @@ public class DomainQL
                     .dataFetcher(
                         new ReferenceFetcher(
                             dslContext,
+                            objectFieldName,
                             findJsonName(classInfo, javaName),
                             foreignKey.getKey().getTable(),
                             findPojoTypeOf(foreignKey.getKey().getTable())
@@ -1293,7 +1294,7 @@ public class DomainQL
                 continue;
             }
 
-            final GraphQLFieldDefinition fieldDef = getPropertyFieldDefinition(outputType, foreignKeyFields, info);
+            final GraphQLFieldDefinition fieldDef = getPropertyFieldDefinition(javaType.getSimpleName(), outputType, foreignKeyFields, info);
             if (fieldDef == null)
             {
                 continue;
@@ -1502,6 +1503,7 @@ public class DomainQL
 
 
     private GraphQLFieldDefinition getPropertyFieldDefinition(
+        String domainType,
         OutputType outputType,
         Set<String> foreignKeyFields,
         JSONPropertyInfo info
@@ -1574,7 +1576,7 @@ public class DomainQL
                         type.getSimpleName() + "." + jsonName
             )
             .type(isNotNull ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
-            .dataFetcher(fetcherAnno == null ? new SvensonFetcher(jsonName) : createFetcher(
+            .dataFetcher(fetcherAnno == null ? new FieldFetcher(domainType, jsonName) : createFetcher(
                 fetcherAnno.value(),
                 fetcherAnno.data(),
                 jsonName

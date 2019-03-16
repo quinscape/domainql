@@ -1,5 +1,6 @@
 package de.quinscape.domainql.generic;
 
+import de.quinscape.domainql.fetcher.FetcherContext;
 import org.svenson.DynamicProperties;
 import org.svenson.JSONProperty;
 
@@ -18,6 +19,7 @@ public final class GenericDomainObject
 
     private Map<String, Object> attrs;
 
+    private FetcherContext fetcherContext;
 
     public GenericDomainObject()
     {
@@ -89,6 +91,21 @@ public final class GenericDomainObject
     public Object removeProperty(String name)
     {
         throw new UnsupportedOperationException();
+    }
+
+
+    @JSONProperty(ignore = true)
+    @Override
+    public FetcherContext getFetcherContext()
+    {
+        return fetcherContext;
+    }
+
+
+    @Override
+    public void setFetcherContext(FetcherContext fetcherContext)
+    {
+        this.fetcherContext = fetcherContext;
     }
 
 

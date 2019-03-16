@@ -2,8 +2,10 @@ package de.quinscape.domainql;
 
 
 import com.google.common.collect.ImmutableMap;
-import de.quinscape.domainql.beans.ComplexInput;
 import de.quinscape.domainql.beans.GenericScalarLogic;
+import de.quinscape.domainql.beans.MyEnum;
+import de.quinscape.domainql.config.SourceField;
+import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.generic.DomainObjectScalar;
 import de.quinscape.domainql.generic.GenericScalar;
@@ -15,18 +17,16 @@ import de.quinscape.domainql.logicimpl.DegenerifiedInputLogic;
 import de.quinscape.domainql.logicimpl.DegenerifyAndRenameLogic;
 import de.quinscape.domainql.logicimpl.DegenerifyContainerLogic;
 import de.quinscape.domainql.logicimpl.DoubleDegenerificationLogic;
+import de.quinscape.domainql.logicimpl.FetcherContextLogic;
 import de.quinscape.domainql.logicimpl.FullDirectiveLogic;
 import de.quinscape.domainql.logicimpl.GenericDomainLogic;
 import de.quinscape.domainql.logicimpl.GenericDomainOutputLogic;
 import de.quinscape.domainql.logicimpl.GetterArgLogic;
 import de.quinscape.domainql.logicimpl.LogicWithEnums;
 import de.quinscape.domainql.logicimpl.LogicWithEnums2;
-import de.quinscape.domainql.beans.MyEnum;
 import de.quinscape.domainql.logicimpl.NullForComplexValueLogic;
 import de.quinscape.domainql.logicimpl.TestLogic;
 import de.quinscape.domainql.logicimpl.TypeConversionLogic;
-import de.quinscape.domainql.config.SourceField;
-import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.logicimpl.TypeParamLogic;
 import de.quinscape.domainql.logicimpl.TypeParamMutationLogic;
 import de.quinscape.domainql.mock.TestProvider;
@@ -45,13 +45,11 @@ import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
-import graphql.schema.GraphQLType;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.jooq.tools.jdbc.MockConnection;
 import org.jooq.tools.jdbc.MockDataProvider;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -851,9 +849,7 @@ public class DomainQLExecutionTest
 
         assertThat(
             data,
-            is("{\"_javaType\":\"de.quinscape.domainql.testdomain.tables.pojos.Foo\",\"_type\":\"=Foo (String)\"," +
-                "\"created\":\"=2018-10-15 16:03:58.078 (Timestamp)\",\"id\":\"=e7c103e7-f559-4896-ac44-702b8458f207 " +
-                "(String)\",\"name\":\"=GreenFoo (String)\",\"num\":\"=9384 (Integer)\"}")
+            is("{\"_javaType\":\"de.quinscape.domainql.testdomain.tables.pojos.Foo\",\"_type\":\"=Foo (String)\",\"created\":\"=2018-10-15 16:03:58.078 (Timestamp)\",\"fetcherContext\":\"=null\",\"id\":\"=e7c103e7-f559-4896-ac44-702b8458f207 (String)\",\"name\":\"=GreenFoo (String)\",\"num\":\"=9384 (Integer)\"}")
         );
 
     }
@@ -1353,6 +1349,48 @@ public class DomainQLExecutionTest
             assertThat(data.get("value"), is ("1970-01-01T02:00:00.000Z"));
 
         }
+    }
+
+
+    @Test
+    public void testFetcherContext()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(new FetcherContextLogic())
+
+            // source variants
+            .configureRelation(SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE)
+
+            .buildGraphQLSchema();
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("query sourceThreeWithFetcherContext\n" +
+                "{\n" +
+                "    sourceThreeWithFetcherContext\n" +
+                "    {\n" +
+                "        id\n" +
+                "        target\n" +
+                "        {\n" +
+                "            id\n" +
+                "        }\n" +
+                "    }\n" +
+                "}")
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+        final Map<String, Object> data = (Map<String, Object>) ((Map<String, Object>) executionResult.getData()).get("sourceThreeWithFetcherContext");
+
+        final JSONPathUtil util = new JSONPathUtil(JSONUtil.OBJECT_SUPPORT);
+
+        assertThat(data.get("id"), is ("source-three-0001"));
+        assertThat(util.getPropertyPath(data, "target.id"), is ("target-three-fetch-context"));
+
 
     }
 }
