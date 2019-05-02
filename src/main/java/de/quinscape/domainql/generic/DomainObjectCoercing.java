@@ -35,6 +35,33 @@ public final class DomainObjectCoercing
     @Override
     public Map<String, Object> serialize(Object result) throws CoercingSerializeException
     {
+        try
+        {
+            return serializeInternal(result);
+        }
+        catch(RuntimeException e)
+        {
+            throw new CoercingParseValueException(e);
+        }
+    }
+
+
+    @Override
+    public DomainObject parseValue(Object input) throws CoercingParseValueException
+    {
+        try
+        {
+            return parseValueInternal(input);
+        }
+        catch(RuntimeException e)
+        {
+            throw new CoercingParseValueException(e);
+        }
+    }
+
+
+    private Map<String, Object> serializeInternal(Object result)
+    {
         if (!(result instanceof DomainObject))
         {
             throw new IllegalArgumentException(result + " is not an instance of " + DomainObject.class.getName());
@@ -84,8 +111,7 @@ public final class DomainObjectCoercing
     }
 
 
-    @Override
-    public DomainObject parseValue(Object input) throws CoercingParseValueException
+    private DomainObject parseValueInternal(Object input)
     {
         if (!(input instanceof Map))
         {
