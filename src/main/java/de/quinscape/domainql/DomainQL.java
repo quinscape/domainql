@@ -4,6 +4,7 @@ import com.esotericsoftware.reflectasm.MethodAccess;
 import com.google.common.collect.Maps;
 import de.quinscape.domainql.annotation.GraphQLFetcher;
 import de.quinscape.domainql.annotation.GraphQLField;
+import de.quinscape.domainql.annotation.GraphQLScalar;
 import de.quinscape.domainql.config.Options;
 import de.quinscape.domainql.config.RelationConfiguration;
 import de.quinscape.domainql.config.SourceField;
@@ -375,6 +376,12 @@ public class DomainQL
         {
             throw new DomainQLTypeException(cls.getName() + " is not a simple POJO class. Have you referenced the " +
                 "wrong class?");
+        }
+
+        final GraphQLScalar annotation = cls.getAnnotation(GraphQLScalar.class);
+        if (annotation != null)
+        {
+            throw new DomainQLTypeException( cls.getName() + " must be declared as scalar (See DomainQLBuilder.withAdditionalScalar)");
         }
 
         return cls;
