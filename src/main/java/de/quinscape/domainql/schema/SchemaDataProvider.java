@@ -62,7 +62,8 @@ public final class SchemaDataProvider
     public SchemaDataProvider(DomainQL domainQL, String viewDataName, boolean appendGenericTypes)
     {
 
-        final Map<String, Object> schema = IntrospectionUtil.introspect(domainQL.getGraphQLSchema());
+        final Map<String, Object> data = IntrospectionUtil.introspect(domainQL.getGraphQLSchema());
+        final Map<String, Object> schema = (Map<String, Object>) data.get("data");
         final Map<String, Object> schemaRoot = (Map<String, Object>) schema.get("__schema");
         if (appendGenericTypes)
         {

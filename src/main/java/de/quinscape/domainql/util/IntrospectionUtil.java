@@ -103,8 +103,7 @@ public final class IntrospectionUtil
             .query(INTROSPECTION_QUERY)
             .build();
 
-        ExecutionResult executionResult = graphQL.execute(executionInput);
-        return executionResult.getData();
+        return graphQL.execute(executionInput).toSpecification();
     }
 
 }
