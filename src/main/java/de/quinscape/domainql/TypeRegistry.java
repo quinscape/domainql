@@ -91,7 +91,17 @@ public class TypeRegistry
 
         for (GraphQLScalarType scalarType : scalarTypeByClass.values())
         {
-            map.put(scalarType.getName(), scalarType);
+            final String name = scalarType.getName();
+            final GraphQLScalarType existing = map.put(name, scalarType);
+            if (existing != null && existing != scalarType)
+            {
+                throw new DomainQLTypeException(
+                    "Scalar name '" + name + "' is declared by both " +
+                        scalarType + " (" + scalarType.getClass().getName() + ") and " +
+                        existing + " (" + existing.getClass().getName() + "). " +
+                        "Did you forget to rename a copy&pasted scalar?"
+                );
+            }
         }
 
         return map;
