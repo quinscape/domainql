@@ -16,6 +16,8 @@ import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import graphql.schema.GraphQLTypeUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,9 @@ import java.util.Map;
 public final class DomainObjectCoercing
     implements Coercing<DomainObject, Map<String, Object>>
 {
+    private final static Logger log = LoggerFactory.getLogger(DomainObjectCoercing.class);
+
+
     private final DomainQL domainQL;
 
 
@@ -41,6 +46,12 @@ public final class DomainObjectCoercing
         }
         catch(RuntimeException e)
         {
+            if (!(e instanceof CoercingParseValueException))
+            {
+                // ensure stacktrace logging for GraphQL validation errors
+                log.error("Error serializing domain object", e);
+            }
+
             throw new CoercingParseValueException(e);
         }
     }
@@ -55,6 +66,12 @@ public final class DomainObjectCoercing
         }
         catch(RuntimeException e)
         {
+            if (!(e instanceof CoercingParseValueException))
+            {
+                // ensure stacktrace logging for GraphQL validation errors
+                log.error("Error serializing domain object", e);
+            }
+
             throw new CoercingParseValueException(e);
         }
     }
