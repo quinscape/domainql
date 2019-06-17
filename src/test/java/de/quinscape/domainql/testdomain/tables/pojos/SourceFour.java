@@ -4,7 +4,7 @@
 package de.quinscape.domainql.testdomain.tables.pojos;
 
 
-import de.quinscape.domainql.generic.GeneratedDomainObject;
+import de.quinscape.domainql.jooq.GeneratedDomainObject;
 
 import java.io.Serializable;
 

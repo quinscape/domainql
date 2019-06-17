@@ -372,7 +372,7 @@
                         </generate>
                         <strategy>
                             <name>
-                                de.quinscape.domainql.generic.DomainObjectGeneratorStrategy
+                                de.quinscape.domainql.jooq.DomainObjectGeneratorStrategy
                             </name>
                         </strategy>
                     </generator>

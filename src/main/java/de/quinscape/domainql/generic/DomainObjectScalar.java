@@ -1,6 +1,7 @@
 package de.quinscape.domainql.generic;
 
 import de.quinscape.domainql.DomainQL;
+import de.quinscape.domainql.jooq.DomainObjectGeneratorStrategy;
 import de.quinscape.domainql.schema.DomainQLAware;
 
 import java.util.Map;

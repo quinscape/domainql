@@ -1,4 +1,4 @@
-package de.quinscape.domainql.generic;
+package de.quinscape.domainql.jooq;
 
 import org.jooq.util.DefaultGeneratorStrategy;
 import org.jooq.util.Definition;
