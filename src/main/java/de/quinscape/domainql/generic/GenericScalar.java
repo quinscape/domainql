@@ -1,7 +1,10 @@
 package de.quinscape.domainql.generic;
 
+import de.quinscape.domainql.annotation.GraphQLScalar;
+
 import java.util.Objects;
 
+@GraphQLScalar
 public class GenericScalar
 {
     private String type;
