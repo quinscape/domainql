@@ -2,7 +2,6 @@ package de.quinscape.domainql.jooq;
 
 import de.quinscape.domainql.fetcher.FetcherContext;
 import de.quinscape.domainql.generic.DomainObject;
-import org.svenson.JSONProperty;
 
 /**
  * Abstract base class for domain objects generated with the the {@link DomainObjectGeneratorStrategy}. Adds a
@@ -13,16 +12,15 @@ public abstract class GeneratedDomainObject
 {
     private FetcherContext fetcherContext;
 
-    @JSONProperty(value = DomainObject.FETCH_CONTEXT_PROPERTY, ignore = true)
     @Override
-    public FetcherContext getFetcherContext()
+    public FetcherContext lookupFetcherContext()
     {
         return fetcherContext;
     }
 
 
     @Override
-    public void setFetcherContext(FetcherContext fetcherContext)
+    public void provideFetcherContext(FetcherContext fetcherContext)
     {
         this.fetcherContext = fetcherContext;
     }

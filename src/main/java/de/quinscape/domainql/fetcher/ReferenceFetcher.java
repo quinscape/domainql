@@ -53,7 +53,7 @@ public class ReferenceFetcher
         final Object source = environment.getSource();
 
         FetcherContext fetcherContext;
-        if (source instanceof DomainObject && (fetcherContext = ((DomainObject) source).getFetcherContext()) != null)
+        if (source instanceof DomainObject && (fetcherContext = ((DomainObject) source).lookupFetcherContext()) != null)
         {
             return fetcherContext.getProperty(fieldName);
         }

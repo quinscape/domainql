@@ -849,7 +849,7 @@ public class DomainQLExecutionTest
 
         assertThat(
             data,
-            is("{\"_javaType\":\"de.quinscape.domainql.testdomain.tables.pojos.Foo\",\"_type\":\"=Foo (String)\",\"created\":\"=2018-10-15 16:03:58.078 (Timestamp)\",\"fetcherContext\":\"=null\",\"id\":\"=e7c103e7-f559-4896-ac44-702b8458f207 (String)\",\"name\":\"=GreenFoo (String)\",\"num\":\"=9384 (Integer)\"}")
+            is("{\"_javaType\":\"de.quinscape.domainql.testdomain.tables.pojos.Foo\",\"created\":\"=2018-10-15 16:03:58.078 (Timestamp)\",\"id\":\"=e7c103e7-f559-4896-ac44-702b8458f207 (String)\",\"name\":\"=GreenFoo (String)\",\"num\":\"=9384 (Integer)\"}")
         );
 
     }

@@ -33,11 +33,13 @@ public interface DomainObject
     
     default Set<String> propertyNames()
     {
-        return JSONUtil.DEFAULT_UTIL.getAllPropertyNames(this);
+        final Set<String> allPropertyNames = JSONUtil.DEFAULT_UTIL.getAllPropertyNames(this);
+        allPropertyNames.remove(DOMAIN_TYPE_PROPERTY);
+        return allPropertyNames;
     }
 
-    FetcherContext getFetcherContext();
+    FetcherContext lookupFetcherContext();
 
-    void setFetcherContext(FetcherContext fetcherContext);
+    void provideFetcherContext(FetcherContext fetcherContext);
 }
 

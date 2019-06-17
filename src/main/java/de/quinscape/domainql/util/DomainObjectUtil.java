@@ -185,11 +185,6 @@ public final class DomainObjectUtil
 
         for (String propertyName : domainObject.propertyNames())
         {
-            if (propertyName.equals(DomainObject.DOMAIN_TYPE_PROPERTY))
-            {
-                continue;
-            }
-
             final Object value = domainObject.getProperty(propertyName);
             final Field fieldForProp = domainQL.lookupField(
                 domainObject.getDomainType(),

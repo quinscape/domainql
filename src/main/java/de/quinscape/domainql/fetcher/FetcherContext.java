@@ -8,7 +8,7 @@ import org.svenson.AbstractDynamicProperties;
  * The reference fetcher will look for a fetcher context on its source domain object and if such a context exist will
  * return a property of the context which corresponds to the GraphQL field name for which the reference fetcher is registered.
  *
- * @see de.quinscape.domainql.generic.DomainObject#setFetcherContext(FetcherContext) 
+ * @see de.quinscape.domainql.generic.DomainObject#provideFetcherContext(FetcherContext)
  * @see ReferenceFetcher
  */
 public class FetcherContext

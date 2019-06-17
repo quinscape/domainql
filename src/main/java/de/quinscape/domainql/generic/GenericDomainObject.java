@@ -7,6 +7,7 @@ import org.svenson.JSONProperty;
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -76,7 +77,11 @@ public final class GenericDomainObject
             return Collections.emptySet();
         }
 
-        return attrs.keySet();
+        final HashSet<String> propNames = new HashSet<>(attrs.keySet());
+
+        propNames.remove(DomainObject.DOMAIN_TYPE_PROPERTY);
+
+        return propNames;
     }
 
 
@@ -94,16 +99,15 @@ public final class GenericDomainObject
     }
 
 
-    @JSONProperty(ignore = true)
     @Override
-    public FetcherContext getFetcherContext()
+    public FetcherContext lookupFetcherContext()
     {
         return fetcherContext;
     }
 
 
     @Override
-    public void setFetcherContext(FetcherContext fetcherContext)
+    public void provideFetcherContext(FetcherContext fetcherContext)
     {
         this.fetcherContext = fetcherContext;
     }

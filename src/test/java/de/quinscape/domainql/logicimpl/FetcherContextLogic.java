@@ -21,7 +21,7 @@ public class FetcherContextLogic
 
         final FetcherContext fetcherContext = new FetcherContext();
         fetcherContext.setProperty("target", targetThree);
-        sourceThree.setFetcherContext(fetcherContext);
+        sourceThree.provideFetcherContext(fetcherContext);
 
         return sourceThree;
     }
