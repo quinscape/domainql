@@ -1208,7 +1208,7 @@ public class DomainQL
                     .name(scalarFieldName)
                     .description("DB foreign key column '" + foreignKeyField.getName() + "'")
                     .type(isNotNull ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
-                    .dataFetcher(new FieldFetcher(pojoType.getSimpleName(), findJsonName(classInfo, javaName)))
+                    .dataFetcher(new FieldFetcher(pojoType.getSimpleName(), findJsonName(classInfo, javaName), foreignKeyField.getType()))
                     .build();
                 log.debug("-- fk scalar {}", fieldDef);
                 domainTypeBuilder.field(
@@ -1583,7 +1583,7 @@ public class DomainQL
                         type.getSimpleName() + "." + jsonName
             )
             .type(isNotNull ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
-            .dataFetcher(fetcherAnno == null ? new FieldFetcher(domainType, jsonName) : createFetcher(
+            .dataFetcher(fetcherAnno == null ? new FieldFetcher(domainType, jsonName, type) : createFetcher(
                 fetcherAnno.value(),
                 fetcherAnno.data(),
                 jsonName

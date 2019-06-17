@@ -23,11 +23,14 @@ public class FieldFetcher
 
     private final String fieldName;
 
+    private final Class<?> propertyType;
 
-    public FieldFetcher(String domainType, String fieldName)
+
+    public FieldFetcher(String domainType, String fieldName, Class<?> propertyType)
     {
         this.domainType = domainType;
         this.fieldName = fieldName;
+        this.propertyType = propertyType;
     }
 
 
@@ -65,6 +68,17 @@ public class FieldFetcher
     public String getFieldName()
     {
         return fieldName;
+    }
+
+
+    /**
+     * Returns the java type of the field property.
+     *
+     * @return java type of the field property
+     */
+    public Class<?> getPropertyType()
+    {
+        return propertyType;
     }
 
 
