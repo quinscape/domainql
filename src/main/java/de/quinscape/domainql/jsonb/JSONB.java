@@ -95,6 +95,10 @@ public final class JSONB
 
     public static JSONB forValue(String json)
     {
+        if (json == null)
+        {
+            return null;
+        }
         return JSONUtil.DEFAULT_PARSER.parse(JSONB.class, json);
     }
 
