@@ -1689,7 +1689,12 @@ public class DomainQL
 
     public Table<?> getJooqTable(String domainType)
     {
-        return jooqTables.get(domainType).getTable();
+        final TableLookup lookup = jooqTables.get(domainType);
+        if (lookup == null)
+        {
+            throw new DomainQLException("No jooq table registered for domain type '" + domainType + "'");
+        }
+        return lookup.getTable();
     }
 
 
