@@ -4,6 +4,7 @@ package de.quinscape.domainql;
 import com.google.common.collect.ImmutableMap;
 import de.quinscape.domainql.beans.GenericScalarLogic;
 import de.quinscape.domainql.beans.MyEnum;
+import de.quinscape.domainql.beans.SumPerMonth;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.generic.DomainObject;
@@ -25,6 +26,7 @@ import de.quinscape.domainql.logicimpl.GetterArgLogic;
 import de.quinscape.domainql.logicimpl.LogicWithEnums;
 import de.quinscape.domainql.logicimpl.LogicWithEnums2;
 import de.quinscape.domainql.logicimpl.NullForComplexValueLogic;
+import de.quinscape.domainql.logicimpl.SumPerMonthLogic;
 import de.quinscape.domainql.logicimpl.TestLogic;
 import de.quinscape.domainql.logicimpl.TypeConversionLogic;
 import de.quinscape.domainql.logicimpl.TypeParamLogic;
@@ -44,7 +46,9 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.GraphQLTypeUtil;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -1393,4 +1397,42 @@ public class DomainQLExecutionTest
 
 
     }
+
+    @Test
+    public void testDBView()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new SumPerMonthLogic()))
+            .objectType(SumPerMonth.class)
+            .build();
+
+        GraphQL graphQL = GraphQL.newGraphQL(domainQL.getGraphQLSchema()).build();
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("query getSumPerMonthLogic($sum: Int!)\n" +
+                "{\n" +
+                "    getSumPerMonthLogic(sum: $sum)\n" +
+                "    {\n" +
+                "        year\n" +
+                "        month\n" +
+                "        sum\n" +
+                "    }\n" +
+                "}")
+            .variables(ImmutableMap.of("sum", 1123))
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+        final Map<String, Object> data = (Map<String, Object>) ((Map<String, Object>) executionResult.getData()).get("getSumPerMonthLogic");
+
+        assertThat(data.get("year"), is(2019));
+        assertThat(data.get("month"), is(6));
+        assertThat(data.get("sum"), is(1123));
+
+    }
+
 }

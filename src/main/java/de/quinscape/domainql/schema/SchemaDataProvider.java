@@ -8,6 +8,8 @@ import de.quinscape.spring.jsview.JsViewProvider;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.schema.SchemaUtil;
+import graphql.schema.idl.SchemaPrinter;
 
 import java.util.Map;
 

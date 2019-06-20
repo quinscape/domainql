@@ -15,9 +15,11 @@ import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import org.jooq.DSLContext;
 import org.jooq.ForeignKey;
+import org.jooq.Record;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
+import org.jooq.impl.DSL;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -57,7 +59,7 @@ public class DomainQLBuilder
     private RelationConfiguration defaultRelationConfiguration = new RelationConfiguration(
         SourceField.SCALAR, TargetField.NONE);
 
-    private Set<Table<?>> jooqTables = new LinkedHashSet<>();
+    private Map<String, TableLookup> jooqTables = new HashMap<>();
 
     private Set<GraphQLFieldDefinition> additionalQueries  = new LinkedHashSet<>();
     private Set<GraphQLFieldDefinition> additionalMutations = new LinkedHashSet<>();
@@ -100,7 +102,7 @@ public class DomainQLBuilder
         return new DomainQL(
             dslContext,
             Collections.unmodifiableSet(logicBeans),
-            Collections.unmodifiableSet(jooqTables),
+            Collections.unmodifiableMap(jooqTables),
             Collections.unmodifiableCollection(parameterProviderFactories),
             Collections.unmodifiableMap( resolveFields( relationConfigurations)),
             defaultRelationConfiguration,
@@ -309,18 +311,73 @@ public class DomainQLBuilder
     }
 
 
+    /**
+     * Adds all tables of the given JOOQ schema to the DomainQL schema.
+     *
+     * @param schema    JOOQ schema
+     *                  
+     * @return this builder
+     */
     public DomainQLBuilder objectTypes(Schema schema)
     {
-        jooqTables.addAll(schema.getTables());
+        for (Table<?> table : schema.getTables())
+        {
+            final Class<?> cls = DomainQL.findPojoTypeOf(table);
+
+            jooqTables.put(cls.getSimpleName(), new TableLookup(cls, table));
+        }
+
         return this;
     }
 
+    /**
+     * Adds the given tables to the DomainQL schema.
+     *
+     * @param tables    tables varargs
+     *
+     * @return this builder
+     */
     public DomainQLBuilder objectTypes(Table<?>... tables)
     {
-        Collections.addAll(jooqTables, tables);
+        for (Table<?> table : tables)
+        {
+            final Class<?> cls = DomainQL.findPojoTypeOf(table);
+            jooqTables.put(cls.getSimpleName(), new TableLookup(cls, table));
+        }
         return this;
     }
 
+
+    /**
+     * Adds a custom SQL type based on a sql table-like name and a POJO class.
+     *
+     * The POJO must have a {@link javax.persistence.Table} annotation defining the table-like and {@link javax.persistence.Table}
+     * annotations on the properties defining the column names.
+     *
+     * {@link javax.validation.constraints.NotNull} annotations can be used to mark non-null fields.
+     *
+     * @param cls           POJO type.
+     *
+     * @return this builder
+     */
+    public DomainQLBuilder objectType(Class<?> cls)
+    {
+        final javax.persistence.Table anno = cls.getAnnotation(javax.persistence.Table.class);
+        if (anno == null)
+        {
+            throw new DomainQLTypeException(
+                "Custom SQL based type must have a @javax.persistence.Table annotation defining the name of the table-like"
+            );
+        }
+
+        final String schema = anno.schema();
+        final Table<?> table = schema.length() > 0 ?
+            DSL.table(DSL.name(schema, anno.name())) :
+            DSL.table(DSL.name(anno.name()));
+        
+        jooqTables.put(cls.getSimpleName(), new TableLookup(cls, table));
+        return this;
+    }
 
     /**
      * Adds additional query fields to DomainQL query type.

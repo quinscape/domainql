@@ -46,6 +46,7 @@ import org.jooq.ForeignKey;
 import org.jooq.Record;
 import org.jooq.Table;
 import org.jooq.TableField;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -125,7 +126,7 @@ public class DomainQL
     DomainQL(
         DSLContext dslContext,
         Set<Object> logicBeans,
-        Set<Table<?>> jooqTables,
+        Map<String, TableLookup> jooqTables,
         Collection<ParameterProviderFactory> parameterProviderFactories,
         Map<ForeignKey<?, ?>, RelationConfiguration> relationConfigurations,
         RelationConfiguration defaultRelationConfiguration,
@@ -153,28 +154,12 @@ public class DomainQL
 
         this.typeRegistry = new TypeRegistry(this, additionalScalarTypes);
 
-        this.jooqTables = createTableLookup(jooqTables);
+        this.jooqTables = jooqTables;
         this.dbFieldLookup = createFieldLookup();
 
         genericTypes = new ArrayList<>();
 
         graphQLSchema = this.buildGraphQLSchema();
-    }
-
-
-    private Map<String, TableLookup> createTableLookup(Set<Table<?>> jooqTables)
-    {
-        final Map<String, TableLookup> lookupMap = Maps.newHashMapWithExpectedSize(jooqTables.size());
-
-        for (Table<?> table : jooqTables)
-        {
-            final Class<?> pojoType = findPojoTypeOf(table);
-            lookupMap.put(
-                pojoType.getSimpleName(),
-                new TableLookup(pojoType, table)
-            );
-        }
-        return Collections.unmodifiableMap(lookupMap);
     }
 
 
@@ -187,7 +172,11 @@ public class DomainQL
             final Class<?> pojoType = lookup.getPojoType();
             final Table<?> table = lookup.getTable();
 
-            map.putAll(createFieldLookupForType(pojoType, table));
+            final Map<String, Field<?>> fields = createFieldLookupForType(pojoType, table);
+
+            log.debug("createFieldLookup {}: {}", pojoType.getSimpleName(), fields );
+
+            map.putAll(fields);
         }
 
         return Collections.unmodifiableMap(map);
@@ -211,9 +200,22 @@ public class DomainQL
             if (jpaColumnAnno != null)
             {
                 final String fieldName = jpaColumnAnno.name();
-                final Field<?> field = table.recordType().field(fieldName);
 
-                fieldsForType.put(pojoType.getSimpleName() + ":" + info.getJsonName(), field);
+                final Field<?> fieldFromRecord = table.recordType().field(fieldName);
+                final Field<?> field;
+                if (fieldFromRecord != null)
+                {
+                    field = fieldFromRecord;
+                }
+                else
+                {
+                    field = DSL.field(DSL.name(fieldName), info.getType());
+                }
+
+
+                final String key = pojoType.getSimpleName() + ":" + info.getJsonName();
+                log.info("field: {}, {}", key, field);
+                fieldsForType.put(key, field);
             }
         }
         return fieldsForType;
@@ -234,13 +236,9 @@ public class DomainQL
 
     /**
      * Builds a graphql schema instance from the given DomainQL configuration.
-     * <p>
-     * This is the same as calling {@link DomainQLBuilder#buildGraphQLSchema()} except that is allows access to the
-     * DomainQL instance involved on the creation side.
-     *
      * @return GraphQL schema
      */
-    public GraphQLSchema buildGraphQLSchema()
+    private GraphQLSchema buildGraphQLSchema()
     {
         final GraphQLSchema.Builder builder = GraphQLSchema.newSchema();
         Set<String> typesForJooqDomain = new HashSet<>();
@@ -700,7 +698,6 @@ public class DomainQL
         // define types for the JOOQ Tables
         for (TableLookup table : jooqTables.values())
         {
-
             final Class<?> pojoType = table.getPojoType();
             typeRegistry.register(new TypeContext(null, pojoType));
             defineTypeForTable(builder, table.getTable(), pojoType, typesForJooqDomain);
@@ -1005,7 +1002,7 @@ public class DomainQL
         try
         {
 
-            final String typeName = table.getClass().getSimpleName();
+            final String typeName = pojoType.getSimpleName();
 
             final javax.persistence.Table tableAnno = pojoType.getAnnotation(javax.persistence.Table.class);
             final GraphQLObjectType.Builder domainTypeBuilder = GraphQLObjectType.newObject()

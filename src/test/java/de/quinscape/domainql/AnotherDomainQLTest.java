@@ -1,6 +1,7 @@
 package de.quinscape.domainql;
 
 import de.quinscape.domainql.beans.GenericScalarLogic;
+import de.quinscape.domainql.beans.SumPerMonth;
 import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.generic.DomainObjectScalar;
 import de.quinscape.domainql.generic.GenericScalar;
@@ -28,7 +29,7 @@ import de.quinscape.domainql.logicimpl.LogicWithWrongInjection;
 import de.quinscape.domainql.logicimpl.LogicWithWrongInjection2;
 import de.quinscape.domainql.logicimpl.MinimalLogic;
 import de.quinscape.domainql.logicimpl.NoMirrorLogic;
-import de.quinscape.domainql.logicimpl.NullForComplexValueLogic;
+import de.quinscape.domainql.logicimpl.SumPerMonthLogic;
 import de.quinscape.domainql.logicimpl.TestLogic;
 import de.quinscape.domainql.logicimpl.TypeParamLogic;
 import de.quinscape.domainql.logicimpl.TypeParamMutationLogic;
@@ -36,12 +37,14 @@ import de.quinscape.domainql.logicimpl.TypeParamWithNamePatternLogic;
 import de.quinscape.domainql.logicimpl.TypeRepeatLogic;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
+import de.quinscape.domainql.schema.SchemaDataProvider;
 import de.quinscape.domainql.testdomain.Public;
 import graphql.Scalars;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectType;
+import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
@@ -49,6 +52,8 @@ import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
+import graphql.schema.GraphQLTypeUtil;
+import graphql.schema.idl.SchemaPrinter;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -896,6 +901,48 @@ public class AnotherDomainQLTest
         assertThat(fieldDef.getType() instanceof GraphQLScalarType, is(true));
         assertThat(fieldDef.getType().getName(), is("GenericScalar"));
     }
+
+
+
+    @Test
+    public void testDBView()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new SumPerMonthLogic()))
+            .objectType(SumPerMonth.class)
+            .build();
+
+        assertThat(
+            domainQL.getJooqTable("SumPerMonth").getName(), is("sum_per_month")
+        );
+        assertThat(
+            domainQL.lookupField("SumPerMonth", "month").getName(), is("month")
+        );
+
+        final GraphQLSchema schema = domainQL.getGraphQLSchema();
+        final GraphQLObjectType objType = (GraphQLObjectType) schema.getType("SumPerMonth");
+
+        final GraphQLOutputType monthFieldType = objType.getFieldDefinition("month").getType();
+        assertThat(GraphQLTypeUtil.isNonNull(monthFieldType), is(true));
+
+        final GraphQLOutputType sumFieldType = objType.getFieldDefinition("sum").getType();
+        assertThat(GraphQLTypeUtil.isNonNull(sumFieldType), is(false));
+
+        final GraphQLObjectType queryType = (GraphQLObjectType) schema.getType("QueryType");
+        final GraphQLFieldDefinition fieldDef = queryType.getFieldDefinition("getSumPerMonthLogic");
+
+        assertThat(fieldDef,is(notNullValue()));
+        assertThat(fieldDef.getType().getName(),is("SumPerMonth"));
+        assertThat(fieldDef.getArguments().size(),is(1));
+
+        assertThat(fieldDef.getArguments().get(0).getType().toString(),is("Int!"));
+
+
+        log.info(new SchemaPrinter().print(schema));
+
+    }
+
 
 }
 
