@@ -4,6 +4,7 @@ import com.esotericsoftware.reflectasm.MethodAccess;
 import de.quinscape.domainql.DomainQL;
 import de.quinscape.domainql.DomainQLExecutionContext;
 import de.quinscape.domainql.DomainQLExecutionException;
+import de.quinscape.domainql.TypeContext;
 import de.quinscape.domainql.param.ParameterProvider;
 import graphql.language.Directive;
 import graphql.schema.DataFetcher;
@@ -38,6 +39,10 @@ public abstract class DomainQLMethod
 
     protected final Class<?> typeParam;
 
+    private final String genericMethodName;
+
+    private final TypeContext typeContext;
+
 
     public DomainQLMethod(
         DomainQL domainQL,
@@ -49,11 +54,14 @@ public abstract class DomainQLMethod
         int methodIndex,
         List<ParameterProvider> parameterProviders,
         GraphQLOutputType resultType,
-        Class<?> typeParam
+        TypeContext typeContext,
+        String genericMethodName
     )
     {
         this.domainQL = domainQL;
-        this.typeParam = typeParam;
+        this.typeContext = typeContext;
+        this.typeParam = typeContext != null ? typeContext.getFirstActualType() : null;
+        this.genericMethodName = genericMethodName;
         if (name == null)
         {
             throw new IllegalArgumentException("name can't be null");
@@ -88,9 +96,16 @@ public abstract class DomainQLMethod
     }
 
 
+
     public String getName()
     {
         return name;
+    }
+
+
+    public String getGenericMethodName()
+    {
+        return genericMethodName;
     }
 
 
@@ -98,7 +113,7 @@ public abstract class DomainQLMethod
     {
         return resultType;
     }
-
+    
     @Override
     public Object get(DataFetchingEnvironment env)
     {
@@ -143,6 +158,11 @@ public abstract class DomainQLMethod
         return (DomainQLExecutionContext) ctx;
     }
 
+
+    public TypeContext getTypeContext()
+    {
+        return typeContext;
+    }
 
     private void ensureFullDirective(DataFetchingEnvironment environment)
     {

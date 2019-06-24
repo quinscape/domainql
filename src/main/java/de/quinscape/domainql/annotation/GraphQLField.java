@@ -10,6 +10,9 @@ import java.lang.annotation.Target;
  * Configures an input field.
  *
  * Applicable to Input type property methods and GraphQL logic query or mutator parameters.
+ *
+ * Non-property methods with parameters can be marked with GraphQLField to be included into
+ * as GraphQL output fields with arguments.
  */
 
 @Target({ElementType.METHOD, ElementType.PARAMETER})

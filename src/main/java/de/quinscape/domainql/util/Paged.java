@@ -4,8 +4,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * Convenient generic container class for paged queries. Will be degenerified when used as return value of a query or
- * mutation method.
+ * Contains paginated [T] rows.
  *
  * @param <T> payload type
  */
@@ -29,6 +28,10 @@ public class Paged<T>
     }
 
 
+    /**
+     * List of [T] rows.
+     * @return
+     */
     @NotNull
     public List<T> getRows()
     {
@@ -42,6 +45,11 @@ public class Paged<T>
     }
 
 
+    /**
+     * Row count available.
+     *
+     * @return
+     */
     @NotNull
     public int getRowCount()
     {

@@ -334,6 +334,10 @@ public class DomainQLExecutionTest
     }
 
 
+    /**
+     * Test parametrized fields
+     *
+     */
     @Test
     public void testGetterArguments()
     {

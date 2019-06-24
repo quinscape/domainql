@@ -767,7 +767,7 @@ public class AnotherDomainQLTest
         assertThat(queryContainerB.getType().getName(), is("ContainerTypeB"));
 
         final GraphQLObjectType type = (GraphQLObjectType) schema.getType(queryContainerB.getType().getName());
-        assertThat(type.getDescription(), is("Generated for Container<TypeB>"));
+        assertThat(type.getDescription(), is("Generated for de.quinscape.domainql.beans.Container<TypeB>"));
         assertThat(type.getFieldDefinitions().size(), is(2));
         assertThat(type.getFieldDefinitions().get(0).getName(), is("value"));
         assertThat(type.getFieldDefinitions().get(0).getType().getName(), is("TypeB"));
@@ -815,7 +815,7 @@ public class AnotherDomainQLTest
         assertThat(mutationContainerB.getType().getName(), is("ContainerTypeB"));
 
         final GraphQLObjectType type = (GraphQLObjectType) schema.getType(mutationContainerB.getType().getName());
-        assertThat(type.getDescription(), is("Generated for Container<TypeB>"));
+        assertThat(type.getDescription(), is("Generated for de.quinscape.domainql.beans.Container<TypeB>"));
         assertThat(type.getFieldDefinitions().size(), is(2));
         assertThat(type.getFieldDefinitions().get(0).getName(), is("value"));
         assertThat(type.getFieldDefinitions().get(0).getType().getName(), is("TypeB"));

@@ -212,7 +212,8 @@ class LogicBeanAnalyzer
                         methodIndex,
                         parameterProviders,
                         queryAnno.full() ? Scalars.GraphQLBoolean : outputType,
-                        typeParam
+                        newContext,
+                        methodName
                     )
                 );
             }
@@ -233,6 +234,7 @@ class LogicBeanAnalyzer
                     methodIndex,
                     parameterProviders,
                     queryAnno.full() ? Scalars.GraphQLBoolean : resultType,
+                    null,
                     null
                 )
             );
@@ -330,7 +332,8 @@ class LogicBeanAnalyzer
                         methodIndex,
                         parameterProviders,
                         mutationAnno.full() ? Scalars.GraphQLBoolean : outputType,
-                        typeParam
+                        newContext,
+                        methodName
                     )
                 );
             }
@@ -351,6 +354,7 @@ class LogicBeanAnalyzer
                     methodIndex,
                     parameterProviders,
                     mutationAnno.full() ? Scalars.GraphQLBoolean : resultType,
+                    null,
                     null
                 )
             );

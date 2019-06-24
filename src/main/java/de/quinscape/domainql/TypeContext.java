@@ -241,12 +241,12 @@ public final class TypeContext
     {
         if (typeMap.isEmpty())
         {
-            return type.getSimpleName();
+            return type.getName();
         }
 
         StringBuilder buff = new StringBuilder();
 
-        buff.append(type.getSimpleName())
+        buff.append(type.getName())
             .append('<');
 
         for (Class<?> cls : typeMap.values())

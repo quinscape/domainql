@@ -4,10 +4,13 @@ import de.quinscape.domainql.annotation.GraphQLLogic;
 import de.quinscape.domainql.config.RelationConfiguration;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
+import de.quinscape.domainql.docs.DocsExtractor;
+import de.quinscape.domainql.docs.TypeDoc;
 import de.quinscape.domainql.param.DataFetchingEnvironmentProviderFactory;
 import de.quinscape.domainql.param.ParameterProviderFactory;
 import de.quinscape.domainql.param.TypeParameterProviderFactory;
 import de.quinscape.domainql.scalar.GraphQLCurrencyScalar;
+import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.Directives;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLFieldDefinition;
@@ -15,12 +18,17 @@ import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import org.jooq.DSLContext;
 import org.jooq.ForeignKey;
-import org.jooq.Record;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.svenson.JSONParser;
+import org.svenson.tokenize.InputStreamSource;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,6 +52,13 @@ public class DomainQLBuilder
         map.add(Directives.IncludeDirective);
         map.add(Directives.SkipDirective);
         STANDARD_DIRECTIVES = map;
+    }
+
+    private final static JSONParser typeDocParser;
+    static
+    {
+        typeDocParser = new JSONParser();
+        typeDocParser.addTypeHint("[]", TypeDoc.class);
     }
 
     private final DSLContext dslContext;
@@ -72,6 +87,8 @@ public class DomainQLBuilder
 
     private Map<Class<?>, GraphQLScalarType> additionalScalarTypes = new LinkedHashMap<>();
 
+    private Set<TypeDoc> typeDocs = new LinkedHashSet<>();
+
     DomainQLBuilder(DSLContext dslContext)
     {
         this.dslContext = dslContext;
@@ -83,6 +100,8 @@ public class DomainQLBuilder
         parameterProviderFactories.add(new TypeParameterProviderFactory());
 
         additionalScalarTypes.put(Long.TYPE, new GraphQLCurrencyScalar());
+
+
     }
 
 
@@ -99,6 +118,7 @@ public class DomainQLBuilder
      */
     public DomainQL build()
     {
+
         return new DomainQL(
             dslContext,
             Collections.unmodifiableSet(logicBeans),
@@ -112,6 +132,9 @@ public class DomainQLBuilder
             Collections.unmodifiableSet(additionalDirectives),
             additionalScalarTypes,
             Collections.unmodifiableSet(additionalInputTypes),
+            Collections.unmodifiableSet(
+                DocsExtractor.normalize(typeDocs)
+            ),
             fullSupported
         );
     }
@@ -521,6 +544,69 @@ public class DomainQLBuilder
         Collections.addAll(this.additionalInputTypes, inputTypes);
 
         return this;
+    }
+
+
+    /**
+     * Read DomainQL type docs from the given input stream to use as source for schema descriptions.
+     *
+     * Multiple sources will be merged.
+     *
+     * @param file    file to read JSON data from
+     *
+     * @return  this builder
+     */
+    public DomainQLBuilder withTypeDocsFrom(File file) throws FileNotFoundException
+    {
+        if (file == null)
+        {
+            throw new IllegalArgumentException("file can't be null");
+        }
+        return withTypeDocsFrom(
+            new FileInputStream(file)
+        );
+    }
+
+
+    /**
+     * Use the given typeDocs as documentation source
+     *
+     * Multiple sources will be merged.
+     *
+     * @return  this builder
+     */
+    public DomainQLBuilder withTypeDocs(Set<TypeDoc> typeDocs)
+    {
+        this.typeDocs.addAll(typeDocs);
+        return this;
+    }
+
+
+    /**
+     * Read DomainQL type docs from the given input stream to use as source for schema descriptions.
+     *
+     * Multiple sources will be merged.
+     *
+     * @param is    input stream
+     *
+     * @return  this builder
+     */
+    public DomainQLBuilder withTypeDocsFrom(InputStream is)
+    {
+        if (is == null)
+        {
+            throw new IllegalArgumentException("is can't be null");
+        }
+
+        //noinspection unchecked
+        final Set<TypeDoc> typeDocs = typeDocParser.parse(
+            Set.class,
+            new InputStreamSource(
+                is,
+                true
+            )
+        );
+        return withTypeDocs(typeDocs);
     }
 }
 

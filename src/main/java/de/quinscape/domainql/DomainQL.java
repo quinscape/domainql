@@ -9,6 +9,9 @@ import de.quinscape.domainql.config.Options;
 import de.quinscape.domainql.config.RelationConfiguration;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
+import de.quinscape.domainql.docs.FieldDoc;
+import de.quinscape.domainql.docs.ParamDoc;
+import de.quinscape.domainql.docs.TypeDoc;
 import de.quinscape.domainql.fetcher.BackReferenceFetcher;
 import de.quinscape.domainql.fetcher.FieldFetcher;
 import de.quinscape.domainql.fetcher.MethodFetcher;
@@ -74,6 +77,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -114,6 +119,8 @@ public class DomainQL
 
     private final Set<Class<?>> additionalInputTypes;
 
+    private final Set<TypeDoc> typeDocs;
+
     private final boolean fullSupported;
 
     private final TypeRegistry typeRegistry;
@@ -136,6 +143,7 @@ public class DomainQL
         Set<GraphQLDirective> additionalDirectives,
         Map<Class<?>, GraphQLScalarType> additionalScalarTypes,
         Set<Class<?>> additionalInputTypes,
+        Set<TypeDoc> typeDocs,
         boolean fullSupported
     )
     {
@@ -147,6 +155,7 @@ public class DomainQL
         this.additionalMutations = additionalMutations;
         this.additionalDirectives = additionalDirectives;
         this.additionalInputTypes = additionalInputTypes;
+        this.typeDocs = typeDocs;
         this.fullSupported = fullSupported;
         this.parameterProviderFactories = parameterProviderFactories;
         this.options = options;
@@ -214,7 +223,6 @@ public class DomainQL
 
 
                 final String key = pojoType.getSimpleName() + ":" + info.getJsonName();
-                log.info("field: {}, {}", key, field);
                 fieldsForType.put(key, field);
             }
         }
@@ -473,16 +481,24 @@ public class DomainQL
 
             GraphQLObjectType.Builder domainTypeBuilder = GraphQLObjectType.newObject();
             final TypeContext typeContext = outputType.getTypeContext();
+
+            TypeDoc typeDoc = findTypeDoc(name);
+
+            if (typeDoc == null && typeContext.isParametrized())
+            {
+                typeDoc = degenerify(findTypeDoc(typeContext.getType().getSimpleName()), typeContext);
+            }
+
+            final String defaultDescription = "Generated for " + typeContext.describe();
             domainTypeBuilder
                 .name(name)
-                .description("Generated for " + typeContext.describe());
-
+                .description(typeDoc != null ? typeDoc.getDescription() : defaultDescription);
 
             registerGenericTypeReference(typeContext);
 
             log.debug("DECLARE LOGIC TYPE {}", name);
 
-            buildFields(domainTypeBuilder, outputType, Collections.emptySet());
+            buildFields(domainTypeBuilder, outputType, Collections.emptySet(), typeDoc);
 
             final GraphQLObjectType newObjectType = domainTypeBuilder.build();
             builder.additionalType(newObjectType);
@@ -492,6 +508,102 @@ public class DomainQL
         }
 
         return graphQLTypes;
+    }
+
+
+    /**
+     * Degenerifies the given type docs by replacing references to generic types.
+     *
+     * @param typeDoc           typeDoc to degenerify, can be null
+     * @param typeContext       type context
+     *
+     * @return typeDoc with replaced references or null
+     */
+    private TypeDoc degenerify(TypeDoc typeDoc, TypeContext typeContext)
+    {
+        if (typeDoc == null)
+        {
+            return null;
+        }
+
+        final TypeDoc copy = new TypeDoc(typeDoc.getName());
+        copy.setDescription(
+            replaceTypeRefs(typeDoc.getDescription(), typeContext)
+        );
+
+        List<FieldDoc> fieldDocsCopy = new ArrayList<>(typeDoc.getFieldDocs().size());
+        for (FieldDoc fieldDoc : typeDoc.getFieldDocs())
+        {
+            fieldDocsCopy.add(
+                degenerifyField(
+                    fieldDoc,
+                    typeContext
+                )
+
+            );
+        }
+
+        copy.setFieldDocs(fieldDocsCopy);
+        return copy;
+    }
+
+
+    private FieldDoc degenerifyField(FieldDoc fieldDoc, TypeContext typeContext)
+    {
+        if (fieldDoc == null)
+        {
+            return null;
+        }
+
+        return new FieldDoc(
+            fieldDoc.getName(),
+            replaceTypeRefs(fieldDoc.getDescription(), typeContext)
+        );
+    }
+
+    private final static Pattern TYPE_REF = Pattern.compile("\\[(.*?)\\]");
+
+    private String replaceTypeRefs(String description, TypeContext typeContext)
+    {
+        final Matcher m = TYPE_REF.matcher(description);
+        StringBuffer sb = new StringBuffer();
+        while (m.find())
+        {
+            final Class<?> aClass = typeContext.resolveType(m.group(1));
+            m.appendReplacement(sb, aClass != null ? aClass.getSimpleName() : m.group());
+        }
+        m.appendTail(sb);
+
+        return sb.toString();
+    }
+
+
+    private TypeDoc findTypeDoc(String name)
+    {
+        for (TypeDoc typeDoc : typeDocs)
+        {
+            if (typeDoc.getName().equals(name))
+            {
+                return typeDoc;
+            }
+        }
+        return null;
+    }
+
+
+    private FieldDoc lookupFieldDoc(TypeDoc typeDoc, String fieldName)
+    {
+        if (typeDoc != null)
+        {
+            for (FieldDoc fieldDoc : typeDoc.getFieldDocs())
+            {
+                if (fieldDoc.getName().equals(fieldName))
+                {
+                    return fieldDoc;
+                }
+            }
+        }
+        return null;
     }
 
 
@@ -528,31 +640,38 @@ public class DomainQL
             .name("MutationType")
             .description("Auto-generated from " + logicBeanList);
 
+        final TypeDoc queryTypeDoc = findTypeDoc(TypeDoc.QUERY_TYPE);
+
         for (Query query : queries)
         {
 
             List<GraphQLArgument> arguments = getGraphQLArguments(query, graphQlInputTypes);
 
+            final FieldDoc fieldDoc = lookMethodDoc(queryTypeDoc, query);
+
             queryTypeBuilder.field(GraphQLFieldDefinition.newFieldDefinition()
                 .name(query.getName())
+                .description(fieldDoc != null ? fieldDoc.getDescription() : query.getDescription())
                 .type(resolveOutputType(query.getResultType(), graphQLOutputTypes))
                 .dataFetcher(query)
                 .argument(arguments)
-                .description(query.getDescription())
                 .build());
 
         }
 
+        final TypeDoc mutationTypeDoc = findTypeDoc(TypeDoc.MUTATION_TYPE);
         for (Mutation mutation : mutations)
         {
             List<GraphQLArgument> arguments = getGraphQLArguments(mutation, graphQlInputTypes);
 
+            final FieldDoc fieldDoc = lookMethodDoc(mutationTypeDoc, mutation);
+
             mutationTypeBuilder.field(GraphQLFieldDefinition.newFieldDefinition()
                 .name(mutation.getName())
+                .description(fieldDoc != null ? fieldDoc.getDescription() : mutation.getDescription())
                 .type(mutation.getResultType())
                 .dataFetcher(mutation)
                 .argument(arguments)
-                .description(mutation.getDescription())
                 .build());
 
         }
@@ -562,6 +681,20 @@ public class DomainQL
 
         builder.query(queryTypeBuilder);
         builder.mutation(mutationTypeBuilder);
+    }
+
+
+    private FieldDoc lookMethodDoc(TypeDoc queryTypeDoc, DomainQLMethod query)
+    {
+        FieldDoc fieldDoc = lookupFieldDoc(queryTypeDoc, query.getName());
+
+        final TypeContext queryTypeContext = query.getTypeContext();
+
+        if (queryTypeDoc != null && fieldDoc == null)
+        {
+            fieldDoc = degenerifyField(lookupFieldDoc(queryTypeDoc, query.getGenericMethodName()), queryTypeContext);
+        }
+        return fieldDoc;
     }
 
 
@@ -591,16 +724,31 @@ public class DomainQL
     }
 
 
-    public static GraphQLEnumType buildEnumType(Class<?> nextType)
+    public GraphQLEnumType buildEnumType(Class<?> nextType)
     {
+        final String enumName = nextType.getSimpleName();
+
+        final TypeDoc typeDoc = findTypeDoc(enumName);
+
         final GraphQLEnumType.Builder enumBuilder = GraphQLEnumType.newEnum()
-            .name(nextType.getSimpleName());
+            .name(enumName)
+            .description(
+                typeDoc != null ? typeDoc.getDescription() : null
+            );
 
         for (String value : getEnumValues(nextType))
         {
-            enumBuilder.value(value);
+            final FieldDoc fieldDoc = lookupFieldDoc(typeDoc, value);
+
+            if (fieldDoc != null)
+            {
+                enumBuilder.value(value, value, fieldDoc.getDescription());
+            }
+            else
+            {
+                enumBuilder.value(value);
+            }
         }
-        ;
 
         return enumBuilder.build();
     }
@@ -736,7 +884,7 @@ public class DomainQL
 
         for (Class<?> enumType : enumTypes)
         {
-            final GraphQLEnumType graphQLEnumType = DomainQL.buildEnumType(enumType);
+            final GraphQLEnumType graphQLEnumType = this.buildEnumType(enumType);
 
             log.debug("DECLARE ENUM TYPE -- {}", enumType);
 
@@ -793,9 +941,17 @@ public class DomainQL
 
         final JSONClassInfo classInfo = JSONUtil.getClassInfo(javaType);
 
+        final String typeName = inputType.getName();
+
+        TypeDoc typeDoc = findTypeDoc(typeName);
+        if (typeDoc == null && typeName.endsWith(INPUT_SUFFIX))
+        {
+            typeDoc = findTypeDoc(typeName.substring(0, typeName.length() - INPUT_SUFFIX.length()));
+        }
+
         final GraphQLInputObjectType.Builder inputBuilder = GraphQLInputObjectType.newInputObject()
             .name(name)
-            .description("Generated for " + javaType.getName());
+            .description(typeDoc != null ? typeDoc.getDescription() : "Generated for " + javaType.getName());
 
         for (JSONPropertyInfo info : classInfo.getPropertyInfos())
         {
@@ -816,7 +972,8 @@ public class DomainQL
                 getterMethod,
                 inputFieldAnno,
                 propertyType,
-                graphQLFieldType
+                graphQLFieldType,
+                typeDoc
             );
             inputBuilder.field(
                 inputField
@@ -834,7 +991,8 @@ public class DomainQL
         Method getterMethod,
         GraphQLField inputFieldAnno,
         Class<?> propertyType,
-        GraphQLInputType graphQLFieldType
+        GraphQLInputType graphQLFieldType,
+        TypeDoc typeDoc
     )
     {
         if (graphQLFieldType == null)
@@ -884,12 +1042,17 @@ public class DomainQL
 
         final boolean isNotNull = (inputFieldAnno != null && inputFieldAnno.notNull()) || jpaNotNull;
 
+        final String fieldName = inputFieldAnno != null && inputFieldAnno.value()
+            .length() > 0 ? inputFieldAnno.value() : info.getJsonName();
+
+        final FieldDoc fieldDoc = lookupFieldDoc(typeDoc, fieldName);
+
+        final String defaultDescription = inputFieldAnno != null && inputFieldAnno.description()
+            .length() > 0 ? inputFieldAnno.description() : null;
         return GraphQLInputObjectField.newInputObjectField()
-            .name(inputFieldAnno != null && inputFieldAnno.value()
-                .length() > 0 ? inputFieldAnno.value() : info.getJsonName())
+            .name(fieldName)
+            .description(fieldDoc != null ? fieldDoc.getDescription() : defaultDescription)
             .type(isNotNull ? nonNull(graphQLFieldType) : graphQLFieldType)
-            .description(inputFieldAnno != null && inputFieldAnno.description()
-                .length() > 0 ? inputFieldAnno.description() : null)
             .defaultValue(defaultValue)
             .build();
     }
@@ -1005,9 +1168,14 @@ public class DomainQL
             final String typeName = pojoType.getSimpleName();
 
             final javax.persistence.Table tableAnno = pojoType.getAnnotation(javax.persistence.Table.class);
+            final String defaultDescription = tableAnno != null ?
+                "Generated from " + tableAnno.schema() + "." + table.getName() : null;
+
+            final TypeDoc typeDoc = findTypeDoc(typeName);
+
             final GraphQLObjectType.Builder domainTypeBuilder = GraphQLObjectType.newObject()
                 .name(typeName)
-                .description(tableAnno != null ? "Generated from " + tableAnno.schema() + "." + table.getName() : null);
+                .description(typeDoc != null ? typeDoc.getDescription() : defaultDescription);
             log.debug("DECLARE TYPE {}", typeName);
 
             final JSONClassInfo classInfo = JSONUtil.getClassInfo(pojoType);
@@ -1022,7 +1190,7 @@ public class DomainQL
                 throw new IllegalStateException("Could not find output type for type " + pojoType.getName());
             }
 
-            buildFields(domainTypeBuilder, outputType, foreignKeyFields);
+            buildFields(domainTypeBuilder, outputType, foreignKeyFields, findTypeDoc(outputType.getName()));
 
             buildForeignKeyFields(domainTypeBuilder, pojoType, classInfo, table);
 
@@ -1264,20 +1432,21 @@ public class DomainQL
 
     /**
      * Builds the normal fields for the given type.
-     *
-     * @param outputType       output type reference
+     *  @param outputType       output type reference
      * @param foreignKeyFields Names of fields that are part of a foreign keys
+     * @param typeDoc
      */
     private void buildFields(
         GraphQLObjectType.Builder domainTypeBuilder,
         OutputType outputType,
-        Set<String> foreignKeyFields
+        Set<String> foreignKeyFields,
+        TypeDoc typeDoc
     )
     {
         final Class<?> javaType = outputType.getJavaType();
 
-        handlePropertyFields(domainTypeBuilder, outputType, foreignKeyFields, javaType);
-        handleParametrizedFields(domainTypeBuilder, outputType, javaType);
+        handlePropertyFields(domainTypeBuilder, outputType, foreignKeyFields, javaType, typeDoc);
+        handleParametrizedFields(domainTypeBuilder, outputType, javaType, typeDoc);
     }
 
 
@@ -1285,7 +1454,8 @@ public class DomainQL
         GraphQLObjectType.Builder domainTypeBuilder,
         OutputType outputType,
         Set<String> foreignKeyFields,
-        Class<?> javaType
+        Class<?> javaType,
+        TypeDoc typeDoc
     )
     {
         final JSONClassInfo classInfo = JSONUtil.getClassInfo(javaType);
@@ -1298,7 +1468,7 @@ public class DomainQL
                 continue;
             }
 
-            final GraphQLFieldDefinition fieldDef = getPropertyFieldDefinition(javaType.getSimpleName(), outputType, foreignKeyFields, info);
+            final GraphQLFieldDefinition fieldDef = getPropertyFieldDefinition(javaType.getSimpleName(), outputType, foreignKeyFields, info, typeDoc);
             if (fieldDef == null)
             {
                 continue;
@@ -1314,7 +1484,8 @@ public class DomainQL
     private void handleParametrizedFields(
         GraphQLObjectType.Builder domainTypeBuilder,
         OutputType outputType,
-        Class<?> javaType
+        Class<?> javaType,
+        TypeDoc typeDoc
     )
     {
         MethodAccess methodAccess = null;
@@ -1336,7 +1507,8 @@ public class DomainQL
                     methodAccess,
                     m,
                     parameterTypes,
-                    fieldAnno
+                    fieldAnno,
+                    typeDoc
                 );
 
                 log.debug("-- {}: {}", fieldDef.getName(), fieldDef.getType().getName());
@@ -1356,7 +1528,8 @@ public class DomainQL
         MethodAccess methodAccess,
         Method m,
         Class<?>[] parameterTypes,
-        GraphQLField fieldAnno
+        GraphQLField fieldAnno,
+        TypeDoc typeDoc
     )
     {
         final int methodIndex = methodAccess.getIndex(m.getName(), parameterTypes);
@@ -1367,17 +1540,18 @@ public class DomainQL
 
         final Class<?> returnType = m.getReturnType();
 
-        GraphQLType graphQLType = getFieldType(outputType, m, fieldAnno, propertyName, returnType);
+        final GraphQLType graphQLType = getFieldType(outputType, m, fieldAnno, propertyName, returnType);
 
-        List<String> parameterNames = getParameterNames(m);
+        final List<String> parameterNames = getParameterNames(m);
+
+        final String fieldName = fieldAnno.value().length() > 0 ? fieldAnno.value() : propertyName;
+
+        final FieldDoc fieldDoc = lookupFieldDoc(typeDoc, fieldName);
+        final String description = fieldDoc != null ? fieldDoc.getDescription() : fieldAnno.description();
 
         final GraphQLFieldDefinition.Builder fieldBuilder = GraphQLFieldDefinition.newFieldDefinition()
-            .name(fieldAnno.value().length() > 0 ? fieldAnno.value() : propertyName)
-            .description(
-                fieldAnno.description().length() > 0 ?
-                    fieldAnno.description() :
-                    javaType.getSimpleName() + "." + m.getName() + "(" + describeParameter(parameterTypes) + ")"
-            )
+            .name(fieldName)
+            .description(description)
             .type(isNotNull ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
             .dataFetcher(new MethodFetcher(methodAccess, methodIndex, parameterNames, parameterTypes));
 
@@ -1386,7 +1560,7 @@ public class DomainQL
             final Class<?> parameterType = parameter.getType();
             final GraphQLField paramFieldAnno = parameter.getAnnotation(GraphQLField.class);
 
-            final GraphQLArgument arg = buildArgument(propertyName, parameter, parameterType, paramFieldAnno);
+            final GraphQLArgument arg = buildArgument(propertyName, parameter, parameterType, paramFieldAnno, fieldDoc);
             fieldBuilder.argument(arg);
         }
 
@@ -1461,7 +1635,8 @@ public class DomainQL
         String propertyName,
         Parameter parameter,
         Class<?> parameterType,
-        GraphQLField paramFieldAnno
+        GraphQLField paramFieldAnno,
+        FieldDoc fieldDoc
     )
     {
         GraphQLInputType paramGQLType;
@@ -1493,16 +1668,37 @@ public class DomainQL
             }
         }
 
+        final String paramName = parameter.getName();
+        final String description = findParamDoc(fieldDoc, paramName, "");
+
+
         final GraphQLArgument.Builder arg = GraphQLArgument.newArgument()
-            .name(parameter.getName())
+            .name(paramName)
+            .description(description)
             .defaultValue(paramFieldAnno != null ? paramFieldAnno.defaultValue() : null)
             .type(
                 paramFieldAnno != null && paramFieldAnno.notNull() ? GraphQLNonNull
                     .nonNull(paramGQLType) : paramGQLType
             );
 
-        log.debug("Method Argument {}: {}", parameter.getName(), paramGQLType);
+        log.debug("Method Argument {}: {}", paramName, paramGQLType);
         return arg.build();
+    }
+
+
+    private String findParamDoc(FieldDoc fieldDoc, String paramName, String defaultValue)
+    {
+        if (fieldDoc != null)
+        {
+            for (ParamDoc paramDoc : fieldDoc.getParamDocs())
+            {
+                if (paramDoc.getName().equals(paramName))
+                {
+                    return paramDoc.getDescription();
+                }
+            }
+        }
+        return defaultValue;
     }
 
 
@@ -1510,7 +1706,8 @@ public class DomainQL
         String domainType,
         OutputType outputType,
         Set<String> foreignKeyFields,
-        JSONPropertyInfo info
+        JSONPropertyInfo info,
+        TypeDoc typeDoc
     )
     {
         final Class<Object> type = info.getType();
@@ -1570,14 +1767,21 @@ public class DomainQL
         }
 
         final GraphQLFieldDefinition fieldDef;
+
+        final String defaultDescription = fieldAnno != null && fieldAnno.description().length() > 0 ?
+            fieldAnno.description() :
+            jpaColumnAnno != null ?
+                "DB column '" + jpaColumnAnno.name() + "'" :
+                "";
+
+        final String fieldName = fieldAnno != null && fieldAnno.value().length() > 0 ? fieldAnno.value() : name;
+
+        final FieldDoc fieldDoc = lookupFieldDoc(typeDoc, fieldName);
+
         fieldDef = GraphQLFieldDefinition.newFieldDefinition()
-            .name(fieldAnno != null && fieldAnno.value().length() > 0 ? fieldAnno.value() : name)
+            .name(fieldName)
             .description(
-                fieldAnno != null && fieldAnno.description().length() > 0 ?
-                    fieldAnno.description() :
-                    jpaColumnAnno != null ?
-                        "DB column '" + jpaColumnAnno.name() + "'" :
-                        type.getSimpleName() + "." + jsonName
+                fieldDoc != null ? fieldDoc.getDescription() : defaultDescription
             )
             .type(isNotNull ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
             .dataFetcher(fetcherAnno == null ? new FieldFetcher(domainType, jsonName, type) : createFetcher(
