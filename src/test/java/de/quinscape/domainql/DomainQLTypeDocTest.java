@@ -17,8 +17,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.*;
@@ -91,14 +93,14 @@ public class DomainQLTypeDocTest
         assertThat(rowsField.getDescription(), is("List of Foo rows."));
     }
 
-    private Set<TypeDoc> generateDocs() throws IOException
+    private List<TypeDoc> generateDocs() throws IOException
     {
         SourceRoot mainSourceRoot = new SourceRoot(Paths.get("./src/main/java/"));
         SourceRoot testSourceRoot = new SourceRoot(Paths.get("./src/test/java/"));
 
         final DocsExtractor docsExtractor = new DocsExtractor();
 
-        final Set<TypeDoc> docs = new LinkedHashSet<>();
+        final List<TypeDoc> docs = new ArrayList<>();
 
         docs.addAll(
             docsExtractor.extract(testSourceRoot,"", "de/quinscape/domainql/logicimpl/DocumentedLogic.java")
@@ -113,7 +115,7 @@ public class DomainQLTypeDocTest
             docsExtractor.extract(mainSourceRoot,"", "de/quinscape/domainql/util/Paged.java")
         );
 
-        final Set<TypeDoc> normalized = DocsExtractor.normalize(docs);
+        final List<TypeDoc> normalized = DocsExtractor.normalize(docs);
 
         //
         // JOOQ POJOs can be documented if the corresponding data is included in the JSON docs

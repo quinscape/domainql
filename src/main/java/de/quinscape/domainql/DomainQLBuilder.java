@@ -10,7 +10,6 @@ import de.quinscape.domainql.param.DataFetchingEnvironmentProviderFactory;
 import de.quinscape.domainql.param.ParameterProviderFactory;
 import de.quinscape.domainql.param.TypeParameterProviderFactory;
 import de.quinscape.domainql.scalar.GraphQLCurrencyScalar;
-import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.Directives;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLFieldDefinition;
@@ -29,11 +28,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -87,7 +88,7 @@ public class DomainQLBuilder
 
     private Map<Class<?>, GraphQLScalarType> additionalScalarTypes = new LinkedHashMap<>();
 
-    private Set<TypeDoc> typeDocs = new LinkedHashSet<>();
+    private List<TypeDoc> typeDocs = new ArrayList<>();
 
     DomainQLBuilder(DSLContext dslContext)
     {
@@ -132,7 +133,7 @@ public class DomainQLBuilder
             Collections.unmodifiableSet(additionalDirectives),
             additionalScalarTypes,
             Collections.unmodifiableSet(additionalInputTypes),
-            Collections.unmodifiableSet(
+            Collections.unmodifiableList(
                 DocsExtractor.normalize(typeDocs)
             ),
             fullSupported
@@ -575,7 +576,7 @@ public class DomainQLBuilder
      *
      * @return  this builder
      */
-    public DomainQLBuilder withTypeDocs(Set<TypeDoc> typeDocs)
+    public DomainQLBuilder withTypeDocs(List<TypeDoc> typeDocs)
     {
         this.typeDocs.addAll(typeDocs);
         return this;
@@ -599,8 +600,8 @@ public class DomainQLBuilder
         }
 
         //noinspection unchecked
-        final Set<TypeDoc> typeDocs = typeDocParser.parse(
-            Set.class,
+        final List<TypeDoc> typeDocs = typeDocParser.parse(
+            List.class,
             new InputStreamSource(
                 is,
                 true

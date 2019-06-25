@@ -29,7 +29,7 @@ public class DocsExtractorTest
 
         final DocsExtractor docsExtractor = new DocsExtractor();
 
-        final Set<TypeDoc> docs = docsExtractor.extract(sourceRoot,"", "de/quinscape/domainql/logicimpl/DocumentedLogic.java");
+        final List<TypeDoc> docs = docsExtractor.extract(sourceRoot,"", "de/quinscape/domainql/logicimpl/DocumentedLogic.java");
 
         assertThat(docs.size(), is(2));
 
@@ -65,7 +65,7 @@ public class DocsExtractorTest
 
         final DocsExtractor docsExtractor = new DocsExtractor();
 
-        final Set<TypeDoc> docs = docsExtractor.extract(sourceRoot,"", "de/quinscape/domainql/beans/DocumentedBean.java");
+        final List<TypeDoc> docs = docsExtractor.extract(sourceRoot,"", "de/quinscape/domainql/beans/DocumentedBean.java");
 
         assertThat(docs.size(), is(1));
 

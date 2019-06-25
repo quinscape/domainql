@@ -119,7 +119,7 @@ public class DomainQL
 
     private final Set<Class<?>> additionalInputTypes;
 
-    private final Set<TypeDoc> typeDocs;
+    private final List<TypeDoc> typeDocs;
 
     private final boolean fullSupported;
 
@@ -143,7 +143,7 @@ public class DomainQL
         Set<GraphQLDirective> additionalDirectives,
         Map<Class<?>, GraphQLScalarType> additionalScalarTypes,
         Set<Class<?>> additionalInputTypes,
-        Set<TypeDoc> typeDocs,
+        List<TypeDoc> typeDocs,
         boolean fullSupported
     )
     {

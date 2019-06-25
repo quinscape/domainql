@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -45,16 +44,16 @@ import java.util.stream.Collectors;
 public class DocsExtractor
 {
 
-    public Set<TypeDoc> extract(SourceRoot sourceRoot, Set<String> basePackages) throws IOException
+    public List<TypeDoc> extract(SourceRoot sourceRoot, Set<String> basePackages) throws IOException
     {
-        final Set<TypeDoc> docs = new HashSet<>();
+        final List<TypeDoc> docs = new ArrayList<>();
         for (String pkg : basePackages)
         {
             sourceRoot.parse(pkg, (localPath, absolutePath, result) -> {
 
                 if (result.isSuccessful())
                 {
-                    final Set<TypeDoc> docsForFile = extract(result);
+                    final List<TypeDoc> docsForFile = extract(result);
                     docs.addAll(docsForFile);
                 }
 
@@ -66,11 +65,11 @@ public class DocsExtractor
     }
 
 
-    public Set<TypeDoc> extract(SourceRoot sourceRoot, String basePackage, String fileName) throws IOException
+    public List<TypeDoc> extract(SourceRoot sourceRoot, String basePackage, String fileName) throws IOException
     {
         final DocsExtractor docsExtractor = new DocsExtractor();
 
-        final Set<TypeDoc> docs = new LinkedHashSet<>();
+        final List<TypeDoc> docs = new ArrayList<>();
         sourceRoot.parse(basePackage, fileName, (localPath, absolutePath, result) -> {
 
             if (result.isSuccessful())
@@ -84,7 +83,7 @@ public class DocsExtractor
     }
 
 
-    Set<TypeDoc> extract(ParseResult<CompilationUnit> result)
+    List<TypeDoc> extract(ParseResult<CompilationUnit> result)
     {
         final CompilationUnit unit = result.getResult().get();
 
@@ -103,20 +102,19 @@ public class DocsExtractor
         }
         else
         {
-            return Collections.emptySet();
+            return Collections.emptyList();
         }
     }
 
 
-    private Set<TypeDoc> extractPojoDocumentation(TypeDeclaration<?> typeDecl)
+    private List<TypeDoc> extractPojoDocumentation(TypeDeclaration<?> typeDecl)
     {
         if (!typeDecl.isTypeDeclaration())
         {
-            return Collections.emptySet();
+            return Collections.emptyList();
         }
 
-        final TypeDoc typeDoc = new TypeDoc();
-        typeDoc.setName(typeDecl.getName().getIdentifier());
+        final TypeDoc typeDoc = new TypeDoc(typeDecl.getName().getIdentifier());
         if (typeDecl.getJavadoc().isPresent())
         {
             final String description = cleanDescription(typeDecl.getJavadoc().get().getDescription().toText());
@@ -139,96 +137,96 @@ public class DocsExtractor
                         new FieldDoc(decl.getName().getIdentifier(), description)
                     );
                 }
-
             }
         }
-
-
-        final Map<String, String> fieldMap = new HashMap<>();
-
-        for (MethodDeclaration method : typeDecl.getMethods())
+        else
         {
-            final String methodName = method.getName().getIdentifier();
+            final Map<String, String> fieldMap = new HashMap<>();
 
-            final NodeList<Parameter> params = method.getParameters();
-
-            final Optional<Javadoc> javadoc = method.getJavadoc();
-            if (javadoc.isPresent())
+            for (MethodDeclaration method : typeDecl.getMethods())
             {
-                final String methodJavaDoc = cleanDescription(javadoc.get().getDescription().toText());
-                if (methodName.startsWith("get") && params.size() == 0)
+                final String methodName = method.getName().getIdentifier();
+
+                final NodeList<Parameter> params = method.getParameters();
+
+                final Optional<Javadoc> javadoc = method.getJavadoc();
+                if (javadoc.isPresent())
                 {
-                    final String propertyName = Introspector.decapitalize(methodName.substring(3));
-                    fieldMap.put(propertyName, methodJavaDoc);
-                }
-                else if (methodName.startsWith("is") && params.size() == 0)
-                {
-                    final String propertyName = Introspector.decapitalize(methodName.substring(2));
-                    fieldMap.put(propertyName, methodJavaDoc);
-                }
-                else if (methodName.startsWith("set") && method.getType().isVoidType())
-                {
-                    final String propertyName = Introspector.decapitalize(methodName.substring(3));
-                    fieldMap.put(propertyName, methodJavaDoc);
-                }
-                else
-                {
-                    final Optional<AnnotationExpr> anno = getAnnotation(method, GraphQLField.class);
-                    if (anno.isPresent())
+                    final String methodJavaDoc = cleanDescription(javadoc.get().getDescription().toText());
+                    if (methodName.startsWith("get") && params.size() == 0)
                     {
-
-                        final String name = getAttribute(anno.get(), "value", method.getName().getIdentifier());
-                        final String description = getAttribute(anno.get(), "description", methodJavaDoc);
-
-                        final FieldDoc fieldDoc = new FieldDoc(
-                            name,
-                            description
-                        );
-
-                        if (params.size() > 0)
+                        final String propertyName = Introspector.decapitalize(methodName.substring(3));
+                        fieldMap.put(propertyName, methodJavaDoc);
+                    }
+                    else if (methodName.startsWith("is") && params.size() == 0)
+                    {
+                        final String propertyName = Introspector.decapitalize(methodName.substring(2));
+                        fieldMap.put(propertyName, methodJavaDoc);
+                    }
+                    else if (methodName.startsWith("set") && method.getType().isVoidType())
+                    {
+                        final String propertyName = Introspector.decapitalize(methodName.substring(3));
+                        fieldMap.put(propertyName, methodJavaDoc);
+                    }
+                    else
+                    {
+                        final Optional<AnnotationExpr> anno = getAnnotation(method, GraphQLField.class);
+                        if (anno.isPresent())
                         {
-                            fieldDoc.setParamDocs(
-                                extractParamDocs(javadoc.get())
+
+                            final String name = getAttribute(anno.get(), "value", method.getName().getIdentifier());
+                            final String description = getAttribute(anno.get(), "description", methodJavaDoc);
+
+                            final FieldDoc fieldDoc = new FieldDoc(
+                                name,
+                                description
+                            );
+
+                            if (params.size() > 0)
+                            {
+                                fieldDoc.setParamDocs(
+                                    extractParamDocs(javadoc.get())
+                                );
+                            }
+
+                            fieldDocs.add(
+                                fieldDoc
                             );
                         }
-
-                        fieldDocs.add(
-                            fieldDoc
-                        );
                     }
                 }
             }
 
+            for (Map.Entry<String, String> e : fieldMap.entrySet())
+            {
+                final String fieldName = e.getKey();
+                final String description = e.getValue();
 
-        }
+                fieldDocs.add(
+                    new FieldDoc(fieldName, description)
+                );
 
-        for (Map.Entry<String, String> e : fieldMap.entrySet())
-        {
-            final String fieldName = e.getKey();
-            final String description = e.getValue();
+            }
 
-            fieldDocs.add(
-                new FieldDoc(fieldName, description)
-            );
+            typeDoc.setFieldDocs(fieldDocs);
 
+            if (typeDoc.getDescription() == null && fieldDocs.size() == 0)
+            {
+                return Collections.emptyList();
+            }
         }
         typeDoc.setFieldDocs(fieldDocs);
 
-        if (typeDoc.getDescription() == null && typeDoc.getFieldDocs().size() == 0)
-        {
-            return Collections.emptySet();
-        }
-
-        return Collections.singleton(typeDoc);
+        return Collections.singletonList(typeDoc);
     }
 
 
-    private Set<TypeDoc> extractLogicClassDocumentation(TypeDeclaration<?> typeDecl)
+    private List<TypeDoc> extractLogicClassDocumentation(TypeDeclaration<?> typeDecl)
     {
         final TypeDoc queryType = new TypeDoc(TypeDoc.QUERY_TYPE);
         final TypeDoc mutationType = new TypeDoc(TypeDoc.MUTATION_TYPE);
 
-        Set<TypeDoc> typeDocs = new HashSet<>();
+        List<TypeDoc> typeDocs = new ArrayList<>();
 
         for (MethodDeclaration method : typeDecl.getMethods())
         {
@@ -369,12 +367,14 @@ public class DocsExtractor
      * Joins all {@link TypeDoc#QUERY_TYPE} and {@link TypeDoc#MUTATION_TYPE} into a single type each.
      * <p>
      * Ensures that type names and field names within the query / mutation types are unique
+     * <p>
+     * Sorts types and fields to stable, reproducible generation.
      *
      * @param typeDocs
      *
      * @return
      */
-    public static Set<TypeDoc> normalize(Set<TypeDoc> typeDocs)
+    public static List<TypeDoc> normalize(List<TypeDoc> typeDocs)
     {
         TypeDoc queryDoc = new TypeDoc(TypeDoc.QUERY_TYPE);
         TypeDoc mutationDoc = new TypeDoc(TypeDoc.MUTATION_TYPE);
@@ -404,9 +404,18 @@ public class DocsExtractor
             typeDocs.add(mutationDoc);
         }
 
+
         ensureUniqueFields(queryDoc);
         ensureUniqueFields(mutationDoc);
-        return removeDuplicateNames(typeDocs);
+        final List<TypeDoc> unique = removeDuplicateNames(typeDocs);
+
+        // sort types by type name
+        unique.sort(TypeDocComparator.INSTANCE);
+
+        queryDoc.getFieldDocs().sort(FieldDocComparator.INSTANCE);
+        mutationDoc.getFieldDocs().sort(FieldDocComparator.INSTANCE);
+
+        return unique;
     }
 
 
@@ -431,7 +440,7 @@ public class DocsExtractor
      *
      * @return new set with unique names
      */
-    private static Set<TypeDoc> removeDuplicateNames(Set<TypeDoc> typeDocs)
+    private static List<TypeDoc> removeDuplicateNames(List<TypeDoc> typeDocs)
     {
         Map<String, TypeDoc> names = new LinkedHashMap<>();
         for (TypeDoc typeDoc : typeDocs)
@@ -439,7 +448,7 @@ public class DocsExtractor
             final String name = typeDoc.getName();
             names.put(name, typeDoc);
         }
-        return new LinkedHashSet<>(names.values());
+        return new ArrayList<>(names.values());
     }
 
 
@@ -499,7 +508,7 @@ public class DocsExtractor
         SourceRoot root = new SourceRoot(Paths.get(sourceRoot));
 
         final DocsExtractor extractor = new DocsExtractor();
-        final Set<TypeDoc> typeDocs = extractor.extract(
+        final List<TypeDoc> typeDocs = extractor.extract(
             root,
             new HashSet<>(basePackages)
         );
@@ -524,4 +533,6 @@ public class DocsExtractor
             );
         }
     }
+
+
 }
