@@ -1401,6 +1401,9 @@ public class DomainQL
                     }
 
                 }
+
+                final TableField<?, ?> targetField = foreignKey.getKey().getFields().get(0);
+
                 final Class<?> otherPojoType = findPojoTypeOf(foreignKey.getKey().getTable());
                 final GraphQLOutputType objectRef = outputTypeRef(otherPojoType);
                 final GraphQLFieldDefinition fieldDef = GraphQLFieldDefinition.newFieldDefinition()
@@ -1413,7 +1416,8 @@ public class DomainQL
                             objectFieldName,
                             findJsonName(classInfo, javaName),
                             foreignKey.getKey().getTable(),
-                            findPojoTypeOf(foreignKey.getKey().getTable())
+                            findPojoTypeOf(foreignKey.getKey().getTable()),
+                            targetField.getName()
                         )
                     )
                     .build();

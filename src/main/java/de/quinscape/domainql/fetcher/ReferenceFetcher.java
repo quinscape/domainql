@@ -7,6 +7,8 @@ import graphql.schema.DataFetchingEnvironment;
 import org.jooq.DSLContext;
 import org.jooq.Table;
 import org.jooq.TableField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -16,6 +18,9 @@ import java.util.List;
 public class ReferenceFetcher
     implements DataFetcher<Object>
 {
+    private final static Logger log = LoggerFactory.getLogger(ReferenceFetcher.class);
+
+
     private final DSLContext dslContext;
 
     /**
@@ -32,12 +37,16 @@ public class ReferenceFetcher
 
     private final Class<?> pojoType;
 
+    private final String targetDBField;
+
+
     public ReferenceFetcher(
         DSLContext dslContext,
         String fieldName,
         String idFieldName,
         Table<?> table,
-        Class<?> pojoType
+        Class<?> pojoType,
+        String targetDBField
     )
     {
         this.dslContext = dslContext;
@@ -45,6 +54,12 @@ public class ReferenceFetcher
         this.idFieldName = idFieldName;
         this.table = table;
         this.pojoType = pojoType;
+        this.targetDBField = targetDBField;
+
+        if (log.isDebugEnabled())
+        {
+            log.debug("{}: fieldName = {}, idFieldName = {}", table.getName(), fieldName, idFieldName);
+        }
     }
 
     @Override
@@ -101,6 +116,16 @@ public class ReferenceFetcher
     public Class<?> getPojoType()
     {
         return pojoType;
+    }
+
+
+    /**
+     * Name of the target DB field for the reference. The single field in the target table contained in the target unique key.
+     * @return
+     */
+    public String getTargetDBField()
+    {
+        return targetDBField;
     }
 
 
