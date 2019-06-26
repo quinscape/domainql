@@ -246,8 +246,8 @@ public class DomainQLBuilder
      * @param fkField           field contained in a foreign key
      * @param sourceField       source field configuration
      * @param targetField       target field configuration
-     * @param leftSideName      field name for the left-hand / source side
-     * @param rightSideName     field name for the right-hand / target side
+     * @param leftSideObjectName      object name for the left-hand / source side
+     * @param rightSideObjectName     object name for the right-hand / target side
      *
      *
      * @return this builder
@@ -256,8 +256,8 @@ public class DomainQLBuilder
         TableField<?, ?> fkField,
         SourceField sourceField,
         TargetField targetField,
-        String leftSideName,
-        String rightSideName
+        String leftSideObjectName,
+        String rightSideObjectName
     )
     {
         relationConfigurations.put(
@@ -265,8 +265,9 @@ public class DomainQLBuilder
             new RelationConfiguration(
                 sourceField,
                 targetField,
-                sourceField != SourceField.NONE ? leftSideName : null,
-                targetField != TargetField.NONE ? rightSideName : null
+                // ignore naming if not creating objects for source and target
+                sourceField == SourceField.OBJECT ||  sourceField == SourceField.OBJECT_AND_SCALAR ? leftSideObjectName : null,
+                targetField != TargetField.NONE ? rightSideObjectName : null
             )
         );
         return this;

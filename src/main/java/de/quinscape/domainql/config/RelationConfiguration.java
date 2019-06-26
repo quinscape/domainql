@@ -8,8 +8,8 @@ public class RelationConfiguration
     private final SourceField sourceField;
     private final TargetField targetField;
 
-    private final String leftSideName;
-    private final String rightSideName;
+    private final String leftSideObjectName;
+    private final String rightSideObjectName;
 
 
     public RelationConfiguration(
@@ -19,13 +19,13 @@ public class RelationConfiguration
         this(sourceField, targetField, null, null);
     }
     public RelationConfiguration(
-        SourceField sourceField, TargetField targetField, String leftSideName, String rightSideName
+        SourceField sourceField, TargetField targetField, String leftSideObjectName, String rightSideObjectName
     )
     {
         this.sourceField = sourceField;
         this.targetField = targetField;
-        this.leftSideName = leftSideName;
-        this.rightSideName = rightSideName;
+        this.leftSideObjectName = leftSideObjectName;
+        this.rightSideObjectName = rightSideObjectName;
     }
 
 
@@ -42,14 +42,14 @@ public class RelationConfiguration
     }
 
 
-    public String getLeftSideName()
+    public String getLeftSideObjectName()
     {
-        return leftSideName;
+        return leftSideObjectName;
     }
 
 
-    public String getRightSideName()
+    public String getRightSideObjectName()
     {
-        return rightSideName;
+        return rightSideObjectName;
     }
 }

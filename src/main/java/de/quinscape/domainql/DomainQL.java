@@ -1271,9 +1271,9 @@ public class DomainQL
         final GraphQLOutputType type = outputTypeRef(otherPojoType);
 
         final String backReferenceFieldName;
-        if (relationConfiguration.getRightSideName() != null)
+        if (relationConfiguration.getRightSideObjectName() != null)
         {
-            backReferenceFieldName = relationConfiguration.getRightSideName();
+            backReferenceFieldName = relationConfiguration.getRightSideObjectName();
         }
         else
         {
@@ -1354,15 +1354,6 @@ public class DomainQL
 
             if (sourceField == SourceField.SCALAR || sourceField == SourceField.OBJECT_AND_SCALAR)
             {
-                final String scalarFieldName;
-                if (relationConfiguration.getLeftSideName() != null)
-                {
-                    scalarFieldName = relationConfiguration.getLeftSideName();
-                }
-                else
-                {
-                    scalarFieldName = javaName;
-                }
                 final GraphQLType graphQLType = outputTypeRef(foreignKeyField.getType());
                 if (graphQLType == null)
                 {
@@ -1370,7 +1361,7 @@ public class DomainQL
                         "Could not determine graphql type for " + foreignKeyField.getType());
                 }
                 final GraphQLFieldDefinition fieldDef = GraphQLFieldDefinition.newFieldDefinition()
-                    .name(scalarFieldName)
+                    .name(javaName)
                     .description("DB foreign key column '" + foreignKeyField.getName() + "'")
                     .type(isNotNull ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
                     .dataFetcher(new FieldFetcher(pojoType.getSimpleName(), findJsonName(classInfo, javaName), foreignKeyField.getType()))
@@ -1384,9 +1375,9 @@ public class DomainQL
             if (sourceField == SourceField.OBJECT || sourceField == SourceField.OBJECT_AND_SCALAR)
             {
                 final String objectFieldName;
-                if (relationConfiguration.getLeftSideName() != null)
+                if (relationConfiguration.getLeftSideObjectName() != null)
                 {
-                    objectFieldName = relationConfiguration.getLeftSideName();
+                    objectFieldName = relationConfiguration.getLeftSideObjectName();
                 }
                 else
                 {

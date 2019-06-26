@@ -97,7 +97,7 @@ public class AnotherDomainQLTest
             final GraphQLObjectType sourceTwo = (GraphQLObjectType) schema.getType("SourceTwo");
             assertThat(sourceTwo,is(notNullValue()));
             assertThat(sourceTwo.getFieldDefinitions().size(),is(2));
-            assertThat(sourceTwo.getFieldDefinition("scalarFieldId").getType(),is(nonNull(Scalars.GraphQLString)));
+            assertThat(sourceTwo.getFieldDefinition("targetId").getType(),is(nonNull(Scalars.GraphQLString)));
 
         }
 
@@ -238,6 +238,33 @@ public class AnotherDomainQLTest
             assertThat(sourceOne.getFieldDefinitions().get(1).getName(),is("targetId"));
             assertThat(sourceOne.getFieldDefinitions().get(1).getType(),is(nonNull(Scalars.GraphQLString)));
             assertThat(sourceOne.getFieldDefinitions().get(2).getName(),is("target"));
+            assertThat(sourceOne.getFieldDefinitions().get(2).getType(),is(nonNull(schema.getType("TargetOne"))));
+
+        }
+    }
+
+    @Test
+    public void testRenamedObjectAndScalarSourceFields()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new TestLogic()))
+
+            // source variants
+            .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.OBJECT_AND_SCALAR, TargetField.NONE, "myTarget", null)
+            .buildGraphQLSchema();
+
+        // SourceField.OBJECT_AND_SCALAR / TargetField.NONE
+        {
+            // just the id fields
+            final GraphQLObjectType sourceOne = (GraphQLObjectType) schema.getType("SourceOne");
+            assertThat(sourceOne,is(notNullValue()));
+            assertThat(sourceOne.getFieldDefinitions().size(),is(3));
+            assertThat(sourceOne.getFieldDefinitions().get(0).getName(),is("id"));
+            assertThat(sourceOne.getFieldDefinitions().get(0).getType(),is(nonNull(Scalars.GraphQLString)));
+            assertThat(sourceOne.getFieldDefinitions().get(1).getName(),is("targetId"));
+            assertThat(sourceOne.getFieldDefinitions().get(1).getType(),is(nonNull(Scalars.GraphQLString)));
+            assertThat(sourceOne.getFieldDefinitions().get(2).getName(),is("myTarget"));
             assertThat(sourceOne.getFieldDefinitions().get(2).getType(),is(nonNull(schema.getType("TargetOne"))));
 
         }
