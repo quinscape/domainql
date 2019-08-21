@@ -13,7 +13,7 @@ public class JSONHolderTest
     public void testJSONHolder()
     {
         {
-            final String json = jsonifyMap(new JSONHolder("blabla"));
+            final String json = jsonifyMap(new JSONHolder("\"blabla\""));
             assertThat(json,is("{\"value\":\"blabla\"}"));
         }
         {

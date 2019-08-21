@@ -15,6 +15,10 @@ public final class JSONHolder
     {
         this.json = JSONUtil.DEFAULT_GENERATOR.forValue(value);
     }
+    public JSONHolder(String json)
+    {
+        this.json = json;
+    }
 
     @Override
     public String toJSON()
