@@ -1,6 +1,7 @@
 package de.quinscape.domainql;
 
 
+import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.logicimpl.LogicWithMirrorInput;
 import de.quinscape.domainql.logicimpl.TestLogic;
 import de.quinscape.domainql.config.SourceField;
@@ -146,12 +147,12 @@ public class DomainQLTest
             final GraphQLObjectType sourceOne = (GraphQLObjectType) schema.getType("SourceOne");
             assertThat(sourceOne,is(notNullValue()));
             assertThat(sourceOne.getFieldDefinitions().size(),is(1));
-            assertThat(sourceOne.getFieldDefinition("id").getType(),is(nonNull(Scalars.GraphQLString)));
+            assertThat(sourceOne.getFieldDefinition(DomainObject.ID).getType(),is(nonNull(Scalars.GraphQLString)));
 
             final GraphQLObjectType targetOne = (GraphQLObjectType) schema.getType("TargetOne");
             assertThat(targetOne,is(notNullValue()));
             assertThat(targetOne.getFieldDefinitions().size(),is(1));
-            assertThat(targetOne.getFieldDefinition("id").getType(),is(nonNull(Scalars.GraphQLString)));
+            assertThat(targetOne.getFieldDefinition(DomainObject.ID).getType(),is(nonNull(Scalars.GraphQLString)));
 
         }
 

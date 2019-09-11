@@ -37,7 +37,7 @@ public final class DomainObjectUtil
         final String domainType = domainObject.getDomainType();
         final Table<?> jooqTable = domainQL.getJooqTable(domainType);
 
-        final String id = (String) domainObject.getProperty("id");
+        final String id = (String) domainObject.getProperty(DomainObject.ID);
 
         final InsertQuery<?> insertQuery = dslContext.insertQuery(
             jooqTable
@@ -45,7 +45,7 @@ public final class DomainObjectUtil
         insertQuery.addConditions(
             field(
                 name(
-                    "id"
+                    DomainObject.ID
                 )
             )
                 .eq(
@@ -73,7 +73,7 @@ public final class DomainObjectUtil
         final String domainType = domainObject.getDomainType();
         final Table<?> jooqTable = domainQL.getJooqTable(domainType);
 
-        final String id = (String) domainObject.getProperty("id");
+        final String id = (String) domainObject.getProperty(DomainObject.ID);
 
         final UpdateQuery<?> updateQuery = dslContext.updateQuery(
             jooqTable
@@ -81,7 +81,7 @@ public final class DomainObjectUtil
         updateQuery.addConditions(
             field(
                 name(
-                    "id"
+                    DomainObject.ID
                 )
             )
                 .eq(
@@ -116,7 +116,7 @@ public final class DomainObjectUtil
         final Table<?> jooqTable = domainQL.getJooqTable(domainType);
 
 
-        final String id = (String) domainObject.getProperty("id");
+        final String id = (String) domainObject.getProperty(DomainObject.ID);
 
         final boolean exists = dslContext.fetchExists(
             dslContext.select()
@@ -124,7 +124,7 @@ public final class DomainObjectUtil
                 .where(
                     field(
                         name(
-                            "id"
+                            DomainObject.ID
                         )
                     )
                         .eq(id)
@@ -146,7 +146,7 @@ public final class DomainObjectUtil
     public static int delete(DSLContext dslContext, DomainQL domainQL, DomainObject domainObject)
     {
         final String domainType = domainObject.getDomainType();
-        final String id = (String) domainObject.getProperty("id");
+        final String id = (String) domainObject.getProperty(DomainObject.ID);
 
         return delete(dslContext, domainQL, domainType, id);
     }
@@ -159,7 +159,7 @@ public final class DomainObjectUtil
         final int count = dslContext.deleteFrom(jooqTable).where(
             field(
                 name(
-                    "id"
+                    DomainObject.ID
                 )
             )
                 .eq(id)

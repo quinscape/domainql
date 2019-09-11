@@ -153,7 +153,7 @@ public class AnotherDomainQLTest
             assertThat(sourceOneInput, is(notNullValue()));
 
             assertThat(sourceOneInput.getFields().size(), is(2));
-            assertThat(sourceOneInput.getField("id").getType(),is(nonNull(Scalars.GraphQLString)));
+            assertThat(sourceOneInput.getField(DomainObject.ID).getType(),is(nonNull(Scalars.GraphQLString)));
             assertThat(sourceOneInput.getField("targetId").getType(),is(nonNull(Scalars.GraphQLString)));
         }
 
@@ -163,7 +163,7 @@ public class AnotherDomainQLTest
 //            assertThat(sourceOneInput, is(notNullValue()));
 //
 //            assertThat(sourceOneInput.getFields().size(), is(3));
-//            assertThat(sourceOneInput.getField("id").getType(),is(nonNull(Scalars.GraphQLString)));
+//            assertThat(sourceOneInput.getField(DomainObject.ID).getType(),is(nonNull(Scalars.GraphQLString)));
 //            assertThat(sourceOneInput.getField("targetId").getType(),is(nonNull(Scalars.GraphQLString)));
 //            assertThat(sourceOneInput.getField("foo").getType(),is(Scalars.GraphQLString));
 //        }
@@ -233,7 +233,7 @@ public class AnotherDomainQLTest
             final GraphQLObjectType sourceOne = (GraphQLObjectType) schema.getType("SourceOne");
             assertThat(sourceOne,is(notNullValue()));
             assertThat(sourceOne.getFieldDefinitions().size(),is(3));
-            assertThat(sourceOne.getFieldDefinitions().get(0).getName(),is("id"));
+            assertThat(sourceOne.getFieldDefinitions().get(0).getName(),is(DomainObject.ID));
             assertThat(sourceOne.getFieldDefinitions().get(0).getType(),is(nonNull(Scalars.GraphQLString)));
             assertThat(sourceOne.getFieldDefinitions().get(1).getName(),is("targetId"));
             assertThat(sourceOne.getFieldDefinitions().get(1).getType(),is(nonNull(Scalars.GraphQLString)));
@@ -260,7 +260,7 @@ public class AnotherDomainQLTest
             final GraphQLObjectType sourceOne = (GraphQLObjectType) schema.getType("SourceOne");
             assertThat(sourceOne,is(notNullValue()));
             assertThat(sourceOne.getFieldDefinitions().size(),is(3));
-            assertThat(sourceOne.getFieldDefinitions().get(0).getName(),is("id"));
+            assertThat(sourceOne.getFieldDefinitions().get(0).getName(),is(DomainObject.ID));
             assertThat(sourceOne.getFieldDefinitions().get(0).getType(),is(nonNull(Scalars.GraphQLString)));
             assertThat(sourceOne.getFieldDefinitions().get(1).getName(),is("targetId"));
             assertThat(sourceOne.getFieldDefinitions().get(1).getType(),is(nonNull(Scalars.GraphQLString)));
@@ -620,7 +620,7 @@ public class AnotherDomainQLTest
         assertThat(arg.getType().getName(), is("SourceOneInput"));
 
         final GraphQLInputObjectType sourceOneInput = (GraphQLInputObjectType) schema.getType("SourceOneInput");
-        assertThat(sourceOneInput.getField("id").getType(),is(nonNull(Scalars.GraphQLString)));
+        assertThat(sourceOneInput.getField(DomainObject.ID).getType(),is(nonNull(Scalars.GraphQLString)));
         assertThat(sourceOneInput.getField("targetId").getType(),is(nonNull(Scalars.GraphQLString)));
         assertThat(sourceOneInput.getField("extra").getType(),is(Scalars.GraphQLString));
     }
@@ -643,7 +643,7 @@ public class AnotherDomainQLTest
         assertThat(arg.getType().getName(), is("SourceOneInput"));
 
         final GraphQLInputObjectType sourceOneInput = (GraphQLInputObjectType) schema.getType("SourceOneInput");
-        assertThat(sourceOneInput.getField("id").getType(),is(nonNull(Scalars.GraphQLString)));
+        assertThat(sourceOneInput.getField(DomainObject.ID).getType(),is(nonNull(Scalars.GraphQLString)));
         assertThat(sourceOneInput.getField("targetId").getType(),is(nonNull(Scalars.GraphQLString)));
         assertThat(sourceOneInput.getField("extra").getType(),is(Scalars.GraphQLString));
 
@@ -758,7 +758,7 @@ public class AnotherDomainQLTest
 
         //log.info(domainQL.getFieldLookup().toString());
 
-        assertThat(domainQL.lookupField("SourceFour", "id").getName(), is("id"));
+        assertThat(domainQL.lookupField("SourceFour", DomainObject.ID).getName(), is("id"));
         assertThat(domainQL.lookupField("SourceFour", "targetId").getName(), is("target_id"));
 
     }

@@ -1396,7 +1396,7 @@ public class DomainQLExecutionTest
 
         final JSONPathUtil util = new JSONPathUtil(JSONUtil.OBJECT_SUPPORT);
 
-        assertThat(data.get("id"), is ("source-three-0001"));
+        assertThat(data.get(DomainObject.ID), is ("source-three-0001"));
         assertThat(util.getPropertyPath(data, "target.id"), is ("target-three-fetch-context"));
 
 

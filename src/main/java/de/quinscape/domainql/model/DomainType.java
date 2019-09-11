@@ -1,5 +1,6 @@
 package de.quinscape.domainql.model;
 
+import de.quinscape.domainql.generic.DomainObject;
 import org.svenson.JSONParameter;
 import org.svenson.JSONProperty;
 import org.svenson.JSONTypeHint;
@@ -204,7 +205,7 @@ public class DomainType
         private static final List<DomainField> DEFAULT_FIELDS =
             Collections.singletonList(
             DomainField.newField()
-                .withName("id")
+                .withName(DomainObject.ID)
                 .withType(FieldType.UUID)
                 .withMaxLength(40)
                 .build()
@@ -215,7 +216,7 @@ public class DomainType
         private List<DomainField> fields = new ArrayList<>();
 
 
-        private UniqueConstraint primaryKey = UniqueConstraint.newPrimaryKey("id");
+        private UniqueConstraint primaryKey = UniqueConstraint.newPrimaryKey(DomainObject.ID);
 
         private List<ForeignKey> foreignKeys = new ArrayList<>();
 

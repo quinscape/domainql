@@ -3,6 +3,7 @@ package de.quinscape.domainql.schema;
 import de.quinscape.domainql.DomainQL;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
+import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.logicimpl.DegenerifyLogic;
 import de.quinscape.domainql.util.Paged;
 import de.quinscape.spring.jsview.util.JSONUtil;
@@ -62,7 +63,7 @@ public class SchemaDataProviderTest
         final Object sourceTwoType = findNamed(types, "SourceTwo");
 
         assertThat(sourceTwoType, is(notNullValue()));
-        assertThat(pathUtil.getPropertyPath(sourceTwoType, "fields[0].name"), is("id"));
+        assertThat(pathUtil.getPropertyPath(sourceTwoType, "fields[0].name"), is(DomainObject.ID));
         assertThat(pathUtil.getPropertyPath(sourceTwoType, "fields[1].name"), is("targetId"));
 
         final List<String> genericTypes = (List<String>) pathUtil.getPropertyPath(schemaData, "genericTypes");

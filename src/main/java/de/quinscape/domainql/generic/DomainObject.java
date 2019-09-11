@@ -14,6 +14,8 @@ public interface DomainObject
 {
     String DOMAIN_TYPE_PROPERTY = "_type";
 
+    String ID = "id";
+
     @NotNull
     @JSONProperty(value = DOMAIN_TYPE_PROPERTY, readOnly = true, priority = 1000)
     default String getDomainType()

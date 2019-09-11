@@ -4,6 +4,7 @@ import com.github.javaparser.utils.SourceRoot;
 import de.quinscape.domainql.docs.DocsExtractor;
 import de.quinscape.domainql.docs.FieldDoc;
 import de.quinscape.domainql.docs.TypeDoc;
+import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.logicimpl.DocumentedLogic;
 import de.quinscape.domainql.testdomain.Public;
 import graphql.schema.GraphQLEnumType;
@@ -81,7 +82,7 @@ public class DomainQLTypeDocTest
         final GraphQLObjectType jooqType = (GraphQLObjectType) graphQLSchema.getType("SourceFour");
         assertThat(jooqType.getDescription(), is("SourceFour desc"));
 
-        final GraphQLFieldDefinition idField = jooqType.getFieldDefinition("id");
+        final GraphQLFieldDefinition idField = jooqType.getFieldDefinition(DomainObject.ID);
         assertThat(idField.getDescription(), is("Custom desc for SourceFour.id"));
 
 
@@ -125,7 +126,7 @@ public class DomainQLTypeDocTest
 
         jooqExampleDoc.setFieldDocs(
             Collections.singletonList(
-                new FieldDoc("id", "Custom desc for SourceFour.id")
+                new FieldDoc(DomainObject.ID, "Custom desc for SourceFour.id")
             )
         );
 
