@@ -98,7 +98,7 @@ public class DomainQLExecutionTest
         .configureRelation(SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE)
         .configureRelation(SOURCE_FIVE.TARGET_ID, SourceField.NONE, TargetField.ONE)
         .configureRelation(SOURCE_SIX.TARGET_ID, SourceField.NONE, TargetField.MANY)
-        .configureRelation(SOURCE_SEVEN.TARGET, SourceField.OBJECT, TargetField.NONE)
+        //.configureRelation(SOURCE_SEVEN.TARGET, SourceField.OBJECT, TargetField.NONE)
 
         .additionalQueries(GraphQLFieldDefinition.newFieldDefinition()
             .name("extraQuery")

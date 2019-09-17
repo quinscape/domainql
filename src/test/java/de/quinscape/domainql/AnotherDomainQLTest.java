@@ -336,16 +336,39 @@ public class AnotherDomainQLTest
             .logicBeans(Collections.singleton(new TypeRepeatLogic()))
 
             // source variants
-            .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.NONE, TargetField.NONE)
-            .configureRelation(   SOURCE_TWO.TARGET_ID, SourceField.SCALAR, TargetField.NONE)
-            .configureRelation( SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE)
-            .configureRelation(  SOURCE_FIVE.TARGET_ID, SourceField.NONE, TargetField.ONE)
-            .configureRelation(   SOURCE_SIX.TARGET_ID, SourceField.NONE, TargetField.MANY)
-            .configureRelation(    SOURCE_SEVEN.TARGET, SourceField.OBJECT, TargetField.NONE)
-
+            .configureRelation(SOURCE_ONE.TARGET_ID, SourceField.NONE, TargetField.NONE)
+            .configureRelation(SOURCE_TWO.TARGET_ID, SourceField.SCALAR, TargetField.NONE)
+            .configureRelation(SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE)
+            .configureRelation(SOURCE_FIVE.TARGET_ID, SourceField.NONE, TargetField.ONE)
+            .configureRelation(SOURCE_SIX.TARGET_ID, SourceField.NONE, TargetField.MANY)
+            .configureRelation(SOURCE_SEVEN.TARGET, SourceField.OBJECT, TargetField.NONE, "targetObj", null)
             .buildGraphQLSchema();
+    }
+    
+    @Test(expected = DomainQLTypeException.class)
+    public void testPojoAndObjNameConflict()
+    {
 
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new TypeRepeatLogic()))
 
+            // source variants
+            .configureRelation(    SOURCE_SEVEN.TARGET, SourceField.OBJECT, TargetField.NONE)
+            .buildGraphQLSchema();
+    }
+
+    @Test(expected = DomainQLTypeException.class)
+    public void testPojoAndBackObjNameConflict()
+    {
+
+        final GraphQLSchema schema = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new TypeRepeatLogic()))
+
+            // source variants
+            .configureRelation(    SOURCE_SEVEN.TARGET, SourceField.OBJECT, TargetField.ONE, "targetObj", "name")
+            .buildGraphQLSchema();
     }
 
 

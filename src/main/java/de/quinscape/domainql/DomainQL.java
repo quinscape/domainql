@@ -1194,7 +1194,7 @@ public class DomainQL
 
             buildForeignKeyFields(domainTypeBuilder, pojoType, classInfo, table);
 
-            buildBackReferenceFields(domainTypeBuilder, pojoType, table, jooqTables.values());
+            buildBackReferenceFields(domainTypeBuilder, pojoType, classInfo, table, jooqTables.values());
 
             final GraphQLObjectType newObjectType = domainTypeBuilder.build();
 
@@ -1205,23 +1205,23 @@ public class DomainQL
         }
         catch (Exception e)
         {
-            throw new DomainQLException("Error creating type for " + table, e);
+            throw new DomainQLTypeException("Error creating type for " + table, e);
         }
     }
 
 
     /**
      * Build all fields resulting from a foreign key pointing to the current object type.
-     *
-     * @param domainTypeBuilder object builder
+     *  @param domainTypeBuilder object builder
      * @param pojoType          pojo type to build the object for
+     * @param classInfo         svenson class info
      * @param table             corresponding table
      * @param allTables         set of all tables
      */
     private void buildBackReferenceFields(
         GraphQLObjectType.Builder domainTypeBuilder,
         Class<?> pojoType,
-        Table<?> table,
+        JSONClassInfo classInfo, Table<?> table,
         Collection<TableLookup> allTables
     )
     {
@@ -1240,6 +1240,7 @@ public class DomainQL
 
             final GraphQLFieldDefinition fieldDef = buildBackReferenceField(
                 pojoType,
+                classInfo,
                 table,
                 foreignKey,
                 relationConfiguration,
@@ -1256,7 +1257,7 @@ public class DomainQL
 
     private GraphQLFieldDefinition buildBackReferenceField(
         Class<?> pojoType,
-        Table<?> table,
+        JSONClassInfo classInfo, Table<?> table,
         ForeignKey<?, ?> foreignKey,
         RelationConfiguration relationConfiguration,
         TargetField targetField,
@@ -1279,6 +1280,10 @@ public class DomainQL
         {
             final String otherName = Introspector.decapitalize(otherPojoType.getSimpleName());
             backReferenceFieldName = isOneToOne ? otherName : options.getPluralizationFunction().apply(otherName);
+        }
+        if (classInfo.getPropertyInfo(backReferenceFieldName) != null)
+        {
+            throw new DomainQLTypeException("Invalid object field name " + pojoType.getSimpleName() + "."  + backReferenceFieldName + ":  exists both as object field and as scalar field.");
         }
 
         final JSONPropertyInfo fkPropertyInfo = findPropertyInfoForField(
@@ -1390,7 +1395,11 @@ public class DomainQL
                     {
                         objectFieldName = javaName;
                     }
+                }
 
+                if (classInfo.getPropertyInfo(objectFieldName) != null)
+                {
+                    throw new DomainQLTypeException("Invalid object field name " + pojoType.getSimpleName() + "."  + objectFieldName + ":  exists both as object field and as scalar field.");
                 }
 
                 final TableField<?, ?> targetField = foreignKey.getKey().getFields().get(0);

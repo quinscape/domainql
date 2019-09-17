@@ -44,7 +44,7 @@ public class DomainQLTest
         .configureRelation( SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE)
         .configureRelation(  SOURCE_FIVE.TARGET_ID, SourceField.NONE, TargetField.ONE)
         .configureRelation(   SOURCE_SIX.TARGET_ID, SourceField.NONE, TargetField.MANY)
-        .configureRelation(    SOURCE_SEVEN.TARGET, SourceField.OBJECT, TargetField.NONE)
+        .configureRelation(    SOURCE_SEVEN.TARGET, SourceField.OBJECT, TargetField.NONE, "targetObj", null)
 
         .buildGraphQLSchema();
 
@@ -209,7 +209,7 @@ public class DomainQLTest
 
             final GraphQLObjectType sourceSeven = (GraphQLObjectType) schema.getType("SourceSeven");
             assertThat(sourceSeven.getFieldDefinitions().size(), is(2));
-            assertThat(sourceSeven.getFieldDefinition("target").getType(), is(nonNull(schema.getType("TargetSeven"))));
+            assertThat(sourceSeven.getFieldDefinition("targetObj").getType(), is(nonNull(schema.getType("TargetSeven"))));
 
         }
     }
