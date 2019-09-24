@@ -841,6 +841,22 @@ public class DomainQL
     }
 
 
+    public static RelationBuilder newRelation(TableField<?, ?> fkField)
+    {
+        return new RelationBuilder(null, fkField);
+    }
+
+    public static RelationBuilder newRelation(String id)
+    {
+        return new RelationBuilder(id, null);
+    }
+
+    public static RelationBuilder newRelation(String id, TableField<?, ?> fkField)
+    {
+        return new RelationBuilder(id, fkField);
+    }
+
+
     private LogicBeanAnalyzer registerTypes(GraphQLSchema.Builder builder, Set<String> typesForJooqDomain)
     {
         // define types for the JOOQ Tables

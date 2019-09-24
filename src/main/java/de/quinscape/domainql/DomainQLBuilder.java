@@ -226,12 +226,21 @@ public class DomainQLBuilder
      * @param targetField       target field configuration
      *
      * @return this builder
+     *
+     * @deprecated Use the new {@link #withRelation(RelationConfiguration)}
      */
     public DomainQLBuilder configureRelation(
         TableField<?, ?> fkField, SourceField sourceField, TargetField targetField
     )
     {
         relationConfigurations.put(fkField, new RelationConfiguration(sourceField, targetField));
+        return this;
+    }
+
+    public DomainQLBuilder withRelation(RelationConfiguration relationConfig)
+    {
+        // TODO: implement
+
         return this;
     }
 
@@ -249,6 +258,7 @@ public class DomainQLBuilder
      * @param leftSideObjectName      object name for the left-hand / source side
      * @param rightSideObjectName     object name for the right-hand / target side
      *
+     * @deprecated Use the new {@link #withRelation(RelationConfiguration)}
      *
      * @return this builder
      */
