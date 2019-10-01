@@ -11,10 +11,7 @@ import java.io.Serializable;
 import javax.annotation.Generated;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Index;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 
@@ -30,45 +27,30 @@ import javax.validation.constraints.Size;
 )
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 @Entity
-@Table(name = "source_six", schema = "public", indexes = {
-    @Index(name = "pk_source_six", unique = true, columnList = "id ASC")
-})
-public class SourceSix extends GeneratedDomainObject implements Serializable {
+@Table(name = "target_nine_counts", schema = "public")
+public class TargetNineCounts extends GeneratedDomainObject implements Serializable {
 
-    private static final long serialVersionUID = -2069893223;
+    private static final long serialVersionUID = 1524349661;
 
-    private String id;
     private String targetId;
+    private Long   count;
 
-    public SourceSix() {}
+    public TargetNineCounts() {}
 
-    public SourceSix(SourceSix value) {
-        this.id = value.id;
+    public TargetNineCounts(TargetNineCounts value) {
         this.targetId = value.targetId;
+        this.count = value.count;
     }
 
-    public SourceSix(
-        String id,
-        String targetId
+    public TargetNineCounts(
+        String targetId,
+        Long   count
     ) {
-        this.id = id;
         this.targetId = targetId;
+        this.count = count;
     }
 
-    @Id
-    @Column(name = "id", unique = true, nullable = false, length = 36)
-    @NotNull
-    @Size(max = 36)
-    public String getId() {
-        return this.id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    @Column(name = "target_id", nullable = false, length = 36)
-    @NotNull
+    @Column(name = "target_id", length = 36)
     @Size(max = 36)
     public String getTargetId() {
         return this.targetId;
@@ -78,12 +60,21 @@ public class SourceSix extends GeneratedDomainObject implements Serializable {
         this.targetId = targetId;
     }
 
+    @Column(name = "count", precision = 64)
+    public Long getCount() {
+        return this.count;
+    }
+
+    public void setCount(Long count) {
+        this.count = count;
+    }
+
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("SourceSix (");
+        StringBuilder sb = new StringBuilder("TargetNineCounts (");
 
-        sb.append(id);
-        sb.append(", ").append(targetId);
+        sb.append(targetId);
+        sb.append(", ").append(count);
 
         sb.append(")");
         return sb.toString();

@@ -35,6 +35,8 @@ import de.quinscape.domainql.mock.TestProvider;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.domainql.testdomain.Public;
 import de.quinscape.domainql.testdomain.tables.pojos.Foo;
+import de.quinscape.domainql.testdomain.tables.pojos.TargetNine;
+import de.quinscape.domainql.testdomain.tables.pojos.TargetNineCounts;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
@@ -46,9 +48,7 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLSchema;
-import graphql.schema.GraphQLTypeUtil;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -80,25 +80,83 @@ public class DomainQLExecutionTest
     private final static Logger log = LoggerFactory.getLogger(DomainQLExecutionTest.class);
 
 
-    MockDataProvider provider = new TestProvider();
+    private MockDataProvider provider = new TestProvider();
 
-    MockConnection connection = new MockConnection(provider);
+    private MockConnection connection = new MockConnection(provider);
 
-    DSLContext dslContext = DSL.using(connection, SQLDialect.POSTGRES);
+    private DSLContext dslContext = DSL.using(connection, SQLDialect.POSTGRES);
 
-    final TestLogic logic = new TestLogic(dslContext);
+    private final TestLogic logic = new TestLogic(dslContext);
 
-    final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
+    private final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
         .objectTypes(Public.PUBLIC)
         .logicBeans(Arrays.asList(logic, new TypeConversionLogic()))
 
         // source variants
-        .configureRelation(SOURCE_ONE.TARGET_ID, SourceField.NONE, TargetField.NONE)
-        .configureRelation(SOURCE_TWO.TARGET_ID, SourceField.SCALAR, TargetField.NONE)
-        .configureRelation(SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE)
-        .configureRelation(SOURCE_FIVE.TARGET_ID, SourceField.NONE, TargetField.ONE)
-        .configureRelation(SOURCE_SIX.TARGET_ID, SourceField.NONE, TargetField.MANY)
-        //.configureRelation(SOURCE_SEVEN.TARGET, SourceField.OBJECT, TargetField.NONE)
+        .withRelation(
+            new RelationBuilder()
+                .withForeignKeyFields(SOURCE_ONE.TARGET_ID)
+                .withSourceField(SourceField.NONE)
+                .withTargetField(TargetField.NONE)
+        )
+
+        .withRelation(
+            new RelationBuilder()
+                .withForeignKeyFields(SOURCE_TWO.TARGET_ID)
+                .withSourceField(SourceField.SCALAR)
+                .withTargetField(TargetField.NONE)
+        )
+
+        .withRelation(
+            new RelationBuilder()
+                .withForeignKeyFields(SOURCE_THREE.TARGET_ID)
+                .withSourceField(SourceField.OBJECT)
+                .withTargetField(TargetField.NONE)
+        )
+
+        .withRelation(
+            new RelationBuilder()
+                .withForeignKeyFields(SOURCE_FIVE.TARGET_ID)
+                .withSourceField(SourceField.NONE)
+                .withTargetField(TargetField.ONE)
+        )
+
+        .withRelation(
+            new RelationBuilder()
+                .withForeignKeyFields(SOURCE_SIX.TARGET_ID)
+                .withSourceField(SourceField.NONE)
+                .withTargetField(TargetField.MANY)
+        )
+
+        .withRelation(
+            new RelationBuilder()
+                .withForeignKeyFields(SOURCE_SEVEN.TARGET)
+                .withSourceField(SourceField.OBJECT)
+                .withTargetField(TargetField.NONE)
+                .withLeftSideObjectName("targetObj")
+        )
+
+        .withRelation(
+            new RelationBuilder()
+                .withForeignKeyFields(
+                    SOURCE_EIGHT.TARGET_NAME, SOURCE_EIGHT.TARGET_NUM
+                )
+                .withSourceField(SourceField.OBJECT)
+                .withTargetField(TargetField.MANY)
+                .withLeftSideObjectName("targetEight")
+                .withRightSideObjectName("sourceEights")
+        )
+        .withRelation(
+            new RelationBuilder()
+                .withPojoFields(
+                    TargetNineCounts.class,
+                    Collections.singletonList("targetId"),
+                    TargetNine.class,
+                    Collections.singletonList("id")
+                )
+                .withSourceField(SourceField.OBJECT)
+                .withTargetField(TargetField.ONE)
+        )
 
         .additionalQueries(GraphQLFieldDefinition.newFieldDefinition()
             .name("extraQuery")
@@ -1368,7 +1426,15 @@ public class DomainQLExecutionTest
             .logicBeans(new FetcherContextLogic())
 
             // source variants
-            .configureRelation(SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE)
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_THREE.TARGET_ID)
+                    .withSourceField(SourceField.OBJECT)
+            )
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_THREE.TARGET_ID)
+            )
 
             .buildGraphQLSchema();
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
@@ -1439,4 +1505,87 @@ public class DomainQLExecutionTest
 
     }
 
+
+    @Test
+    public void testMultiKeyFKTraversal()
+    {
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("{ walkMultiKey { id targetEight { id name num } } }")
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+        assertThat(
+            JSON.defaultJSON().forValue(executionResult.getData()),
+            is("{\"walkMultiKey\":[{\"id\":\"source-id\",\"targetEight\":{\"id\":\"target-id\",\"name\":\"target-name\",\"num\":123}}]}")
+        );
+    }
+
+
+    @Test
+    public void testMultiKeyFKTraversalBackwards()
+    {
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("{ walkMultiKeyBackWards { id name num sourceEights { id } } }")
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+        assertThat(
+            JSON.defaultJSON().forValue(executionResult.getData()),
+            is("{\"walkMultiKeyBackWards\":[{\"id\":\"target-id\",\"name\":\"target-name\",\"num\":345,\"sourceEights\":[{\"id\":\"target-id\"},{\"id\":\"target-id-2\"}]}]}")
+        );
+    }
+
+
+    @Test
+    public void testViewPojoRelation()
+    {
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("{ walkViewPojoRelation { count target { id name } } }")
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+        assertThat(
+            JSON.defaultJSON().forValue(executionResult.getData()),
+            is("{\"walkViewPojoRelation\":[{\"count\":123,\"target\":{\"id\":\"target-id\",\"name\":\"target 9 name\"}}]}")
+        );
+    }
+
+
+    @Test
+    public void testViewPojoRelationBackwards()
+    {
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("{ walkViewPojoRelationBackwards { id name targetNineCounts { count } } }")
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+        assertThat(
+            JSON.defaultJSON().forValue(executionResult.getData()),
+            is("{\"walkViewPojoRelationBackwards\":[{\"id\":\"target-id\",\"name\":\"target 9 name\",\"targetNineCounts\":{\"count\":234}}]}")
+        );
+    }
 }

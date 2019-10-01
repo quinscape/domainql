@@ -1,15 +1,19 @@
 package de.quinscape.domainql.fetcher;
 
+import de.quinscape.domainql.config.RelationModel;
 import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
-import org.jooq.Table;
+import org.jooq.Field;
 import org.jooq.TableField;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,39 +32,24 @@ public class ReferenceFetcher
      */
     private final String fieldName;
 
-    /**
-     * Name of the referencing id field.
-     */
-    private final String idFieldName;
-
-    private final Table<?> table;
-
-    private final Class<?> pojoType;
-
-    private final String targetDBField;
+    private final RelationModel relationModel;
 
 
     public ReferenceFetcher(
         DSLContext dslContext,
         String fieldName,
-        String idFieldName,
-        Table<?> table,
-        Class<?> pojoType,
-        String targetDBField
+        RelationModel relationModel
     )
     {
         this.dslContext = dslContext;
         this.fieldName = fieldName;
-        this.idFieldName = idFieldName;
-        this.table = table;
-        this.pojoType = pojoType;
-        this.targetDBField = targetDBField;
-
+        this.relationModel = relationModel;
         if (log.isDebugEnabled())
         {
-            log.debug("{}: fieldName = {}, idFieldName = {}", table.getName(), fieldName, idFieldName);
+            log.debug("ReferenceFetcher: {}, {}", fieldName, relationModel);
         }
     }
+
 
     @Override
     public Object get(DataFetchingEnvironment environment)
@@ -73,70 +62,46 @@ public class ReferenceFetcher
             return fetcherContext.getProperty(fieldName);
         }
 
-        final Object id = JSONUtil.DEFAULT_UTIL.getProperty(source, idFieldName);
 
-        final List<? extends TableField<?, ?>> pkFields = table.getPrimaryKey().getFields();
-        // XXX: support multi-field keys
-        if (pkFields.size() != 1)
+        final List<String> sourceFields = relationModel.getSourceFields();
+        final List<? extends TableField<?, ?>> targetDBFields = relationModel.getTargetDBFields();
+
+        final Condition condition;
+        if (sourceFields.size() == 1)
         {
-            throw new UnsupportedOperationException("Multi-key references not implented yet: Cannot query " + table);
+            final Object id = JSONUtil.DEFAULT_UTIL.getProperty(source, sourceFields.get(0));
+            condition = ((Field<Object>) targetDBFields.get(0)).eq(id);
+
+        }
+        else
+        {
+            List<Condition> conditions = new ArrayList<>(sourceFields.size());
+            for (int i = 0; i < targetDBFields.size(); i++)
+            {
+                final String sourceField = sourceFields.get(i);
+                final TableField<?, Object> targetDBField = (TableField<?, Object>) targetDBFields.get(i);
+
+                final Object id = JSONUtil.DEFAULT_UTIL.getProperty(source, sourceField);
+                conditions.add(
+                    targetDBField.eq(id)
+                );
+            }
+
+            condition = DSL.and(
+                conditions
+            );
         }
 
-        final TableField<?, Object> pkField = (TableField<?, Object>) pkFields.get(0);
-
-        return dslContext.select().from(table).where(pkField.eq(id)).fetchSingleInto(pojoType);
+        return dslContext.select()
+            .from(relationModel.getTargetTable())
+            .where(condition)
+            .fetchSingleInto(relationModel.getTargetPojoClass());
     }
 
 
-    /**
-     * Returns the name of the id field in the referencing / source type.
-     *
-     * @return  id field name
-     */
-    public String getIdFieldName()
+    public RelationModel getRelationModel()
     {
-        return idFieldName;
+        return relationModel;
     }
 
-
-    /**
-     * Returns the JOOQ table for the referenced / target type.
-     * @return
-     */
-    public Table<?> getTable()
-    {
-        return table;
-    }
-
-
-    /**
-     * Returns the pojo type of the referenced / target type
-     * @return
-     */
-    public Class<?> getPojoType()
-    {
-        return pojoType;
-    }
-
-
-    /**
-     * Name of the target DB field for the reference. The single field in the target table contained in the target unique key.
-     * @return
-     */
-    public String getTargetDBField()
-    {
-        return targetDBField;
-    }
-
-
-    @Override
-    public String toString()
-    {
-        return super.toString() + ": "
-            + "dslContext = " + dslContext
-            + ", idFieldName = '" + idFieldName + '\''
-            + ", table = " + table
-            + ", pojoType = " + pojoType
-            ;
-    }
 }

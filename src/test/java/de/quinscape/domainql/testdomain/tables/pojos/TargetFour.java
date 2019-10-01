@@ -35,7 +35,7 @@ import javax.validation.constraints.Size;
 })
 public class TargetFour extends GeneratedDomainObject implements Serializable {
 
-    private static final long serialVersionUID = 817395628;
+    private static final long serialVersionUID = 798869434;
 
     private String id;
 

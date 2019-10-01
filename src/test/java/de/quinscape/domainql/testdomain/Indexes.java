@@ -5,15 +5,19 @@ package de.quinscape.domainql.testdomain;
 
 
 import de.quinscape.domainql.testdomain.tables.Foo;
+import de.quinscape.domainql.testdomain.tables.SourceEight;
 import de.quinscape.domainql.testdomain.tables.SourceFive;
 import de.quinscape.domainql.testdomain.tables.SourceFour;
+import de.quinscape.domainql.testdomain.tables.SourceNine;
 import de.quinscape.domainql.testdomain.tables.SourceOne;
 import de.quinscape.domainql.testdomain.tables.SourceSeven;
 import de.quinscape.domainql.testdomain.tables.SourceSix;
 import de.quinscape.domainql.testdomain.tables.SourceThree;
 import de.quinscape.domainql.testdomain.tables.SourceTwo;
+import de.quinscape.domainql.testdomain.tables.TargetEight;
 import de.quinscape.domainql.testdomain.tables.TargetFive;
 import de.quinscape.domainql.testdomain.tables.TargetFour;
+import de.quinscape.domainql.testdomain.tables.TargetNine;
 import de.quinscape.domainql.testdomain.tables.TargetOne;
 import de.quinscape.domainql.testdomain.tables.TargetSeven;
 import de.quinscape.domainql.testdomain.tables.TargetSix;
@@ -45,15 +49,20 @@ public class Indexes {
     // -------------------------------------------------------------------------
 
     public static final Index PK_FOO = Indexes0.PK_FOO;
+    public static final Index PK_SOURCE_EIGHT = Indexes0.PK_SOURCE_EIGHT;
     public static final Index PK_SOURCE_FIVE = Indexes0.PK_SOURCE_FIVE;
     public static final Index PK_SOURCE_FOUR = Indexes0.PK_SOURCE_FOUR;
+    public static final Index PK_SOURCE_NINE = Indexes0.PK_SOURCE_NINE;
     public static final Index PK_SOURCE_ONE = Indexes0.PK_SOURCE_ONE;
     public static final Index PK_SOURCE_SEVEN = Indexes0.PK_SOURCE_SEVEN;
     public static final Index PK_SOURCE_SIX = Indexes0.PK_SOURCE_SIX;
     public static final Index PK_SOURCE_THREE = Indexes0.PK_SOURCE_THREE;
     public static final Index PK_SOURCE_TWO = Indexes0.PK_SOURCE_TWO;
+    public static final Index PK_TARGET_EIGHT = Indexes0.PK_TARGET_EIGHT;
+    public static final Index TARGET_EIGHT_NAME_KEY = Indexes0.TARGET_EIGHT_NAME_KEY;
     public static final Index PK_TARGET_FIVE = Indexes0.PK_TARGET_FIVE;
     public static final Index PK_TARGET_FOUR = Indexes0.PK_TARGET_FOUR;
+    public static final Index PK_TARGET_NINE = Indexes0.PK_TARGET_NINE;
     public static final Index PK_TARGET_ONE = Indexes0.PK_TARGET_ONE;
     public static final Index PK_TARGET_SEVEN = Indexes0.PK_TARGET_SEVEN;
     public static final Index TARGET_SEVEN_NAME_KEY = Indexes0.TARGET_SEVEN_NAME_KEY;
@@ -67,15 +76,20 @@ public class Indexes {
 
     private static class Indexes0 {
         public static Index PK_FOO = Internal.createIndex("pk_foo", Foo.FOO, new OrderField[] { Foo.FOO.ID }, true);
+        public static Index PK_SOURCE_EIGHT = Internal.createIndex("pk_source_eight", SourceEight.SOURCE_EIGHT, new OrderField[] { SourceEight.SOURCE_EIGHT.ID }, true);
         public static Index PK_SOURCE_FIVE = Internal.createIndex("pk_source_five", SourceFive.SOURCE_FIVE, new OrderField[] { SourceFive.SOURCE_FIVE.ID }, true);
         public static Index PK_SOURCE_FOUR = Internal.createIndex("pk_source_four", SourceFour.SOURCE_FOUR, new OrderField[] { SourceFour.SOURCE_FOUR.ID }, true);
+        public static Index PK_SOURCE_NINE = Internal.createIndex("pk_source_nine", SourceNine.SOURCE_NINE, new OrderField[] { SourceNine.SOURCE_NINE.ID }, true);
         public static Index PK_SOURCE_ONE = Internal.createIndex("pk_source_one", SourceOne.SOURCE_ONE, new OrderField[] { SourceOne.SOURCE_ONE.ID }, true);
         public static Index PK_SOURCE_SEVEN = Internal.createIndex("pk_source_seven", SourceSeven.SOURCE_SEVEN, new OrderField[] { SourceSeven.SOURCE_SEVEN.ID }, true);
         public static Index PK_SOURCE_SIX = Internal.createIndex("pk_source_six", SourceSix.SOURCE_SIX, new OrderField[] { SourceSix.SOURCE_SIX.ID }, true);
         public static Index PK_SOURCE_THREE = Internal.createIndex("pk_source_three", SourceThree.SOURCE_THREE, new OrderField[] { SourceThree.SOURCE_THREE.ID }, true);
         public static Index PK_SOURCE_TWO = Internal.createIndex("pk_source_two", SourceTwo.SOURCE_TWO, new OrderField[] { SourceTwo.SOURCE_TWO.ID }, true);
+        public static Index PK_TARGET_EIGHT = Internal.createIndex("pk_target_eight", TargetEight.TARGET_EIGHT, new OrderField[] { TargetEight.TARGET_EIGHT.ID }, true);
+        public static Index TARGET_EIGHT_NAME_KEY = Internal.createIndex("target_eight_name_key", TargetEight.TARGET_EIGHT, new OrderField[] { TargetEight.TARGET_EIGHT.NAME, TargetEight.TARGET_EIGHT.NUM }, true);
         public static Index PK_TARGET_FIVE = Internal.createIndex("pk_target_five", TargetFive.TARGET_FIVE, new OrderField[] { TargetFive.TARGET_FIVE.ID }, true);
         public static Index PK_TARGET_FOUR = Internal.createIndex("pk_target_four", TargetFour.TARGET_FOUR, new OrderField[] { TargetFour.TARGET_FOUR.ID }, true);
+        public static Index PK_TARGET_NINE = Internal.createIndex("pk_target_nine", TargetNine.TARGET_NINE, new OrderField[] { TargetNine.TARGET_NINE.ID }, true);
         public static Index PK_TARGET_ONE = Internal.createIndex("pk_target_one", TargetOne.TARGET_ONE, new OrderField[] { TargetOne.TARGET_ONE.ID }, true);
         public static Index PK_TARGET_SEVEN = Internal.createIndex("pk_target_seven", TargetSeven.TARGET_SEVEN, new OrderField[] { TargetSeven.TARGET_SEVEN.ID }, true);
         public static Index TARGET_SEVEN_NAME_KEY = Internal.createIndex("target_seven_name_key", TargetSeven.TARGET_SEVEN, new OrderField[] { TargetSeven.TARGET_SEVEN.NAME }, true);

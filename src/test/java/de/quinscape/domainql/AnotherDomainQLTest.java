@@ -84,10 +84,30 @@ public class AnotherDomainQLTest
             .objectTypes(Public.PUBLIC)
             .logicBeans(Collections.singleton(new TestLogic()))
 
-            .configureRelation(   SOURCE_TWO.TARGET_ID, SourceField.SCALAR, TargetField.NONE, "scalarFieldId", null)
-            .configureRelation( SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE, "objField", null)
-            .configureRelation(  SOURCE_FIVE.TARGET_ID, SourceField.NONE, TargetField.ONE, null, "oneObj")
-            .configureRelation(   SOURCE_SIX.TARGET_ID, SourceField.NONE, TargetField.MANY, null, "manyObj")
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_TWO.TARGET_ID)
+                    .withSourceField(SourceField.SCALAR)
+                    .withLeftSideObjectName("scalarFieldId")
+            )
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_THREE.TARGET_ID)
+                    .withSourceField(SourceField.OBJECT)
+                    .withLeftSideObjectName("objField")
+            )
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_FIVE.TARGET_ID)
+                    .withTargetField(TargetField.ONE)
+                    .withRightSideObjectName("oneObj")
+            )
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_SIX.TARGET_ID)
+                    .withTargetField(TargetField.MANY)
+                    .withRightSideObjectName("manyObj")
+            )
             .buildGraphQLSchema();
 
 
@@ -139,11 +159,40 @@ public class AnotherDomainQLTest
             .objectTypes(Public.PUBLIC)
             .logicBeans(Arrays.asList(new TestLogic(), new LogicWithMirrorInput(), new NoMirrorLogic()))
             // test override
-            .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.NONE, TargetField.NONE)
-            .configureRelation(   SOURCE_TWO.TARGET_ID, SourceField.SCALAR, TargetField.NONE)
-            .configureRelation( SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE)
-            .configureRelation(  SOURCE_FIVE.TARGET_ID, SourceField.NONE, TargetField.ONE)
-            .configureRelation(   SOURCE_SIX.TARGET_ID, SourceField.NONE, TargetField.MANY)
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_ONE.TARGET_ID)
+                    .withSourceField(SourceField.NONE)
+                    .withTargetField(TargetField.NONE)
+            )
+
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_TWO.TARGET_ID)
+                    .withSourceField(SourceField.SCALAR)
+                    .withTargetField(TargetField.NONE)
+            )
+
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_THREE.TARGET_ID)
+                    .withSourceField(SourceField.OBJECT)
+                    .withTargetField(TargetField.NONE)
+            )
+
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_FIVE.TARGET_ID)
+                    .withSourceField(SourceField.NONE)
+                    .withTargetField(TargetField.ONE)
+            )
+
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_SIX.TARGET_ID)
+                    .withSourceField(SourceField.NONE)
+                    .withTargetField(TargetField.MANY)
+            )
             .buildGraphQLSchema();
 
 
@@ -186,14 +235,24 @@ public class AnotherDomainQLTest
     }
 
 
-    @Test//(expected = DomainQLException.class)
+    @Test(expected = DomainQLTypeException.class)
     public void testFieldConflict()
     {
         final GraphQLSchema schema = DomainQL.newDomainQL(null)
             .objectTypes(Public.PUBLIC)
             .logicBeans(Collections.singleton(new TestLogic()))
-            .configureRelation( SOURCE_FOUR.TARGET_ID, SourceField.NONE, TargetField.ONE)
-            .configureRelation(SOURCE_FOUR.TARGET2_ID, SourceField.NONE, TargetField.ONE)
+            //.configureRelation( SOURCE_FOUR.TARGET_ID, SourceField.NONE, TargetField.ONE)
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_FOUR.TARGET_ID)
+                    .withTargetField(TargetField.ONE)
+            )
+            //.configureRelation(SOURCE_FOUR.TARGET2_ID, SourceField.NONE, TargetField.ONE)
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_FOUR.TARGET2_ID)
+                    .withTargetField(TargetField.ONE)
+            )
             .buildGraphQLSchema();
 
         GraphQLObjectType type = (GraphQLObjectType) schema.getType("SourceFour");
@@ -208,8 +267,18 @@ public class AnotherDomainQLTest
         final GraphQLSchema schema = DomainQL.newDomainQL(null)
             .objectTypes(Public.PUBLIC)
             .logicBeans(Collections.singleton(new TestLogic()))
-            .configureRelation(  SOURCE_FOUR.TARGET_ID, SourceField.NONE, TargetField.ONE)
-            .configureRelation( SOURCE_FOUR.TARGET2_ID, SourceField.NONE, TargetField.ONE, null, "source2")
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_FOUR.TARGET_ID)
+                    .withTargetField(TargetField.ONE)
+            )
+            //.configureRelation(SOURCE_FOUR.TARGET2_ID, SourceField.NONE, TargetField.ONE)
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_FOUR.TARGET2_ID)
+                    .withTargetField(TargetField.ONE)
+                    .withRightSideObjectName("source2")
+            )
             .buildGraphQLSchema();
 
     }
@@ -224,7 +293,11 @@ public class AnotherDomainQLTest
             .logicBeans(Collections.singleton(new TestLogic()))
 
             // source variants
-            .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.OBJECT_AND_SCALAR, TargetField.NONE)
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_ONE.TARGET_ID)
+                    .withSourceField(SourceField.OBJECT_AND_SCALAR)
+            )
             .buildGraphQLSchema();
 
         // SourceField.OBJECT_AND_SCALAR / TargetField.NONE
@@ -251,7 +324,13 @@ public class AnotherDomainQLTest
             .logicBeans(Collections.singleton(new TestLogic()))
 
             // source variants
-            .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.OBJECT_AND_SCALAR, TargetField.NONE, "myTarget", null)
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_ONE.TARGET_ID)
+                    .withSourceField(SourceField.OBJECT_AND_SCALAR)
+                    .withLeftSideObjectName("myTarget")
+            )
+
             .buildGraphQLSchema();
 
         // SourceField.OBJECT_AND_SCALAR / TargetField.NONE
@@ -270,20 +349,6 @@ public class AnotherDomainQLTest
         }
     }
 
-//  no type overriding anymore
-//    @Test(expected =  DomainQLTypeException.class)
-//    public void testWrongType()
-//    {
-//        final GraphQLSchema schema = DomainQL.newDomainQL(null)
-//            .objectTypes(Public.PUBLIC)
-//            .logicBeans(Collections.singleton(new TestLogic()))
-//            //.overrideInputTypes(SourceOne.class)
-//
-//            // source variants
-//            .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.OBJECT_AND_SCALAR, TargetField.NONE)
-//            .buildGraphQLSchema();
-//    }
-
     @Test(expected =  DomainQLTypeException.class)
     public void testWrongTypeAsQueryInput()
     {
@@ -291,8 +356,11 @@ public class AnotherDomainQLTest
             .objectTypes(Public.PUBLIC)
             .logicBeans(Collections.singleton(new LogicWithWrongInjection()))
 
-            // source variants
-            .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.OBJECT_AND_SCALAR, TargetField.NONE)
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_ONE.TARGET_ID)
+                    .withSourceField(SourceField.OBJECT_AND_SCALAR)
+            )
             .buildGraphQLSchema();
     }
 
@@ -303,8 +371,11 @@ public class AnotherDomainQLTest
             .objectTypes(Public.PUBLIC)
             .logicBeans(Collections.singleton(new LogicWithWrongInjection2()))
 
-            // source variants
-            .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.OBJECT_AND_SCALAR, TargetField.NONE)
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_ONE.TARGET_ID)
+                    .withSourceField(SourceField.OBJECT_AND_SCALAR)
+            )
             .buildGraphQLSchema();
     }
 
@@ -336,12 +407,40 @@ public class AnotherDomainQLTest
             .logicBeans(Collections.singleton(new TypeRepeatLogic()))
 
             // source variants
-            .configureRelation(SOURCE_ONE.TARGET_ID, SourceField.NONE, TargetField.NONE)
-            .configureRelation(SOURCE_TWO.TARGET_ID, SourceField.SCALAR, TargetField.NONE)
-            .configureRelation(SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE)
-            .configureRelation(SOURCE_FIVE.TARGET_ID, SourceField.NONE, TargetField.ONE)
-            .configureRelation(SOURCE_SIX.TARGET_ID, SourceField.NONE, TargetField.MANY)
-            .configureRelation(SOURCE_SEVEN.TARGET, SourceField.OBJECT, TargetField.NONE, "targetObj", null)
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_ONE.TARGET_ID)
+                    .withSourceField(SourceField.NONE)
+                    .withTargetField(TargetField.NONE)
+            )
+
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_TWO.TARGET_ID)
+                    .withSourceField(SourceField.SCALAR)
+                    .withTargetField(TargetField.NONE)
+            )
+
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_THREE.TARGET_ID)
+                    .withSourceField(SourceField.OBJECT)
+                    .withTargetField(TargetField.NONE)
+            )
+
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_FIVE.TARGET_ID)
+                    .withSourceField(SourceField.NONE)
+                    .withTargetField(TargetField.ONE)
+            )
+
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_SIX.TARGET_ID)
+                    .withSourceField(SourceField.NONE)
+                    .withTargetField(TargetField.MANY)
+            )
             .buildGraphQLSchema();
     }
     
@@ -354,7 +453,11 @@ public class AnotherDomainQLTest
             .logicBeans(Collections.singleton(new TypeRepeatLogic()))
 
             // source variants
-            .configureRelation(    SOURCE_SEVEN.TARGET, SourceField.OBJECT, TargetField.NONE)
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_SEVEN.TARGET)
+                    .withSourceField(SourceField.OBJECT_AND_SCALAR)
+            )
             .buildGraphQLSchema();
     }
 
@@ -363,12 +466,19 @@ public class AnotherDomainQLTest
     {
 
         final GraphQLSchema schema = DomainQL.newDomainQL(null)
-            .objectTypes(Public.PUBLIC)
+            .objectTypes(SOURCE_SEVEN, TARGET_SEVEN)
             .logicBeans(Collections.singleton(new TypeRepeatLogic()))
 
             // source variants
-            .configureRelation(    SOURCE_SEVEN.TARGET, SourceField.OBJECT, TargetField.ONE, "targetObj", "name")
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_SEVEN.TARGET)
+                    .withSourceField(SourceField.OBJECT_AND_SCALAR)
+            )
             .buildGraphQLSchema();
+
+        log.info(new SchemaPrinter().print(schema));
+
     }
 
 
@@ -989,7 +1099,7 @@ public class AnotherDomainQLTest
         assertThat(fieldDef.getArguments().get(0).getType().toString(),is("Int!"));
 
 
-        log.info(new SchemaPrinter().print(schema));
+        //log.info(new SchemaPrinter().print(schema));
 
     }
 

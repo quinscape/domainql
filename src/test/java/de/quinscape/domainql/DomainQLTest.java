@@ -1,13 +1,15 @@
 package de.quinscape.domainql;
 
 
+import de.quinscape.domainql.config.SourceField;
+import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.logicimpl.LogicWithMirrorInput;
 import de.quinscape.domainql.logicimpl.TestLogic;
-import de.quinscape.domainql.config.SourceField;
-import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.domainql.testdomain.Public;
+import de.quinscape.domainql.testdomain.tables.pojos.TargetNine;
+import de.quinscape.domainql.testdomain.tables.pojos.TargetNineCounts;
 import graphql.Scalars;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectType;
@@ -15,6 +17,7 @@ import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
+import graphql.schema.idl.SchemaPrinter;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static de.quinscape.domainql.testdomain.Tables.*;
+import static graphql.schema.GraphQLList.*;
 import static graphql.schema.GraphQLNonNull.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -39,12 +43,70 @@ public class DomainQLTest
         .logicBeans(Collections.singleton(logic))
 
         // source variants
-        .configureRelation(   SOURCE_ONE.TARGET_ID, SourceField.NONE, TargetField.NONE)
-        .configureRelation(   SOURCE_TWO.TARGET_ID, SourceField.SCALAR, TargetField.NONE)
-        .configureRelation( SOURCE_THREE.TARGET_ID, SourceField.OBJECT, TargetField.NONE)
-        .configureRelation(  SOURCE_FIVE.TARGET_ID, SourceField.NONE, TargetField.ONE)
-        .configureRelation(   SOURCE_SIX.TARGET_ID, SourceField.NONE, TargetField.MANY)
-        .configureRelation(    SOURCE_SEVEN.TARGET, SourceField.OBJECT, TargetField.NONE, "targetObj", null)
+        .withRelation(
+            new RelationBuilder()
+                .withForeignKeyFields(SOURCE_ONE.TARGET_ID)
+                .withSourceField(SourceField.NONE)
+                .withTargetField(TargetField.NONE)
+        )
+
+        .withRelation(
+            new RelationBuilder()
+                .withForeignKeyFields(SOURCE_TWO.TARGET_ID)
+                .withSourceField(SourceField.SCALAR)
+                .withTargetField(TargetField.NONE)
+        )
+
+        .withRelation(
+            new RelationBuilder()
+                .withForeignKeyFields(SOURCE_THREE.TARGET_ID)
+                .withSourceField(SourceField.OBJECT)
+                .withTargetField(TargetField.NONE)
+        )
+
+        .withRelation(
+            new RelationBuilder()
+                .withForeignKeyFields(SOURCE_FIVE.TARGET_ID)
+                .withSourceField(SourceField.NONE)
+                .withTargetField(TargetField.ONE)
+        )
+
+        .withRelation(
+            new RelationBuilder()
+                .withForeignKeyFields(SOURCE_SIX.TARGET_ID)
+                .withSourceField(SourceField.NONE)
+                .withTargetField(TargetField.MANY)
+        )
+
+        .withRelation(
+            new RelationBuilder()
+                .withForeignKeyFields(SOURCE_SEVEN.TARGET)
+                .withSourceField(SourceField.OBJECT)
+                .withTargetField(TargetField.NONE)
+                .withLeftSideObjectName("targetObj")
+        )
+
+        .withRelation(
+            new RelationBuilder()
+                .withForeignKeyFields(
+                    SOURCE_EIGHT.TARGET_NAME, SOURCE_EIGHT.TARGET_NUM
+                )
+                .withSourceField(SourceField.OBJECT)
+                .withTargetField(TargetField.MANY)
+                .withLeftSideObjectName("targetEight")
+                .withRightSideObjectName("sourceEights")
+        )
+        .withRelation(
+            new RelationBuilder()
+                .withPojoFields(
+                    TargetNineCounts.class,
+                    Collections.singletonList("targetId"),
+                    TargetNine.class,
+                    Collections.singletonList("id")
+                )
+                .withSourceField(SourceField.OBJECT)
+                .withTargetField(TargetField.ONE)
+        )
 
         .buildGraphQLSchema();
 
@@ -227,4 +289,45 @@ public class DomainQLTest
         }
     }
 
+
+    @Test
+    public void testMultiFieldForeignKey()
+    {
+        //log.info(new SchemaPrinter().print(schema));
+
+        {
+            final GraphQLObjectType sourceEight = (GraphQLObjectType) schema.getType("SourceEight");
+            assertThat(sourceEight.getFieldDefinitions().size(), is(2));
+
+            assertThat(sourceEight.getFieldDefinition("id").getType(), is(nonNull(schema.getType("String"))));
+            assertThat(sourceEight.getFieldDefinition("targetEight").getType(), is( nonNull(schema.getType("TargetEight"))));
+        }
+
+        {
+            final GraphQLObjectType targetEight = (GraphQLObjectType) schema.getType("TargetEight");
+            assertThat(targetEight.getFieldDefinitions().size(), is(4));
+
+            assertThat(targetEight.getFieldDefinition("id").getType(), is(nonNull(schema.getType("String"))));
+            assertThat(targetEight.getFieldDefinition("name").getType(), is(nonNull(schema.getType("String"))));
+            assertThat(targetEight.getFieldDefinition("num").getType(), is(nonNull(schema.getType("Int"))));
+            assertThat(targetEight.getFieldDefinition("sourceEights").getType(), is(nonNull(list(schema.getType("SourceEight")))));
+        }
+    }
+
+
+    @Test
+    public void testRelationOnViewPojo()
+    {
+
+        //log.info(new SchemaPrinter().print(schema));
+
+        final GraphQLObjectType targetNineCountsType = (GraphQLObjectType) schema.getType("TargetNineCounts");
+        assertThat(targetNineCountsType.getFieldDefinitions().size(), is(2));
+
+        // the "NOT NULL" on the original target_id field gets lost in the view
+        assertThat(targetNineCountsType.getFieldDefinition("target").getType(), is(schema.getType("TargetNine")));
+        assertThat(targetNineCountsType.getFieldDefinition("count").getType(), is(schema.getType("Long")));
+
+
+    }
 }

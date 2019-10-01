@@ -1,6 +1,7 @@
 package de.quinscape.domainql.schema;
 
 import de.quinscape.domainql.DomainQL;
+import de.quinscape.domainql.RelationBuilder;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.generic.DomainObject;
@@ -36,8 +37,12 @@ public class SchemaDataProviderTest
     {
         final DomainQL domainQL = DomainQL.newDomainQL(null)
             .logicBeans(new DegenerifyLogic())
-            .objectTypes(SOURCE_TWO)
-            .configureRelation(   SOURCE_TWO.TARGET_ID, SourceField.SCALAR, TargetField.NONE)
+            .objectTypes(SOURCE_TWO, TARGET_TWO)
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_TWO.TARGET_ID)
+                    .withSourceField(SourceField.SCALAR)
+            )
             .build();
 
         final SchemaDataProvider provider = new SchemaDataProvider(domainQL);

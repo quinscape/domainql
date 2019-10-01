@@ -35,7 +35,7 @@ import javax.validation.constraints.Size;
 })
 public class SourceSeven extends GeneratedDomainObject implements Serializable {
 
-    private static final long serialVersionUID = 1228358952;
+    private static final long serialVersionUID = 764764726;
 
     private String id;
     private String target;

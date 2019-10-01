@@ -5,15 +5,20 @@ package de.quinscape.domainql.testdomain;
 
 
 import de.quinscape.domainql.testdomain.tables.Foo;
+import de.quinscape.domainql.testdomain.tables.SourceEight;
 import de.quinscape.domainql.testdomain.tables.SourceFive;
 import de.quinscape.domainql.testdomain.tables.SourceFour;
+import de.quinscape.domainql.testdomain.tables.SourceNine;
 import de.quinscape.domainql.testdomain.tables.SourceOne;
 import de.quinscape.domainql.testdomain.tables.SourceSeven;
 import de.quinscape.domainql.testdomain.tables.SourceSix;
 import de.quinscape.domainql.testdomain.tables.SourceThree;
 import de.quinscape.domainql.testdomain.tables.SourceTwo;
+import de.quinscape.domainql.testdomain.tables.TargetEight;
 import de.quinscape.domainql.testdomain.tables.TargetFive;
 import de.quinscape.domainql.testdomain.tables.TargetFour;
+import de.quinscape.domainql.testdomain.tables.TargetNine;
+import de.quinscape.domainql.testdomain.tables.TargetNineCounts;
 import de.quinscape.domainql.testdomain.tables.TargetOne;
 import de.quinscape.domainql.testdomain.tables.TargetSeven;
 import de.quinscape.domainql.testdomain.tables.TargetSix;
@@ -44,7 +49,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 1587208651;
+    private static final long serialVersionUID = 1392134475;
 
     /**
      * The reference instance of <code>public</code>
@@ -57,6 +62,11 @@ public class Public extends SchemaImpl {
     public final Foo FOO = de.quinscape.domainql.testdomain.tables.Foo.FOO;
 
     /**
+     * The table <code>public.source_eight</code>.
+     */
+    public final SourceEight SOURCE_EIGHT = de.quinscape.domainql.testdomain.tables.SourceEight.SOURCE_EIGHT;
+
+    /**
      * The table <code>public.source_five</code>.
      */
     public final SourceFive SOURCE_FIVE = de.quinscape.domainql.testdomain.tables.SourceFive.SOURCE_FIVE;
@@ -65,6 +75,11 @@ public class Public extends SchemaImpl {
      * The table <code>public.source_four</code>.
      */
     public final SourceFour SOURCE_FOUR = de.quinscape.domainql.testdomain.tables.SourceFour.SOURCE_FOUR;
+
+    /**
+     * The table <code>public.source_nine</code>.
+     */
+    public final SourceNine SOURCE_NINE = de.quinscape.domainql.testdomain.tables.SourceNine.SOURCE_NINE;
 
     /**
      * The table <code>public.source_one</code>.
@@ -92,6 +107,11 @@ public class Public extends SchemaImpl {
     public final SourceTwo SOURCE_TWO = de.quinscape.domainql.testdomain.tables.SourceTwo.SOURCE_TWO;
 
     /**
+     * The table <code>public.target_eight</code>.
+     */
+    public final TargetEight TARGET_EIGHT = de.quinscape.domainql.testdomain.tables.TargetEight.TARGET_EIGHT;
+
+    /**
      * The table <code>public.target_five</code>.
      */
     public final TargetFive TARGET_FIVE = de.quinscape.domainql.testdomain.tables.TargetFive.TARGET_FIVE;
@@ -100,6 +120,16 @@ public class Public extends SchemaImpl {
      * The table <code>public.target_four</code>.
      */
     public final TargetFour TARGET_FOUR = de.quinscape.domainql.testdomain.tables.TargetFour.TARGET_FOUR;
+
+    /**
+     * The table <code>public.target_nine</code>.
+     */
+    public final TargetNine TARGET_NINE = de.quinscape.domainql.testdomain.tables.TargetNine.TARGET_NINE;
+
+    /**
+     * The table <code>public.target_nine_counts</code>.
+     */
+    public final TargetNineCounts TARGET_NINE_COUNTS = de.quinscape.domainql.testdomain.tables.TargetNineCounts.TARGET_NINE_COUNTS;
 
     /**
      * The table <code>public.target_one</code>.
@@ -152,15 +182,20 @@ public class Public extends SchemaImpl {
     private final List<Table<?>> getTables0() {
         return Arrays.<Table<?>>asList(
             Foo.FOO,
+            SourceEight.SOURCE_EIGHT,
             SourceFive.SOURCE_FIVE,
             SourceFour.SOURCE_FOUR,
+            SourceNine.SOURCE_NINE,
             SourceOne.SOURCE_ONE,
             SourceSeven.SOURCE_SEVEN,
             SourceSix.SOURCE_SIX,
             SourceThree.SOURCE_THREE,
             SourceTwo.SOURCE_TWO,
+            TargetEight.TARGET_EIGHT,
             TargetFive.TARGET_FIVE,
             TargetFour.TARGET_FOUR,
+            TargetNine.TARGET_NINE,
+            TargetNineCounts.TARGET_NINE_COUNTS,
             TargetOne.TARGET_ONE,
             TargetSeven.TARGET_SEVEN,
             TargetSix.TARGET_SIX,

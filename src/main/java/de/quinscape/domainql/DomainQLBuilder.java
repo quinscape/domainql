@@ -1,7 +1,9 @@
 package de.quinscape.domainql;
 
+import com.google.common.collect.Maps;
 import de.quinscape.domainql.annotation.GraphQLLogic;
-import de.quinscape.domainql.config.RelationConfiguration;
+import de.quinscape.domainql.config.Options;
+import de.quinscape.domainql.config.RelationModel;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.docs.DocsExtractor;
@@ -10,20 +12,26 @@ import de.quinscape.domainql.param.DataFetchingEnvironmentProviderFactory;
 import de.quinscape.domainql.param.ParameterProviderFactory;
 import de.quinscape.domainql.param.TypeParameterProviderFactory;
 import de.quinscape.domainql.scalar.GraphQLCurrencyScalar;
+import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.Directives;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import org.jooq.DSLContext;
-import org.jooq.ForeignKey;
+import org.jooq.Field;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.svenson.JSONParser;
+import org.svenson.info.JSONClassInfo;
+import org.svenson.info.JSONPropertyInfo;
 import org.svenson.tokenize.InputStreamSource;
 
+import javax.persistence.Column;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -37,12 +45,15 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Mutable builder / configurator for {@link DomainQL}.
  */
 public class DomainQLBuilder
 {
+    private final static Logger log = LoggerFactory.getLogger(DomainQLBuilder.class);
+
     /**
      * Standard GraphQL directives. Are registered by default, unless {@link #withoutStandardDirectives()} is called.
      */
@@ -70,10 +81,7 @@ public class DomainQLBuilder
 
     private Set<Object> logicBeans = new LinkedHashSet<>();
 
-    private Map<TableField<?, ?>, RelationConfiguration> relationConfigurations = new HashMap<>();
-
-    private RelationConfiguration defaultRelationConfiguration = new RelationConfiguration(
-        SourceField.SCALAR, TargetField.NONE);
+    private List<RelationBuilder> relationBuilders = new ArrayList<>();
 
     private Map<String, TableLookup> jooqTables = new HashMap<>();
 
@@ -119,15 +127,20 @@ public class DomainQLBuilder
      */
     public DomainQL build()
     {
+        final Map<String, Field<?>> fieldLookup = createFieldLookup();
+
+        final Options options = optionsBuilder.buildOptions();
+        final List<RelationModel> relationModels = relationBuilders.stream()
+            .map(b -> b.build(jooqTables, fieldLookup, options))
+            .collect(Collectors.toList());
 
         return new DomainQL(
             dslContext,
             Collections.unmodifiableSet(logicBeans),
             Collections.unmodifiableMap(jooqTables),
             Collections.unmodifiableCollection(parameterProviderFactories),
-            Collections.unmodifiableMap( resolveFields( relationConfigurations)),
-            defaultRelationConfiguration,
-            optionsBuilder.buildOptions(),
+            Collections.unmodifiableList(relationModels),
+            options,
             Collections.unmodifiableSet(additionalQueries),
             Collections.unmodifiableSet(additionalMutations),
             Collections.unmodifiableSet(additionalDirectives),
@@ -136,49 +149,71 @@ public class DomainQLBuilder
             Collections.unmodifiableList(
                 DocsExtractor.normalize(typeDocs)
             ),
+            fieldLookup,
             fullSupported
         );
     }
 
-
-
-
-    private Map<ForeignKey<?, ?>, RelationConfiguration> resolveFields(Map<TableField<?, ?>, RelationConfiguration> relationConfigurations)
+    private Map<String, Field<?>> createFieldLookup()
     {
-        Map<ForeignKey<?, ?>, RelationConfiguration> map = new HashMap<>(relationConfigurations.size());
+        final Map<String, Field<?>> map = new HashMap<>();
 
-        for (Map.Entry<TableField<?, ?>, RelationConfiguration> e :
-            relationConfigurations
-                .entrySet())
+        for (TableLookup lookup : jooqTables.values())
         {
-            final TableField<?, ?> field = e.getKey();
-            final RelationConfiguration config = e.getValue();
+            final Class<?> pojoType = lookup.getPojoType();
+            final Table<?> table = lookup.getTable();
 
-            final ForeignKey<?, ?> foreignKey = resolveField(field);
-            map.put(foreignKey,config);
+            final Map<String, Field<?>> fields = createFieldLookupForType(pojoType, table);
+
+            log.debug("createFieldLookup {}: {}", pojoType.getSimpleName(), fields );
+
+            map.putAll(fields);
         }
-        return map;
+
+        return Collections.unmodifiableMap(map);
     }
 
 
-    private ForeignKey<?, ?> resolveField(TableField<?, ?> field)
+    private Map<String, Field<?>> createFieldLookupForType(Class<?> pojoType, Table<?> table)
     {
-        final Table<?> tableOfField = field.getTable();
-        for (ForeignKey<?, ?> foreignKey : tableOfField.getReferences())
+        final JSONClassInfo classInfo = JSONUtil.getClassInfo(pojoType);
+        final Map<String, Field<?>> fieldsForType = Maps.newHashMapWithExpectedSize(classInfo.getPropertyInfos()
+            .size());
+
+        for (JSONPropertyInfo info : classInfo.getPropertyInfos())
         {
-            if (foreignKey.getFields().indexOf(field) >= 0)
+            if (!DomainQL.isNormalProperty(info))
             {
-                return foreignKey;
+                continue;
+            }
+
+            final Column jpaColumnAnno = JSONUtil.findAnnotation(info, Column.class);
+            if (jpaColumnAnno != null)
+            {
+                final String fieldName = jpaColumnAnno.name();
+
+                final Field<?> fieldFromRecord = table.recordType().field(fieldName);
+                final Field<?> field;
+                if (fieldFromRecord != null)
+                {
+                    field = fieldFromRecord;
+                }
+                else
+                {
+                    field = DSL.field(DSL.name(fieldName), info.getType());
+                }
+
+                final String key = fieldLookupKey(pojoType.getSimpleName(), info.getJsonName());
+                fieldsForType.put(key, field);
             }
         }
-
-        final String javaTableName = tableOfField.getName().toUpperCase();
-        final String javaFieldName = javaTableName + "." + field.getName().toUpperCase();
-
-
-        throw new DomainQLBuilderException("Field " + javaFieldName + " is not part of any foreign key in " + javaTableName);
+        return fieldsForType;
     }
 
+    static String fieldLookupKey(String domainType, String fieldName)
+    {
+        return domainType + ":" + fieldName;
+    }
 
     /**
      * Adds the given collection of parameter provider factories to the DomainQL configuration.
@@ -212,9 +247,9 @@ public class DomainQLBuilder
      *
      * @return this builder
      */
-    public Map<TableField<?, ?>, RelationConfiguration> getRelationConfigurations()
+    public List<RelationBuilder> getRelationBuilders()
     {
-        return relationConfigurations;
+        return relationBuilders;
     }
 
 
@@ -226,12 +261,37 @@ public class DomainQLBuilder
      * @param targetField       target field configuration
      *
      * @return this builder
+     *
+     * This is the old API, which is less powerful but more succinct for simple cases.
+     *
+     * More complex configuration is provided by {@link #withRelation(RelationBuilder)}
+     *
+     * @see #withRelation(RelationBuilder) 
+     *
      */
     public DomainQLBuilder configureRelation(
         TableField<?, ?> fkField, SourceField sourceField, TargetField targetField
     )
     {
-        relationConfigurations.put(fkField, new RelationConfiguration(sourceField, targetField));
+        return configureRelation(
+            fkField,
+            sourceField,
+            targetField,
+            null,
+            null
+        );
+    }
+
+
+    /**
+     * Adds a new relation based on the given relation configuration.
+     *
+     * @param relationBuilder
+     * @return
+     */
+    public DomainQLBuilder withRelation(RelationBuilder relationBuilder)
+    {
+        relationBuilders.add(relationBuilder);
         return this;
     }
 
@@ -249,6 +309,9 @@ public class DomainQLBuilder
      * @param leftSideObjectName      object name for the left-hand / source side
      * @param rightSideObjectName     object name for the right-hand / target side
      *
+     * This is the old API, which is less powerful but more succinct for simple cases.
+     *
+     * More complex configuration is provided by {@link #withRelation(RelationBuilder)}
      *
      * @return this builder
      */
@@ -260,44 +323,14 @@ public class DomainQLBuilder
         String rightSideObjectName
     )
     {
-        relationConfigurations.put(
-            fkField,
-            new RelationConfiguration(
-                sourceField,
-                targetField,
-                // ignore naming if not creating objects for source and target
-                sourceField == SourceField.OBJECT ||  sourceField == SourceField.OBJECT_AND_SCALAR ? leftSideObjectName : null,
-                targetField != TargetField.NONE ? rightSideObjectName : null
-            )
+        return withRelation(
+            new RelationBuilder()
+                .withForeignKeyFields(fkField)
+                .withSourceField(sourceField)
+                .withTargetField(targetField)
+                .withLeftSideObjectName(leftSideObjectName)
+                .withRightSideObjectName(rightSideObjectName)
         );
-        return this;
-    }
-
-
-    /**
-     * Returns the current default relation configuration.
-     * @return default relation configuration
-     */
-    public RelationConfiguration getDefaultRelationConfiguration()
-    {
-        return defaultRelationConfiguration;
-    }
-
-
-    /**
-     * Configures the source and target field generation to use as default.
-     *
-     * @param sourceField       source field configuration
-     * @param targetField       target field configuration
-     *
-     * @return this builder
-     */
-    public DomainQLBuilder defaultRelationConfiguration(
-        SourceField sourceField, TargetField targetField
-    )
-    {
-        this.defaultRelationConfiguration = new RelationConfiguration(sourceField, targetField);
-        return this;
     }
 
     /**

@@ -14,6 +14,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -30,30 +31,36 @@ import javax.validation.constraints.Size;
 )
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 @Entity
-@Table(name = "target_seven", schema = "public", indexes = {
-    @Index(name = "pk_target_seven", unique = true, columnList = "id ASC"),
-    @Index(name = "target_seven_name_key", unique = true, columnList = "name ASC")
+@Table(name = "target_eight", schema = "public", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"name", "num"})
+}, indexes = {
+    @Index(name = "pk_target_eight", unique = true, columnList = "id ASC"),
+    @Index(name = "target_eight_name_key", unique = true, columnList = "name ASC, num ASC")
 })
-public class TargetSeven extends GeneratedDomainObject implements Serializable {
+public class TargetEight extends GeneratedDomainObject implements Serializable {
 
-    private static final long serialVersionUID = -375091471;
+    private static final long serialVersionUID = 601812588;
 
-    private String id;
-    private String name;
+    private String  id;
+    private String  name;
+    private Integer num;
 
-    public TargetSeven() {}
+    public TargetEight() {}
 
-    public TargetSeven(TargetSeven value) {
+    public TargetEight(TargetEight value) {
         this.id = value.id;
         this.name = value.name;
+        this.num = value.num;
     }
 
-    public TargetSeven(
-        String id,
-        String name
+    public TargetEight(
+        String  id,
+        String  name,
+        Integer num
     ) {
         this.id = id;
         this.name = name;
+        this.num = num;
     }
 
     @Id
@@ -68,7 +75,7 @@ public class TargetSeven extends GeneratedDomainObject implements Serializable {
         this.id = id;
     }
 
-    @Column(name = "name", unique = true, nullable = false, length = 36)
+    @Column(name = "name", nullable = false, length = 36)
     @NotNull
     @Size(max = 36)
     public String getName() {
@@ -79,12 +86,23 @@ public class TargetSeven extends GeneratedDomainObject implements Serializable {
         this.name = name;
     }
 
+    @Column(name = "num", nullable = false, precision = 32)
+    @NotNull
+    public Integer getNum() {
+        return this.num;
+    }
+
+    public void setNum(Integer num) {
+        this.num = num;
+    }
+
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("TargetSeven (");
+        StringBuilder sb = new StringBuilder("TargetEight (");
 
         sb.append(id);
         sb.append(", ").append(name);
+        sb.append(", ").append(num);
 
         sb.append(")");
         return sb.toString();

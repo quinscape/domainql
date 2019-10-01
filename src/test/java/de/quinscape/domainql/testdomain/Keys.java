@@ -5,30 +5,38 @@ package de.quinscape.domainql.testdomain;
 
 
 import de.quinscape.domainql.testdomain.tables.Foo;
+import de.quinscape.domainql.testdomain.tables.SourceEight;
 import de.quinscape.domainql.testdomain.tables.SourceFive;
 import de.quinscape.domainql.testdomain.tables.SourceFour;
+import de.quinscape.domainql.testdomain.tables.SourceNine;
 import de.quinscape.domainql.testdomain.tables.SourceOne;
 import de.quinscape.domainql.testdomain.tables.SourceSeven;
 import de.quinscape.domainql.testdomain.tables.SourceSix;
 import de.quinscape.domainql.testdomain.tables.SourceThree;
 import de.quinscape.domainql.testdomain.tables.SourceTwo;
+import de.quinscape.domainql.testdomain.tables.TargetEight;
 import de.quinscape.domainql.testdomain.tables.TargetFive;
 import de.quinscape.domainql.testdomain.tables.TargetFour;
+import de.quinscape.domainql.testdomain.tables.TargetNine;
 import de.quinscape.domainql.testdomain.tables.TargetOne;
 import de.quinscape.domainql.testdomain.tables.TargetSeven;
 import de.quinscape.domainql.testdomain.tables.TargetSix;
 import de.quinscape.domainql.testdomain.tables.TargetThree;
 import de.quinscape.domainql.testdomain.tables.TargetTwo;
 import de.quinscape.domainql.testdomain.tables.records.FooRecord;
+import de.quinscape.domainql.testdomain.tables.records.SourceEightRecord;
 import de.quinscape.domainql.testdomain.tables.records.SourceFiveRecord;
 import de.quinscape.domainql.testdomain.tables.records.SourceFourRecord;
+import de.quinscape.domainql.testdomain.tables.records.SourceNineRecord;
 import de.quinscape.domainql.testdomain.tables.records.SourceOneRecord;
 import de.quinscape.domainql.testdomain.tables.records.SourceSevenRecord;
 import de.quinscape.domainql.testdomain.tables.records.SourceSixRecord;
 import de.quinscape.domainql.testdomain.tables.records.SourceThreeRecord;
 import de.quinscape.domainql.testdomain.tables.records.SourceTwoRecord;
+import de.quinscape.domainql.testdomain.tables.records.TargetEightRecord;
 import de.quinscape.domainql.testdomain.tables.records.TargetFiveRecord;
 import de.quinscape.domainql.testdomain.tables.records.TargetFourRecord;
+import de.quinscape.domainql.testdomain.tables.records.TargetNineRecord;
 import de.quinscape.domainql.testdomain.tables.records.TargetOneRecord;
 import de.quinscape.domainql.testdomain.tables.records.TargetSevenRecord;
 import de.quinscape.domainql.testdomain.tables.records.TargetSixRecord;
@@ -66,15 +74,20 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<FooRecord> PK_FOO = UniqueKeys0.PK_FOO;
+    public static final UniqueKey<SourceEightRecord> PK_SOURCE_EIGHT = UniqueKeys0.PK_SOURCE_EIGHT;
     public static final UniqueKey<SourceFiveRecord> PK_SOURCE_FIVE = UniqueKeys0.PK_SOURCE_FIVE;
     public static final UniqueKey<SourceFourRecord> PK_SOURCE_FOUR = UniqueKeys0.PK_SOURCE_FOUR;
+    public static final UniqueKey<SourceNineRecord> PK_SOURCE_NINE = UniqueKeys0.PK_SOURCE_NINE;
     public static final UniqueKey<SourceOneRecord> PK_SOURCE_ONE = UniqueKeys0.PK_SOURCE_ONE;
     public static final UniqueKey<SourceSevenRecord> PK_SOURCE_SEVEN = UniqueKeys0.PK_SOURCE_SEVEN;
     public static final UniqueKey<SourceSixRecord> PK_SOURCE_SIX = UniqueKeys0.PK_SOURCE_SIX;
     public static final UniqueKey<SourceThreeRecord> PK_SOURCE_THREE = UniqueKeys0.PK_SOURCE_THREE;
     public static final UniqueKey<SourceTwoRecord> PK_SOURCE_TWO = UniqueKeys0.PK_SOURCE_TWO;
+    public static final UniqueKey<TargetEightRecord> PK_TARGET_EIGHT = UniqueKeys0.PK_TARGET_EIGHT;
+    public static final UniqueKey<TargetEightRecord> TARGET_EIGHT_NAME_KEY = UniqueKeys0.TARGET_EIGHT_NAME_KEY;
     public static final UniqueKey<TargetFiveRecord> PK_TARGET_FIVE = UniqueKeys0.PK_TARGET_FIVE;
     public static final UniqueKey<TargetFourRecord> PK_TARGET_FOUR = UniqueKeys0.PK_TARGET_FOUR;
+    public static final UniqueKey<TargetNineRecord> PK_TARGET_NINE = UniqueKeys0.PK_TARGET_NINE;
     public static final UniqueKey<TargetOneRecord> PK_TARGET_ONE = UniqueKeys0.PK_TARGET_ONE;
     public static final UniqueKey<TargetSevenRecord> PK_TARGET_SEVEN = UniqueKeys0.PK_TARGET_SEVEN;
     public static final UniqueKey<TargetSevenRecord> TARGET_SEVEN_NAME_KEY = UniqueKeys0.TARGET_SEVEN_NAME_KEY;
@@ -86,9 +99,11 @@ public class Keys {
     // FOREIGN KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final ForeignKey<SourceEightRecord, TargetEightRecord> SOURCE_EIGHT__FK_SOURCE_EIGHT_TARGET = ForeignKeys0.SOURCE_EIGHT__FK_SOURCE_EIGHT_TARGET;
     public static final ForeignKey<SourceFiveRecord, TargetFiveRecord> SOURCE_FIVE__FK_SOURCE_FIVE_TARGET_ID = ForeignKeys0.SOURCE_FIVE__FK_SOURCE_FIVE_TARGET_ID;
     public static final ForeignKey<SourceFourRecord, TargetFourRecord> SOURCE_FOUR__FK_SOURCE_FOUR_TARGET_ID = ForeignKeys0.SOURCE_FOUR__FK_SOURCE_FOUR_TARGET_ID;
     public static final ForeignKey<SourceFourRecord, TargetFourRecord> SOURCE_FOUR__FK_SOURCE_FOUR_TARGET2_ID = ForeignKeys0.SOURCE_FOUR__FK_SOURCE_FOUR_TARGET2_ID;
+    public static final ForeignKey<SourceNineRecord, TargetNineRecord> SOURCE_NINE__FK_SOURCE_NINE_TARGET_ID = ForeignKeys0.SOURCE_NINE__FK_SOURCE_NINE_TARGET_ID;
     public static final ForeignKey<SourceOneRecord, TargetOneRecord> SOURCE_ONE__FK_SOURCE_ONE_TARGET_ID = ForeignKeys0.SOURCE_ONE__FK_SOURCE_ONE_TARGET_ID;
     public static final ForeignKey<SourceSevenRecord, TargetSevenRecord> SOURCE_SEVEN__FK_SOURCE_SEVEN_TARGET = ForeignKeys0.SOURCE_SEVEN__FK_SOURCE_SEVEN_TARGET;
     public static final ForeignKey<SourceSixRecord, TargetSixRecord> SOURCE_SIX__FK_SOURCE_SIX_TARGET_ID = ForeignKeys0.SOURCE_SIX__FK_SOURCE_SIX_TARGET_ID;
@@ -101,15 +116,20 @@ public class Keys {
 
     private static class UniqueKeys0 {
         public static final UniqueKey<FooRecord> PK_FOO = Internal.createUniqueKey(Foo.FOO, "pk_foo", Foo.FOO.ID);
+        public static final UniqueKey<SourceEightRecord> PK_SOURCE_EIGHT = Internal.createUniqueKey(SourceEight.SOURCE_EIGHT, "pk_source_eight", SourceEight.SOURCE_EIGHT.ID);
         public static final UniqueKey<SourceFiveRecord> PK_SOURCE_FIVE = Internal.createUniqueKey(SourceFive.SOURCE_FIVE, "pk_source_five", SourceFive.SOURCE_FIVE.ID);
         public static final UniqueKey<SourceFourRecord> PK_SOURCE_FOUR = Internal.createUniqueKey(SourceFour.SOURCE_FOUR, "pk_source_four", SourceFour.SOURCE_FOUR.ID);
+        public static final UniqueKey<SourceNineRecord> PK_SOURCE_NINE = Internal.createUniqueKey(SourceNine.SOURCE_NINE, "pk_source_nine", SourceNine.SOURCE_NINE.ID);
         public static final UniqueKey<SourceOneRecord> PK_SOURCE_ONE = Internal.createUniqueKey(SourceOne.SOURCE_ONE, "pk_source_one", SourceOne.SOURCE_ONE.ID);
         public static final UniqueKey<SourceSevenRecord> PK_SOURCE_SEVEN = Internal.createUniqueKey(SourceSeven.SOURCE_SEVEN, "pk_source_seven", SourceSeven.SOURCE_SEVEN.ID);
         public static final UniqueKey<SourceSixRecord> PK_SOURCE_SIX = Internal.createUniqueKey(SourceSix.SOURCE_SIX, "pk_source_six", SourceSix.SOURCE_SIX.ID);
         public static final UniqueKey<SourceThreeRecord> PK_SOURCE_THREE = Internal.createUniqueKey(SourceThree.SOURCE_THREE, "pk_source_three", SourceThree.SOURCE_THREE.ID);
         public static final UniqueKey<SourceTwoRecord> PK_SOURCE_TWO = Internal.createUniqueKey(SourceTwo.SOURCE_TWO, "pk_source_two", SourceTwo.SOURCE_TWO.ID);
+        public static final UniqueKey<TargetEightRecord> PK_TARGET_EIGHT = Internal.createUniqueKey(TargetEight.TARGET_EIGHT, "pk_target_eight", TargetEight.TARGET_EIGHT.ID);
+        public static final UniqueKey<TargetEightRecord> TARGET_EIGHT_NAME_KEY = Internal.createUniqueKey(TargetEight.TARGET_EIGHT, "target_eight_name_key", TargetEight.TARGET_EIGHT.NAME, TargetEight.TARGET_EIGHT.NUM);
         public static final UniqueKey<TargetFiveRecord> PK_TARGET_FIVE = Internal.createUniqueKey(TargetFive.TARGET_FIVE, "pk_target_five", TargetFive.TARGET_FIVE.ID);
         public static final UniqueKey<TargetFourRecord> PK_TARGET_FOUR = Internal.createUniqueKey(TargetFour.TARGET_FOUR, "pk_target_four", TargetFour.TARGET_FOUR.ID);
+        public static final UniqueKey<TargetNineRecord> PK_TARGET_NINE = Internal.createUniqueKey(TargetNine.TARGET_NINE, "pk_target_nine", TargetNine.TARGET_NINE.ID);
         public static final UniqueKey<TargetOneRecord> PK_TARGET_ONE = Internal.createUniqueKey(TargetOne.TARGET_ONE, "pk_target_one", TargetOne.TARGET_ONE.ID);
         public static final UniqueKey<TargetSevenRecord> PK_TARGET_SEVEN = Internal.createUniqueKey(TargetSeven.TARGET_SEVEN, "pk_target_seven", TargetSeven.TARGET_SEVEN.ID);
         public static final UniqueKey<TargetSevenRecord> TARGET_SEVEN_NAME_KEY = Internal.createUniqueKey(TargetSeven.TARGET_SEVEN, "target_seven_name_key", TargetSeven.TARGET_SEVEN.NAME);
@@ -119,9 +139,11 @@ public class Keys {
     }
 
     private static class ForeignKeys0 {
+        public static final ForeignKey<SourceEightRecord, TargetEightRecord> SOURCE_EIGHT__FK_SOURCE_EIGHT_TARGET = Internal.createForeignKey(de.quinscape.domainql.testdomain.Keys.TARGET_EIGHT_NAME_KEY, SourceEight.SOURCE_EIGHT, "source_eight__fk_source_eight_target", SourceEight.SOURCE_EIGHT.TARGET_NAME, SourceEight.SOURCE_EIGHT.TARGET_NUM);
         public static final ForeignKey<SourceFiveRecord, TargetFiveRecord> SOURCE_FIVE__FK_SOURCE_FIVE_TARGET_ID = Internal.createForeignKey(de.quinscape.domainql.testdomain.Keys.PK_TARGET_FIVE, SourceFive.SOURCE_FIVE, "source_five__fk_source_five_target_id", SourceFive.SOURCE_FIVE.TARGET_ID);
         public static final ForeignKey<SourceFourRecord, TargetFourRecord> SOURCE_FOUR__FK_SOURCE_FOUR_TARGET_ID = Internal.createForeignKey(de.quinscape.domainql.testdomain.Keys.PK_TARGET_FOUR, SourceFour.SOURCE_FOUR, "source_four__fk_source_four_target_id", SourceFour.SOURCE_FOUR.TARGET_ID);
         public static final ForeignKey<SourceFourRecord, TargetFourRecord> SOURCE_FOUR__FK_SOURCE_FOUR_TARGET2_ID = Internal.createForeignKey(de.quinscape.domainql.testdomain.Keys.PK_TARGET_FOUR, SourceFour.SOURCE_FOUR, "source_four__fk_source_four_target2_id", SourceFour.SOURCE_FOUR.TARGET2_ID);
+        public static final ForeignKey<SourceNineRecord, TargetNineRecord> SOURCE_NINE__FK_SOURCE_NINE_TARGET_ID = Internal.createForeignKey(de.quinscape.domainql.testdomain.Keys.PK_TARGET_NINE, SourceNine.SOURCE_NINE, "source_nine__fk_source_nine_target_id", SourceNine.SOURCE_NINE.TARGET_ID);
         public static final ForeignKey<SourceOneRecord, TargetOneRecord> SOURCE_ONE__FK_SOURCE_ONE_TARGET_ID = Internal.createForeignKey(de.quinscape.domainql.testdomain.Keys.PK_TARGET_ONE, SourceOne.SOURCE_ONE, "source_one__fk_source_one_target_id", SourceOne.SOURCE_ONE.TARGET_ID);
         public static final ForeignKey<SourceSevenRecord, TargetSevenRecord> SOURCE_SEVEN__FK_SOURCE_SEVEN_TARGET = Internal.createForeignKey(de.quinscape.domainql.testdomain.Keys.TARGET_SEVEN_NAME_KEY, SourceSeven.SOURCE_SEVEN, "source_seven__fk_source_seven_target", SourceSeven.SOURCE_SEVEN.TARGET);
         public static final ForeignKey<SourceSixRecord, TargetSixRecord> SOURCE_SIX__FK_SOURCE_SIX_TARGET_ID = Internal.createForeignKey(de.quinscape.domainql.testdomain.Keys.PK_TARGET_SIX, SourceSix.SOURCE_SIX, "source_six__fk_source_six_target_id", SourceSix.SOURCE_SIX.TARGET_ID);

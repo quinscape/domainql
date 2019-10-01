@@ -6,7 +6,7 @@ import de.quinscape.domainql.annotation.GraphQLFetcher;
 import de.quinscape.domainql.annotation.GraphQLField;
 import de.quinscape.domainql.annotation.GraphQLScalar;
 import de.quinscape.domainql.config.Options;
-import de.quinscape.domainql.config.RelationConfiguration;
+import de.quinscape.domainql.config.RelationModel;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.docs.FieldDoc;
@@ -45,11 +45,9 @@ import graphql.schema.GraphQLTypeReference;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.jooq.DSLContext;
 import org.jooq.Field;
-import org.jooq.ForeignKey;
 import org.jooq.Record;
 import org.jooq.Table;
 import org.jooq.TableField;
-import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -71,7 +69,6 @@ import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -107,9 +104,7 @@ public class DomainQL
 
     private final Map<String, Field<?>> dbFieldLookup;
 
-    private final Map<ForeignKey<?, ?>, RelationConfiguration> relationConfigurations;
-
-    private final RelationConfiguration defaultRelationConfiguration;
+    private final List<RelationModel> relationModels;
 
     private final Set<GraphQLFieldDefinition> additionalQueries;
 
@@ -135,8 +130,7 @@ public class DomainQL
         Set<Object> logicBeans,
         Map<String, TableLookup> jooqTables,
         Collection<ParameterProviderFactory> parameterProviderFactories,
-        Map<ForeignKey<?, ?>, RelationConfiguration> relationConfigurations,
-        RelationConfiguration defaultRelationConfiguration,
+        List<RelationModel> relationModels,
         Options options,
         Set<GraphQLFieldDefinition> additionalQueries,
         Set<GraphQLFieldDefinition> additionalMutations,
@@ -144,13 +138,13 @@ public class DomainQL
         Map<Class<?>, GraphQLScalarType> additionalScalarTypes,
         Set<Class<?>> additionalInputTypes,
         List<TypeDoc> typeDocs,
+        Map<String, Field<?>> dbFieldLookup,
         boolean fullSupported
     )
     {
         this.dslContext = dslContext;
         this.logicBeans = logicBeans;
-        this.relationConfigurations = relationConfigurations;
-        this.defaultRelationConfiguration = defaultRelationConfiguration;
+        this.relationModels = relationModels;
         this.additionalQueries = additionalQueries;
         this.additionalMutations = additionalMutations;
         this.additionalDirectives = additionalDirectives;
@@ -164,71 +158,12 @@ public class DomainQL
         this.typeRegistry = new TypeRegistry(this, additionalScalarTypes);
 
         this.jooqTables = jooqTables;
-        this.dbFieldLookup = createFieldLookup();
+        this.dbFieldLookup = dbFieldLookup;
 
         genericTypes = new ArrayList<>();
 
         graphQLSchema = this.buildGraphQLSchema();
     }
-
-
-    private Map<String, Field<?>> createFieldLookup()
-    {
-        final Map<String, Field<?>> map = new HashMap<>();
-
-        for (TableLookup lookup : jooqTables.values())
-        {
-            final Class<?> pojoType = lookup.getPojoType();
-            final Table<?> table = lookup.getTable();
-
-            final Map<String, Field<?>> fields = createFieldLookupForType(pojoType, table);
-
-            log.debug("createFieldLookup {}: {}", pojoType.getSimpleName(), fields );
-
-            map.putAll(fields);
-        }
-
-        return Collections.unmodifiableMap(map);
-    }
-
-
-    private Map<String, Field<?>> createFieldLookupForType(Class<?> pojoType, Table<?> table)
-    {
-        final JSONClassInfo classInfo = JSONUtil.getClassInfo(pojoType);
-        final Map<String, Field<?>> fieldsForType = Maps.newHashMapWithExpectedSize(classInfo.getPropertyInfos()
-            .size());
-
-        for (JSONPropertyInfo info : classInfo.getPropertyInfos())
-        {
-            if (!isNormalProperty(info))
-            {
-                continue;
-            }
-
-            final Column jpaColumnAnno = JSONUtil.findAnnotation(info, Column.class);
-            if (jpaColumnAnno != null)
-            {
-                final String fieldName = jpaColumnAnno.name();
-
-                final Field<?> fieldFromRecord = table.recordType().field(fieldName);
-                final Field<?> field;
-                if (fieldFromRecord != null)
-                {
-                    field = fieldFromRecord;
-                }
-                else
-                {
-                    field = DSL.field(DSL.name(fieldName), info.getType());
-                }
-
-
-                final String key = pojoType.getSimpleName() + ":" + info.getJsonName();
-                fieldsForType.put(key, field);
-            }
-        }
-        return fieldsForType;
-    }
-
 
     Map<String, Field<?>> getFieldLookup()
     {
@@ -238,7 +173,7 @@ public class DomainQL
 
     public Field<?> lookupField(String domainType, String property)
     {
-        return dbFieldLookup.get(domainType + ":" + property);
+        return dbFieldLookup.get(DomainQLBuilder.fieldLookupKey(domainType, property));
     }
 
 
@@ -357,11 +292,16 @@ public class DomainQL
     private Set<String> findForeignKeyFields(Table<?> table)
     {
         Set<String> set = new HashSet<>();
-        for (ForeignKey<?, ?> foreignKey : table.getReferences())
+
+        for (RelationModel relationModel : relationModels)
         {
-            for (TableField<?, ?> field : foreignKey.getFields())
+            if (relationModel.getSourceTable().equals(table))
             {
-                set.add(field.getName());
+                set.addAll(
+                    relationModel.getSourceDBFields().stream()
+                        .map(Field::getName)
+                        .collect(Collectors.toList())
+                );
             }
         }
         return set;
@@ -394,25 +334,23 @@ public class DomainQL
     }
 
 
-    static boolean isPojoType(Class<?> cls)
+    private static boolean isPojoType(Class<?> cls)
     {
         return !Table.class.isAssignableFrom(cls) && !Record.class.isAssignableFrom(cls);
     }
 
 
-    private Set<ForeignKey<?, ?>> findBackReferences(Table<?> table, Collection<TableLookup> tables)
+    private Set<RelationModel> findBackReferences(Class<?> pojoClass)
     {
-        Set<ForeignKey<?, ?>> set = new LinkedHashSet<>();
-        for (TableLookup other : tables)
+        Set<RelationModel> set = new LinkedHashSet<>();
+        for (RelationModel relationConfig : relationModels)
         {
-            for (ForeignKey<?, ?> foreignKey : other.getTable().getReferences())
+            if (
+                relationConfig.getTargetPojoClass().getSimpleName().equals(pojoClass.getSimpleName()) &&
+                relationConfig.getTargetField() != TargetField.NONE
+            )
             {
-                if (foreignKey.getFields().size() == 1 &&
-                    foreignKey.getKey().getTable().equals(table) &&
-                    getRelationConfiguration(foreignKey).getTargetField() != TargetField.NONE)
-                {
-                    set.add(foreignKey);
-                }
+                set.add(relationConfig);
             }
         }
         return set;
@@ -498,7 +436,7 @@ public class DomainQL
 
             log.debug("DECLARE LOGIC TYPE {}", name);
 
-            buildFields(domainTypeBuilder, outputType, Collections.emptySet(), typeDoc);
+            buildFields(domainTypeBuilder, outputType, Collections.emptySet(), typeDoc, new HashSet<>());
 
             final GraphQLObjectType newObjectType = domainTypeBuilder.build();
             builder.additionalType(newObjectType);
@@ -718,13 +656,13 @@ public class DomainQL
     }
 
 
-    public static boolean isNormalProperty(JSONPropertyInfo info)
+    static boolean isNormalProperty(JSONPropertyInfo info)
     {
         return !info.isReadOnly() && !Class.class.isAssignableFrom(info.getType()) && ((JavaObjectPropertyInfo) info).getGetterMethod() != null && !info.isIgnore();
     }
 
 
-    public GraphQLEnumType buildEnumType(Class<?> nextType)
+    private GraphQLEnumType buildEnumType(Class<?> nextType)
     {
         final String enumName = nextType.getSimpleName();
 
@@ -754,7 +692,7 @@ public class DomainQL
     }
 
 
-    static List<String> getEnumValues(Class<?> type)
+    private static List<String> getEnumValues(Class<?> type)
     {
         Enum[] enums = null;
         try
@@ -826,20 +764,6 @@ public class DomainQL
 
         return inputType;
     }
-
-
-    public RelationConfiguration getRelationConfiguration(ForeignKey<?, ?> fk)
-    {
-        final RelationConfiguration relationConfiguration = relationConfigurations.get(fk);
-        return relationConfiguration != null ? relationConfiguration : defaultRelationConfiguration;
-    }
-
-
-    public static DomainQLBuilder newDomainQL(DSLContext dslContext)
-    {
-        return new DomainQLBuilder(dslContext);
-    }
-
 
     private LogicBeanAnalyzer registerTypes(GraphQLSchema.Builder builder, Set<String> typesForJooqDomain)
     {
@@ -1190,11 +1114,10 @@ public class DomainQL
                 throw new IllegalStateException("Could not find output type for type " + pojoType.getName());
             }
 
-            buildFields(domainTypeBuilder, outputType, foreignKeyFields, findTypeDoc(outputType.getName()));
-
-            buildForeignKeyFields(domainTypeBuilder, pojoType, classInfo, table);
-
-            buildBackReferenceFields(domainTypeBuilder, pojoType, classInfo, table, jooqTables.values());
+            final Set<String> fieldsGenerated = new HashSet<>();
+            buildFields(domainTypeBuilder, outputType, foreignKeyFields, findTypeDoc(outputType.getName()), fieldsGenerated);
+            buildForeignKeyFields(domainTypeBuilder, pojoType, classInfo, table, fieldsGenerated);
+            buildBackReferenceFields(domainTypeBuilder, pojoType, fieldsGenerated);
 
             final GraphQLObjectType newObjectType = domainTypeBuilder.build();
 
@@ -1212,40 +1135,24 @@ public class DomainQL
 
     /**
      * Build all fields resulting from a foreign key pointing to the current object type.
-     *  @param domainTypeBuilder object builder
+     * @param domainTypeBuilder object builder
      * @param pojoType          pojo type to build the object for
-     * @param classInfo         svenson class info
-     * @param table             corresponding table
-     * @param allTables         set of all tables
+     * @param fieldsGenerated
      */
     private void buildBackReferenceFields(
         GraphQLObjectType.Builder domainTypeBuilder,
         Class<?> pojoType,
-        JSONClassInfo classInfo, Table<?> table,
-        Collection<TableLookup> allTables
+        Set<String> fieldsGenerated
     )
     {
-        final Set<ForeignKey<?, ?>> backReferences = findBackReferences(table, allTables);
+        final Set<RelationModel> relationsToType = findBackReferences(pojoType);
 
-        for (ForeignKey<?, ?> foreignKey : backReferences)
+        for (RelationModel relationModel : relationsToType)
         {
-            if (foreignKey.getFields().size() != 1)
-            {
-                continue;
-            }
-
-            final RelationConfiguration relationConfiguration = getRelationConfiguration(foreignKey);
-            final TargetField targetField = relationConfiguration.getTargetField();
-            final TableField<?, ?> foreignKeyField = foreignKey.getFields().get(0);
 
             final GraphQLFieldDefinition fieldDef = buildBackReferenceField(
-                pojoType,
-                classInfo,
-                table,
-                foreignKey,
-                relationConfiguration,
-                targetField,
-                foreignKeyField
+                relationModel,
+                fieldsGenerated
             );
 
             domainTypeBuilder.field(
@@ -1256,32 +1163,23 @@ public class DomainQL
 
 
     private GraphQLFieldDefinition buildBackReferenceField(
-        Class<?> pojoType,
-        JSONClassInfo classInfo, Table<?> table,
-        ForeignKey<?, ?> foreignKey,
-        RelationConfiguration relationConfiguration,
-        TargetField targetField,
-        TableField<?, ?> foreignKeyField
+        RelationModel relationModel,
+        Set<String> fieldsGenerated
     )
     {
-        final Table<?> otherTable = foreignKey.getTable();
+        final Table<?> otherTable = relationModel.getSourceTable();
         final Class<?> otherPojoType = findPojoTypeOf(otherTable);
 
-        final boolean isOneToOne = targetField == TargetField.ONE;
+        final boolean isOneToOne = relationModel.getTargetField() == TargetField.ONE;
 
         final GraphQLOutputType type = outputTypeRef(otherPojoType);
 
-        final String backReferenceFieldName;
-        if (relationConfiguration.getRightSideObjectName() != null)
-        {
-            backReferenceFieldName = relationConfiguration.getRightSideObjectName();
-        }
-        else
-        {
-            final String otherName = Introspector.decapitalize(otherPojoType.getSimpleName());
-            backReferenceFieldName = isOneToOne ? otherName : options.getPluralizationFunction().apply(otherName);
-        }
-        if (classInfo.getPropertyInfo(backReferenceFieldName) != null)
+        final String backReferenceFieldName = relationModel.getRightSideObjectName();
+
+        final Class<?> pojoType = relationModel.getTargetPojoClass();
+        final Table<?> table = relationModel.getTargetTable();
+
+        if (fieldsGenerated.contains(backReferenceFieldName))
         {
             throw new DomainQLTypeException("Invalid object field name " + pojoType.getSimpleName() + "."  + backReferenceFieldName + ":  exists both as object field and as scalar field.");
         }
@@ -1296,20 +1194,26 @@ public class DomainQL
         final GraphQLOutputType fieldType = isOneToOne ? type : new GraphQLList(type);
         final GraphQLFieldDefinition.Builder backReferenceField = GraphQLFieldDefinition.newFieldDefinition()
             .name(backReferenceFieldName)
-            .description((isOneToOne ? "One-to-one object" : "Many-to-many objects") + " from '" + otherTable.getName() + "." + foreignKeyField
-                .getName() + "'")
+            .description(
+                (isOneToOne ? "One-to-one object" : "Many-to-many objects") +
+                    " from " +
+                    relationModel.getSourceDBFields().stream()
+                        .map(
+                            field -> otherTable.getName() + "." + field.getName()
+                        )
+                        .collect(Collectors.joining(", "))
+            )
             .type(isNotNull ? nonNull(fieldType) : fieldType)
             .dataFetcher(
                 new BackReferenceFetcher(
                     dslContext,
-                    fkPropertyInfo.getJsonName(),
-                    otherTable,
-                    otherPojoType,
-                    foreignKey,
-                    isOneToOne
+                    relationModel
                 )
             );
         final GraphQLFieldDefinition fieldDef = backReferenceField.build();
+
+        fieldsGenerated.add(backReferenceFieldName);
+
         log.debug("-- fk {} {}", isOneToOne ? "backref" : "backrefs", fieldDef);
         return fieldDef;
     }
@@ -1317,118 +1221,102 @@ public class DomainQL
 
     /**
      * Build the fields resulting from the foreign keys of this type.
-     *
-     * @param domainTypeBuilder object builder
+     *  @param domainTypeBuilder object builder
      * @param pojoType          pojo type to build the object for
      * @param classInfo         JSON classInfo for that type
      * @param table             corresponding table
+     * @param fieldsGenerated
      */
     private void buildForeignKeyFields(
         GraphQLObjectType.Builder domainTypeBuilder,
         Class<?> pojoType,
         JSONClassInfo classInfo,
-        Table<?> table
+        Table<?> table,
+        Set<String> fieldsGenerated
     )
     {
-        for (ForeignKey<?, ?> foreignKey : table.getReferences())
+        for (RelationModel relationModel : relationModels)
         {
-            final List<? extends TableField<?, ?>> fields = foreignKey.getFields();
-
-
-            // we ignore foreign keys that are configured with NONE and keys with more than one field
-            final RelationConfiguration relationConfiguration = getRelationConfiguration(foreignKey);
-            final SourceField sourceField = relationConfiguration.getSourceField();
-            if (fields.size() != 1)
+            if (table.equals(relationModel.getSourceTable()))
             {
-                continue;
-            }
-            final TableField<?, ?> foreignKeyField = fields.get(0);
-            final JSONPropertyInfo fkPropertyInfo = findPropertyInfoForField(
-                pojoType,
-                foreignKeyField
-            );
 
-            final boolean isNotNull = JSONUtil.findAnnotation(fkPropertyInfo, NotNull.class) != null;
+                final List<? extends TableField<?, ?>> fields = relationModel.getSourceDBFields();
+                final SourceField sourceField = relationModel.getSourceField();
 
-            final String javaName = fkPropertyInfo.getJavaPropertyName();
-            if (javaName == null)
-            {
-                throw new IllegalStateException("Cannot find java name for " + foreignKeyField);
-            }
-
-
-            if (sourceField == SourceField.SCALAR || sourceField == SourceField.OBJECT_AND_SCALAR)
-            {
-                final GraphQLType graphQLType = outputTypeRef(foreignKeyField.getType());
-                if (graphQLType == null)
+                boolean first = true;
+                for (int i = 0; i < fields.size(); i++)
                 {
-                    throw new IllegalStateException(
-                        "Could not determine graphql type for " + foreignKeyField.getType());
-                }
-                final GraphQLFieldDefinition fieldDef = GraphQLFieldDefinition.newFieldDefinition()
-                    .name(javaName)
-                    .description("DB foreign key column '" + foreignKeyField.getName() + "'")
-                    .type(isNotNull ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
-                    .dataFetcher(new FieldFetcher(pojoType.getSimpleName(), findJsonName(classInfo, javaName), foreignKeyField.getType()))
-                    .build();
-                log.debug("-- fk scalar {}", fieldDef);
-                domainTypeBuilder.field(
-                    fieldDef
-                );
-            }
+                    TableField<?, ?> foreignKeyField = fields.get(i);
+                    final JSONPropertyInfo fkPropertyInfo = findPropertyInfoForField(
+                        pojoType,
+                        foreignKeyField
+                    );
 
-            if (sourceField == SourceField.OBJECT || sourceField == SourceField.OBJECT_AND_SCALAR)
-            {
-                final String objectFieldName;
-                if (relationConfiguration.getLeftSideObjectName() != null)
-                {
-                    objectFieldName = relationConfiguration.getLeftSideObjectName();
-                }
-                else
-                {
-                    final String suffix = options.getForeignKeySuffix();
-                    if (javaName.endsWith(suffix))
+                    final boolean isNotNull = JSONUtil.findAnnotation(fkPropertyInfo, NotNull.class) != null;
+
+                    final String javaName = relationModel.getSourceFields().get(i);
+
+                    if (sourceField == SourceField.SCALAR || sourceField == SourceField.OBJECT_AND_SCALAR)
                     {
-                        objectFieldName = javaName.substring(0, javaName.length() - suffix.length());
+
+                        final GraphQLOutputType graphQLType = outputTypeRef(foreignKeyField.getType());
+                        final GraphQLFieldDefinition fieldDef = GraphQLFieldDefinition.newFieldDefinition()
+                            .name(javaName)
+                            .description("DB foreign key column '" + foreignKeyField.getName() + "'")
+                            .type(isNotNull ? nonNull(graphQLType) : graphQLType)
+                            .dataFetcher(new FieldFetcher(
+                                pojoType.getSimpleName(),
+                                findJsonName(classInfo, javaName),
+                                foreignKeyField.getType()
+                            ))
+                            .build();
+                        log.debug("-- fk scalar {}", fieldDef);
+
+                        if (fieldsGenerated.contains(javaName))
+                        {
+                            throw new DomainQLTypeException("Invalid object field name " + pojoType.getSimpleName() + "." + javaName + ": not unique");
+                        }
+
+                        fieldsGenerated.add(javaName);
+
+                        domainTypeBuilder.field(
+                            fieldDef
+                        );
                     }
-                    else
+
+                    if (first && (sourceField == SourceField.OBJECT || sourceField == SourceField.OBJECT_AND_SCALAR))
                     {
-                        objectFieldName = javaName;
+                        final String objectFieldName = relationModel.getLeftSideObjectName();
+
+                        if (fieldsGenerated.contains(objectFieldName))
+                        {
+                            throw new DomainQLTypeException("Invalid object field name " + pojoType.getSimpleName() + "." + objectFieldName + ":  exists both as object field and as scalar field.");
+                        }
+
+                        final Class<?> otherPojoType = relationModel.getTargetPojoClass();
+                        final GraphQLOutputType objectRef = outputTypeRef(otherPojoType);
+                        final GraphQLFieldDefinition fieldDef = GraphQLFieldDefinition.newFieldDefinition()
+                            .name(objectFieldName)
+                            .description("Target of '" + foreignKeyField.getName() + "'")
+                            .type(isNotNull ? nonNull(objectRef) : objectRef)
+                            .dataFetcher(
+                                new ReferenceFetcher(
+                                    dslContext,
+                                    objectFieldName,
+                                    relationModel
+                                )
+                            )
+                            .build();
+
+                        fieldsGenerated.add(objectFieldName);
+
+                        log.debug("-- fk target {}", fieldDef);
+                        domainTypeBuilder.field(
+                            fieldDef
+                        );
                     }
+                    first = false;
                 }
-
-                if (classInfo.getPropertyInfo(objectFieldName) != null)
-                {
-                    throw new DomainQLTypeException("Invalid object field name " + pojoType.getSimpleName() + "."  + objectFieldName + ":  exists both as object field and as scalar field.");
-                }
-
-                final TableField<?, ?> targetField = foreignKey.getKey().getFields().get(0);
-
-                final Class<?> otherPojoType = findPojoTypeOf(foreignKey.getKey().getTable());
-                final GraphQLOutputType objectRef = outputTypeRef(otherPojoType);
-                final GraphQLFieldDefinition fieldDef = GraphQLFieldDefinition.newFieldDefinition()
-                    .name(objectFieldName)
-                    .description("Target of '" + foreignKeyField.getName() + "'")
-                    .type(isNotNull ? GraphQLNonNull.nonNull(objectRef) : objectRef)
-                    .dataFetcher(
-                        new ReferenceFetcher(
-                            dslContext,
-                            objectFieldName,
-                            findJsonName(classInfo, javaName),
-                            foreignKey.getKey().getTable(),
-                            findPojoTypeOf(foreignKey.getKey().getTable()),
-                            targetField.getName()
-                        )
-                    )
-                    .build();
-                log.debug("-- fk target {}", fieldDef);
-                domainTypeBuilder.field(
-                    fieldDef
-                );
-            }
-            else if (sourceField == SourceField.NONE)
-            {// nothing to do
-
             }
         }
     }
@@ -1436,21 +1324,23 @@ public class DomainQL
 
     /**
      * Builds the normal fields for the given type.
-     *  @param outputType       output type reference
+     * @param outputType       output type reference
      * @param foreignKeyFields Names of fields that are part of a foreign keys
      * @param typeDoc
+     * @param fieldsGenerated
      */
     private void buildFields(
         GraphQLObjectType.Builder domainTypeBuilder,
         OutputType outputType,
         Set<String> foreignKeyFields,
-        TypeDoc typeDoc
+        TypeDoc typeDoc,
+        Set<String> fieldsGenerated
     )
     {
         final Class<?> javaType = outputType.getJavaType();
 
-        handlePropertyFields(domainTypeBuilder, outputType, foreignKeyFields, javaType, typeDoc);
-        handleParametrizedFields(domainTypeBuilder, outputType, javaType, typeDoc);
+        handlePropertyFields(domainTypeBuilder, outputType, foreignKeyFields, javaType, typeDoc, fieldsGenerated);
+        handleParametrizedFields(domainTypeBuilder, outputType, javaType, typeDoc, fieldsGenerated);
     }
 
 
@@ -1459,7 +1349,8 @@ public class DomainQL
         OutputType outputType,
         Set<String> foreignKeyFields,
         Class<?> javaType,
-        TypeDoc typeDoc
+        TypeDoc typeDoc,
+        Set<String> fieldsGenerated
     )
     {
         final JSONClassInfo classInfo = JSONUtil.getClassInfo(javaType);
@@ -1472,7 +1363,7 @@ public class DomainQL
                 continue;
             }
 
-            final GraphQLFieldDefinition fieldDef = getPropertyFieldDefinition(javaType.getSimpleName(), outputType, foreignKeyFields, info, typeDoc);
+            final GraphQLFieldDefinition fieldDef = buildPropertyFieldDefinition(javaType.getSimpleName(), outputType, foreignKeyFields, info, typeDoc, fieldsGenerated);
             if (fieldDef == null)
             {
                 continue;
@@ -1489,7 +1380,8 @@ public class DomainQL
         GraphQLObjectType.Builder domainTypeBuilder,
         OutputType outputType,
         Class<?> javaType,
-        TypeDoc typeDoc
+        TypeDoc typeDoc,
+        Set<String> fieldsGenerated
     )
     {
         MethodAccess methodAccess = null;
@@ -1507,7 +1399,6 @@ public class DomainQL
 
                 final GraphQLFieldDefinition fieldDef = createParametrizedField(
                     outputType,
-                    javaType,
                     methodAccess,
                     m,
                     parameterTypes,
@@ -1516,6 +1407,8 @@ public class DomainQL
                 );
 
                 log.debug("-- {}: {}", fieldDef.getName(), fieldDef.getType().getName());
+
+                fieldsGenerated.add(fieldDef.getName());
 
                 domainTypeBuilder.field(
                     fieldDef
@@ -1528,7 +1421,6 @@ public class DomainQL
 
     private GraphQLFieldDefinition createParametrizedField(
         OutputType outputType,
-        Class<?> javaType,
         MethodAccess methodAccess,
         Method m,
         Class<?>[] parameterTypes,
@@ -1619,22 +1511,6 @@ public class DomainQL
     }
 
 
-    private String describeParameter(Class<?>[] parameterTypes)
-    {
-        final StringBuilder paramDesc = new StringBuilder();
-        for (int i = 0; i < parameterTypes.length; i++)
-        {
-            Class<?> parameterType = parameterTypes[i];
-            if (i > 0)
-            {
-                paramDesc.append(",");
-            }
-            paramDesc.append(parameterType.getSimpleName());
-        }
-        return paramDesc.toString();
-    }
-
-
     private GraphQLArgument buildArgument(
         String propertyName,
         Parameter parameter,
@@ -1646,8 +1522,6 @@ public class DomainQL
         GraphQLInputType paramGQLType;
         if (List.class.isAssignableFrom(parameterType))
         {
-
-            GraphQLType inputType;
             final Type genericParamType = parameter.getParameterizedType();
             if (!(genericParamType instanceof ParameterizedType))
             {
@@ -1706,12 +1580,13 @@ public class DomainQL
     }
 
 
-    private GraphQLFieldDefinition getPropertyFieldDefinition(
+    private GraphQLFieldDefinition buildPropertyFieldDefinition(
         String domainType,
         OutputType outputType,
         Set<String> foreignKeyFields,
         JSONPropertyInfo info,
-        TypeDoc typeDoc
+        TypeDoc typeDoc,
+        Set<String> fieldsGenerated
     )
     {
         final Class<Object> type = info.getType();
@@ -1795,6 +1670,8 @@ public class DomainQL
             ))
             .build();
 
+        fieldsGenerated.add(fieldName);
+        
         log.debug("-- {}: {}", fieldDef.getName(), fieldDef.getType().getName());
         return fieldDef;
     }
@@ -1894,30 +1771,30 @@ public class DomainQL
 
     public Table<?> getJooqTable(String domainType)
     {
+        return lookupType(domainType).getTable();
+    }
+
+
+    public TableLookup lookupType(String domainType)
+    {
         final TableLookup lookup = jooqTables.get(domainType);
         if (lookup == null)
         {
-            throw new DomainQLException("No jooq table registered for domain type '" + domainType + "'");
+            throw new DomainQLException("Could not find domain type '" + domainType + "'");
         }
-        return lookup.getTable();
+        return lookup;
     }
 
 
     public Class<?> getPojoType(String domainType)
     {
-        return jooqTables.get(domainType).getPojoType();
+        return lookupType(domainType).getPojoType();
     }
 
 
-    public Map<ForeignKey<?, ?>, RelationConfiguration> getRelationConfigurations()
+    public List<RelationModel> getRelationModels()
     {
-        return relationConfigurations;
-    }
-
-
-    public RelationConfiguration getDefaultRelationConfiguration()
-    {
-        return defaultRelationConfiguration;
+        return relationModels;
     }
 
 
@@ -1960,6 +1837,20 @@ public class DomainQL
     public GraphQLSchema getGraphQLSchema()
     {
         return graphQLSchema;
+    }
+
+
+    /**
+     * Creates a new DomainQL builder to be configured. Call {@link DomainQLBuilder#build()} on the builder after
+     * configuration to create the actual DomainQL object.
+     *
+     * @param dslContext    JOOQ DSL context instance
+     *
+     * @return DomainQL builder
+     */
+    public static DomainQLBuilder newDomainQL(DSLContext dslContext)
+    {
+        return new DomainQLBuilder(dslContext);
     }
 }
 

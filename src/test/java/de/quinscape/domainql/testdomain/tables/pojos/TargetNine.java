@@ -30,29 +30,29 @@ import javax.validation.constraints.Size;
 )
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 @Entity
-@Table(name = "source_six", schema = "public", indexes = {
-    @Index(name = "pk_source_six", unique = true, columnList = "id ASC")
+@Table(name = "target_nine", schema = "public", indexes = {
+    @Index(name = "pk_target_nine", unique = true, columnList = "id ASC")
 })
-public class SourceSix extends GeneratedDomainObject implements Serializable {
+public class TargetNine extends GeneratedDomainObject implements Serializable {
 
-    private static final long serialVersionUID = -2069893223;
+    private static final long serialVersionUID = -349622496;
 
     private String id;
-    private String targetId;
+    private String name;
 
-    public SourceSix() {}
+    public TargetNine() {}
 
-    public SourceSix(SourceSix value) {
+    public TargetNine(TargetNine value) {
         this.id = value.id;
-        this.targetId = value.targetId;
+        this.name = value.name;
     }
 
-    public SourceSix(
+    public TargetNine(
         String id,
-        String targetId
+        String name
     ) {
         this.id = id;
-        this.targetId = targetId;
+        this.name = name;
     }
 
     @Id
@@ -67,23 +67,23 @@ public class SourceSix extends GeneratedDomainObject implements Serializable {
         this.id = id;
     }
 
-    @Column(name = "target_id", nullable = false, length = 36)
+    @Column(name = "name", nullable = false, length = 36)
     @NotNull
     @Size(max = 36)
-    public String getTargetId() {
-        return this.targetId;
+    public String getName() {
+        return this.name;
     }
 
-    public void setTargetId(String targetId) {
-        this.targetId = targetId;
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("SourceSix (");
+        StringBuilder sb = new StringBuilder("TargetNine (");
 
         sb.append(id);
-        sb.append(", ").append(targetId);
+        sb.append(", ").append(name);
 
         sb.append(")");
         return sb.toString();

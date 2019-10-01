@@ -5,15 +5,20 @@ package de.quinscape.domainql.testdomain;
 
 
 import de.quinscape.domainql.testdomain.tables.Foo;
+import de.quinscape.domainql.testdomain.tables.SourceEight;
 import de.quinscape.domainql.testdomain.tables.SourceFive;
 import de.quinscape.domainql.testdomain.tables.SourceFour;
+import de.quinscape.domainql.testdomain.tables.SourceNine;
 import de.quinscape.domainql.testdomain.tables.SourceOne;
 import de.quinscape.domainql.testdomain.tables.SourceSeven;
 import de.quinscape.domainql.testdomain.tables.SourceSix;
 import de.quinscape.domainql.testdomain.tables.SourceThree;
 import de.quinscape.domainql.testdomain.tables.SourceTwo;
+import de.quinscape.domainql.testdomain.tables.TargetEight;
 import de.quinscape.domainql.testdomain.tables.TargetFive;
 import de.quinscape.domainql.testdomain.tables.TargetFour;
+import de.quinscape.domainql.testdomain.tables.TargetNine;
+import de.quinscape.domainql.testdomain.tables.TargetNineCounts;
 import de.quinscape.domainql.testdomain.tables.TargetOne;
 import de.quinscape.domainql.testdomain.tables.TargetSeven;
 import de.quinscape.domainql.testdomain.tables.TargetSix;
@@ -42,6 +47,11 @@ public class Tables {
     public static final Foo FOO = de.quinscape.domainql.testdomain.tables.Foo.FOO;
 
     /**
+     * The table <code>public.source_eight</code>.
+     */
+    public static final SourceEight SOURCE_EIGHT = de.quinscape.domainql.testdomain.tables.SourceEight.SOURCE_EIGHT;
+
+    /**
      * The table <code>public.source_five</code>.
      */
     public static final SourceFive SOURCE_FIVE = de.quinscape.domainql.testdomain.tables.SourceFive.SOURCE_FIVE;
@@ -50,6 +60,11 @@ public class Tables {
      * The table <code>public.source_four</code>.
      */
     public static final SourceFour SOURCE_FOUR = de.quinscape.domainql.testdomain.tables.SourceFour.SOURCE_FOUR;
+
+    /**
+     * The table <code>public.source_nine</code>.
+     */
+    public static final SourceNine SOURCE_NINE = de.quinscape.domainql.testdomain.tables.SourceNine.SOURCE_NINE;
 
     /**
      * The table <code>public.source_one</code>.
@@ -77,6 +92,11 @@ public class Tables {
     public static final SourceTwo SOURCE_TWO = de.quinscape.domainql.testdomain.tables.SourceTwo.SOURCE_TWO;
 
     /**
+     * The table <code>public.target_eight</code>.
+     */
+    public static final TargetEight TARGET_EIGHT = de.quinscape.domainql.testdomain.tables.TargetEight.TARGET_EIGHT;
+
+    /**
      * The table <code>public.target_five</code>.
      */
     public static final TargetFive TARGET_FIVE = de.quinscape.domainql.testdomain.tables.TargetFive.TARGET_FIVE;
@@ -85,6 +105,16 @@ public class Tables {
      * The table <code>public.target_four</code>.
      */
     public static final TargetFour TARGET_FOUR = de.quinscape.domainql.testdomain.tables.TargetFour.TARGET_FOUR;
+
+    /**
+     * The table <code>public.target_nine</code>.
+     */
+    public static final TargetNine TARGET_NINE = de.quinscape.domainql.testdomain.tables.TargetNine.TARGET_NINE;
+
+    /**
+     * The table <code>public.target_nine_counts</code>.
+     */
+    public static final TargetNineCounts TARGET_NINE_COUNTS = de.quinscape.domainql.testdomain.tables.TargetNineCounts.TARGET_NINE_COUNTS;
 
     /**
      * The table <code>public.target_one</code>.

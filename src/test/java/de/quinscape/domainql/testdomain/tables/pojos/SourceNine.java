@@ -30,24 +30,24 @@ import javax.validation.constraints.Size;
 )
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 @Entity
-@Table(name = "source_six", schema = "public", indexes = {
-    @Index(name = "pk_source_six", unique = true, columnList = "id ASC")
+@Table(name = "source_nine", schema = "public", indexes = {
+    @Index(name = "pk_source_nine", unique = true, columnList = "id ASC")
 })
-public class SourceSix extends GeneratedDomainObject implements Serializable {
+public class SourceNine extends GeneratedDomainObject implements Serializable {
 
-    private static final long serialVersionUID = -2069893223;
+    private static final long serialVersionUID = 208968755;
 
     private String id;
     private String targetId;
 
-    public SourceSix() {}
+    public SourceNine() {}
 
-    public SourceSix(SourceSix value) {
+    public SourceNine(SourceNine value) {
         this.id = value.id;
         this.targetId = value.targetId;
     }
 
-    public SourceSix(
+    public SourceNine(
         String id,
         String targetId
     ) {
@@ -80,7 +80,7 @@ public class SourceSix extends GeneratedDomainObject implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("SourceSix (");
+        StringBuilder sb = new StringBuilder("SourceNine (");
 
         sb.append(id);
         sb.append(", ").append(targetId);
