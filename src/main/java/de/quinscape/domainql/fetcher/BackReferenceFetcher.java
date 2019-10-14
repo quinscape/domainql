@@ -2,6 +2,7 @@ package de.quinscape.domainql.fetcher;
 
 import de.quinscape.domainql.config.RelationModel;
 import de.quinscape.domainql.config.TargetField;
+import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -35,7 +36,13 @@ public class BackReferenceFetcher
     public Object get(DataFetchingEnvironment environment)
     {
 
-        // XXX: support multi-field keys
+        FetcherContext fetcherContext;
+        final Object source = environment.getSource();
+
+        if (source instanceof DomainObject && (fetcherContext = ((DomainObject) source).lookupFetcherContext()) != null)
+        {
+            return fetcherContext.getProperty(relationModel.getRightSideObjectName());
+        }
 
         final List<? extends TableField<?, ?>> targetDBFields = relationModel.getTargetDBFields();
 
@@ -45,7 +52,7 @@ public class BackReferenceFetcher
         final Condition condition;
         if (targetDBFields.size() == 1)
         {
-            final Object id = JSONUtil.DEFAULT_UTIL.getProperty(environment.getSource(), targetFields.get(0));
+            final Object id = JSONUtil.DEFAULT_UTIL.getProperty(source, targetFields.get(0));
             final TableField<?, Object> fkField = (TableField<?, Object>) sourceDBFields.get(0);
             condition = fkField.eq(id);
         }
@@ -59,7 +66,7 @@ public class BackReferenceFetcher
                 final String targetField = targetFields.get(i);
                 final TableField<?, Object> sourceDBField = (TableField<?, Object>) sourceDBFields.get(i);
 
-                final Object id = JSONUtil.DEFAULT_UTIL.getProperty(environment.getSource(), targetField);
+                final Object id = JSONUtil.DEFAULT_UTIL.getProperty(source, targetField);
                 conditions.add(
                     sourceDBField.eq(id)
                 );

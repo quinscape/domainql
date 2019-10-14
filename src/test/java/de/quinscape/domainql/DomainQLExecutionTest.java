@@ -1425,18 +1425,14 @@ public class DomainQLExecutionTest
             .objectTypes(Public.PUBLIC)
             .logicBeans(new FetcherContextLogic())
 
-            // source variants
             .withRelation(
                 new RelationBuilder()
                     .withForeignKeyFields(SOURCE_THREE.TARGET_ID)
                     .withSourceField(SourceField.OBJECT)
             )
-            .withRelation(
-                new RelationBuilder()
-                    .withForeignKeyFields(SOURCE_THREE.TARGET_ID)
-            )
 
             .buildGraphQLSchema();
+
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
 
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
@@ -1458,15 +1454,113 @@ public class DomainQLExecutionTest
 
         assertThat(executionResult.getErrors(), is(Collections.emptyList()));
 
-        final Map<String, Object> data = (Map<String, Object>) ((Map<String, Object>) executionResult.getData()).get("sourceThreeWithFetcherContext");
+        final Map<String, Object> data = (Map<String, Object>) ((Map<String, Object>) executionResult.getData()).get(
+            "sourceThreeWithFetcherContext");
 
         final JSONPathUtil util = new JSONPathUtil(JSONUtil.OBJECT_SUPPORT);
 
-        assertThat(data.get(DomainObject.ID), is ("source-three-0001"));
-        assertThat(util.getPropertyPath(data, "target.id"), is ("target-three-fetch-context"));
+        assertThat(data.get(DomainObject.ID), is("source-three-0001"));
+        assertThat(util.getPropertyPath(data, "target.id"), is("target-three-fetch-context"));
+    }
 
+
+    @Test
+    public void testToOneBackReferenceWithFetcherContext()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(new FetcherContextLogic())
+
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_FIVE.TARGET_ID)
+                    .withSourceField(SourceField.NONE)
+                    .withTargetField(TargetField.ONE)
+            )
+
+            .buildGraphQLSchema();
+
+
+        // fetcher context back reference *-to-one
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("query sourceThreeWithFetcherContext\n" +
+                "{\n" +
+                "    targetFiveWithFetcherContext\n" +
+                "    {\n" +
+                "        id\n" +
+                "        sourceFive\n" +
+                "        {\n" +
+                "            id\n" +
+                "        }\n" +
+                "    }\n" +
+                "}")
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+        final Map<String, Object> data = (Map<String, Object>) ((Map<String, Object>) executionResult.getData()).get(
+            "targetFiveWithFetcherContext");
+
+        final JSONPathUtil util = new JSONPathUtil(JSONUtil.OBJECT_SUPPORT);
+
+        assertThat(data.get(DomainObject.ID), is("target-five-0001"));
+        assertThat(util.getPropertyPath(data, "sourceFive.id"), is("source-five-fetch-context"));
 
     }
+    @Test
+    public void testToManyBackReferenceWithFetcherContext()
+    {
+        final GraphQLSchema schema = DomainQL.newDomainQL(dslContext)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(new FetcherContextLogic())
+
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_SIX.TARGET_ID)
+                    .withSourceField(SourceField.NONE)
+                    .withTargetField(TargetField.MANY)
+            )
+
+            .buildGraphQLSchema();
+
+        // fetcher context back reference *-to-many
+        GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("query sourceThreeWithFetcherContext\n" +
+                "{\n" +
+                "    targetSixWithFetcherContext\n" +
+                "    {\n" +
+                "        id\n" +
+                "        sourceSixes\n" +
+                "        {\n" +
+                "            id\n" +
+                "        }\n" +
+                "    }\n" +
+                "}")
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+        final Map<String, Object> data = (Map<String, Object>) ((Map<String, Object>) executionResult.getData()).get(
+            "targetSixWithFetcherContext");
+
+        final JSONPathUtil util = new JSONPathUtil(JSONUtil.OBJECT_SUPPORT);
+
+        assertThat(data.get(DomainObject.ID), is("target-six-0001"));
+        assertThat(util.getPropertyPath(data, "sourceSixes[0].id"), is("source-six-fetch-context"));
+
+    }
+
+
 
     @Test
     public void testDBView()

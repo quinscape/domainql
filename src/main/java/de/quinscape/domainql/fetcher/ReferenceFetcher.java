@@ -27,26 +27,19 @@ public class ReferenceFetcher
 
     private final DSLContext dslContext;
 
-    /**
-     * GraphQL field name of the embedded object in the parent type
-     */
-    private final String fieldName;
-
     private final RelationModel relationModel;
 
 
     public ReferenceFetcher(
         DSLContext dslContext,
-        String fieldName,
         RelationModel relationModel
     )
     {
         this.dslContext = dslContext;
-        this.fieldName = fieldName;
         this.relationModel = relationModel;
         if (log.isDebugEnabled())
         {
-            log.debug("ReferenceFetcher: {}, {}", fieldName, relationModel);
+            log.debug("ReferenceFetcher: {}", relationModel);
         }
     }
 
@@ -59,7 +52,7 @@ public class ReferenceFetcher
         FetcherContext fetcherContext;
         if (source instanceof DomainObject && (fetcherContext = ((DomainObject) source).lookupFetcherContext()) != null)
         {
-            return fetcherContext.getProperty(fieldName);
+            return fetcherContext.getProperty(relationModel.getLeftSideObjectName());
         }
 
 

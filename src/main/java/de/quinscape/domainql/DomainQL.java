@@ -1302,7 +1302,6 @@ public class DomainQL
                             .dataFetcher(
                                 new ReferenceFetcher(
                                     dslContext,
-                                    objectFieldName,
                                     relationModel
                                 )
                             )
