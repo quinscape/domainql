@@ -5,11 +5,13 @@ import de.quinscape.domainql.util.IntrospectionUtil;
 import de.quinscape.domainql.util.JSONHolder;
 import de.quinscape.spring.jsview.JsViewContext;
 import de.quinscape.spring.jsview.JsViewProvider;
+import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.schema.SchemaUtil;
 import graphql.schema.idl.SchemaPrinter;
+import org.svenson.util.JSONBuilder;
 
 import java.util.Map;
 
@@ -26,10 +28,11 @@ public final class SchemaDataProvider
      */
     private static final String GENERIC_TYPES = "genericTypes";
 
+    private static final String RELATIONS = "relations";
+
     private final JSONHolder schemaData;
 
     private final String viewDataName;
-
 
     /**
      * Creates a new SchemaDataProvider that uses "schema" as view data name and adds generic type references.
@@ -38,7 +41,7 @@ public final class SchemaDataProvider
      */
     public SchemaDataProvider(DomainQL domainQL)
     {
-        this(domainQL, DEFAULT_VIEW_DATA_NAME, true);
+        this(domainQL, DEFAULT_VIEW_DATA_NAME, true, true);
     }
 
 
@@ -50,7 +53,7 @@ public final class SchemaDataProvider
      */
     public SchemaDataProvider(DomainQL domainQL, String viewDataName)
     {
-        this(domainQL, viewDataName, true);
+        this(domainQL, viewDataName, true, true);
     }
 
 
@@ -61,7 +64,7 @@ public final class SchemaDataProvider
      * @param viewDataName          name this provider will provide the schema data under
      * @param appendGenericTypes    true to add information about generic types to the provided schema data
      */
-    public SchemaDataProvider(DomainQL domainQL, String viewDataName, boolean appendGenericTypes)
+    public SchemaDataProvider(DomainQL domainQL, String viewDataName, boolean appendGenericTypes, boolean appendRelations)
     {
 
         final Map<String, Object> data = IntrospectionUtil.introspect(domainQL.getGraphQLSchema());
@@ -72,10 +75,14 @@ public final class SchemaDataProvider
             schemaRoot.put(GENERIC_TYPES, domainQL.getGenericTypes());
         }
 
+        if (appendRelations)
+        {
+            schemaRoot.put(RELATIONS, domainQL.getRelationModels());
+        }
+
         this.schemaData = new JSONHolder(schemaRoot);
         this.viewDataName = viewDataName;
     }
-
 
 
     @Override
