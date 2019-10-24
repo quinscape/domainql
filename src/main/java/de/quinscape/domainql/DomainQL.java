@@ -1791,9 +1791,34 @@ public class DomainQL
     }
 
 
+    /**
+     * Returns all relation models.
+     * @return
+     */
     public List<RelationModel> getRelationModels()
     {
         return relationModels;
+    }
+
+
+    /**
+     * Returns the relation model with the given id.
+     *
+     * @param id    id
+     * @return relation model with the given id
+     * 
+     * @throws DomainQLException if there is no relation model with the given id.
+     */
+    public RelationModel getRelationModel(String id)
+    {
+        for (RelationModel relationModel : relationModels)
+        {
+            if (relationModel.getId().equals(id))
+            {
+                return relationModel;
+            }
+        }
+        throw new DomainQLException("Relation with id '" + id + "' not found");
     }
 
 
