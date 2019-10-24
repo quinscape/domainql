@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Builds and configures a DomainQL relation configuration object.
@@ -190,14 +191,17 @@ public class RelationBuilder
      * @param fieldLookup
      *
      * @param options
+     * @param usedRelationIds
      * @return relation configuration
      */
     RelationModel build(
         Map<String, TableLookup> jooqTables,
         Map<String, Field<?>> fieldLookup,
-        Options options
+        Options options,
+        Set<String> usedRelationIds
     )
     {
+
         // the case of both being set is already prevented in the "wither" methods
         if (foreignKey == null && this.sourcePojo == null)
         {
@@ -269,7 +273,7 @@ public class RelationBuilder
             }
 
             return new RelationModel(
-                id,
+                getRelationId(usedRelationIds, sourcePojo, leftSideObjectName != null ? leftSideObjectName : sourceFields.get(0)),
                 sourceTable,
                 sourcePojo,
                 sourceDBFields,
@@ -291,7 +295,7 @@ public class RelationBuilder
             {
                 leftSideObjectName = this.leftSideObjectName;
             }
-            else
+            else if (sourceField != SourceField.NONE)
             {
                 final String javaName = sourceFields.get(0);
                 final String suffix = options.getForeignKeySuffix();
@@ -304,6 +308,10 @@ public class RelationBuilder
                     leftSideObjectName = javaName;
                 }
             }
+            else
+            {
+                leftSideObjectName = null;
+            }
 
             final String rightSideObjectName;
 
@@ -311,10 +319,14 @@ public class RelationBuilder
             {
                 rightSideObjectName = this.rightSideObjectName;
             }
-            else
+            else if (targetField != TargetField.NONE)
             {
                 final String otherName = Introspector.decapitalize(sourcePojo.getSimpleName());
                 rightSideObjectName = targetField == TargetField.ONE ? otherName : options.getPluralizationFunction().apply(otherName);
+            }
+            else
+            {
+                rightSideObjectName = null;
             }
 
             final String sourceDomainType = sourcePojo.getSimpleName();
@@ -322,7 +334,8 @@ public class RelationBuilder
             final Table<?> sourceTable = jooqTables.get(sourceDomainType).getTable();
             final Table<?> targetTable = jooqTables.get(targetDomainType).getTable();
             return new RelationModel(
-                id, sourceTable,
+                getRelationId(usedRelationIds, sourcePojo, leftSideObjectName != null ? leftSideObjectName : sourceFields.get(0)),
+                sourceTable,
                 sourcePojo,
                 resolveFields(fieldLookup, sourceDomainType, sourceFields),
                 sourceFields,
@@ -337,6 +350,32 @@ public class RelationBuilder
             );
 
         }
+    }
+
+
+    private String getRelationId(Set<String> usedRelationIds, Class<?> sourcePojo, String objectName)
+    {
+        String id = this.id;
+        if (id != null)
+        {
+            if (usedRelationIds.contains(id))
+            {
+                throw new DomainQLBuilderException("Relation id '" + id + "' is already used.");
+            }
+        }
+        else
+        {
+            final String baseId = sourcePojo.getSimpleName() + "-" + objectName;
+            id = baseId;
+            int count = 2;
+            while (usedRelationIds.contains(id))
+            {
+                id = baseId + count++;
+            }
+        }
+        
+        usedRelationIds.add(id);
+        return id;
     }
 
 

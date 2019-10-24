@@ -1,6 +1,7 @@
 package de.quinscape.domainql;
 
 
+import de.quinscape.domainql.config.RelationModel;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.generic.DomainObject;
@@ -10,6 +11,7 @@ import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.domainql.testdomain.Public;
 import de.quinscape.domainql.testdomain.tables.pojos.TargetNine;
 import de.quinscape.domainql.testdomain.tables.pojos.TargetNineCounts;
+import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.Scalars;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectType;
@@ -17,7 +19,6 @@ import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
-import graphql.schema.idl.SchemaPrinter;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,13 +39,16 @@ public class DomainQLTest
     final TestLogic logic = new TestLogic();
     final LogicWithMirrorInput logic2 = new LogicWithMirrorInput();
 
-    final GraphQLSchema schema = DomainQL.newDomainQL(null)
+
+    final DomainQL domainQL = DomainQL.newDomainQL(null)
         .objectTypes(Public.PUBLIC)
         .logicBeans(Collections.singleton(logic))
 
         // source variants
         .withRelation(
             new RelationBuilder()
+                // trigger renaming in second
+                .withId("SourceTwo-target")
                 .withForeignKeyFields(SOURCE_ONE.TARGET_ID)
                 .withSourceField(SourceField.NONE)
                 .withTargetField(TargetField.NONE)
@@ -80,6 +84,7 @@ public class DomainQLTest
 
         .withRelation(
             new RelationBuilder()
+                .withId("SourceSeven-renamedTarget")
                 .withForeignKeyFields(SOURCE_SEVEN.TARGET)
                 .withSourceField(SourceField.OBJECT)
                 .withTargetField(TargetField.NONE)
@@ -107,9 +112,9 @@ public class DomainQLTest
                 .withSourceField(SourceField.OBJECT)
                 .withTargetField(TargetField.ONE)
         )
+        .build();
 
-        .buildGraphQLSchema();
-
+    final GraphQLSchema schema = domainQL.getGraphQLSchema();
 
     @Test
     public void testQueries()
@@ -328,6 +333,19 @@ public class DomainQLTest
         assertThat(targetNineCountsType.getFieldDefinition("target").getType(), is(schema.getType("TargetNine")));
         assertThat(targetNineCountsType.getFieldDefinition("count").getType(), is(schema.getType("Long")));
 
+
+    }
+
+
+    @Test
+    public void testRelationModels()
+    {
+        final List<RelationModel> relationModels = domainQL.getRelationModels();
+        //log.info(JSONUtil.formatJSON(JSONUtil.DEFAULT_GENERATOR.forValue(relationModels)));
+
+        assertThat(relationModels.get(0).getId(), is("SourceTwo-target"));
+        assertThat(relationModels.get(1).getId(), is("SourceTwo-target2"));
+        assertThat(relationModels.get(5).getId(), is("SourceSeven-renamedTarget"));
 
     }
 }

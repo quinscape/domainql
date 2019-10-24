@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -98,6 +99,8 @@ public class DomainQLBuilder
 
     private List<TypeDoc> typeDocs = new ArrayList<>();
 
+    private Set<String> relationIds = new HashSet<>();
+
     DomainQLBuilder(DSLContext dslContext)
     {
         this.dslContext = dslContext;
@@ -131,7 +134,7 @@ public class DomainQLBuilder
 
         final Options options = optionsBuilder.buildOptions();
         final List<RelationModel> relationModels = relationBuilders.stream()
-            .map(b -> b.build(jooqTables, fieldLookup, options))
+            .map(b -> b.build(jooqTables, fieldLookup, options, relationIds))
             .collect(Collectors.toList());
 
         return new DomainQL(
