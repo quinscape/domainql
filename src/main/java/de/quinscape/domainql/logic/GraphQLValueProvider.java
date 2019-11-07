@@ -11,6 +11,7 @@ import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLInputType;
+import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import org.slf4j.Logger;
@@ -79,26 +80,49 @@ public class GraphQLValueProvider
 
         Object value = environment.getArgument(argumentName);
 
-        final GraphQLType type = schema.getType(inputType.getName());
+        if (inputType instanceof GraphQLList)
+        {
+            final List<Object> valueList = (List<Object>) value;
+            final List<Object> converted  = new ArrayList<>(valueList.size());
 
+            for (Object o : valueList)
+            {
+                converted.add(
+                    convertObj(environment, o, ((GraphQLList) inputType).getWrappedType())
+                );
+            }
+
+            value = converted;
+        }
+        else
+        {
+            // inputType is a GraphQLTypeReference, so we have to get the actual type
+            final GraphQLType type = schema.getType(inputType.getName());
+            value = convertObj(environment, value, type);
+        }
+        return value;
+    }
+
+
+    private Object convertObj(DataFetchingEnvironment environment, Object value, GraphQLType type)
+    {
         if (type instanceof GraphQLEnumType && value instanceof String)
         {
+            final InputType inputType = typeRegistry.lookupInput(type.getName());
 
-            final OutputType outputType = typeRegistry.lookup(type.getName());
-
-            final Class<?> javaType = outputType.getJavaType();
+            final Class<?> javaType = inputType.getJavaType();
             if (!Enum.class.isAssignableFrom(javaType))
             {
-                throw new IllegalStateException(outputType + " is not an enum type");
+                throw new IllegalStateException(inputType + " is not an enum type");
             }
 
             Class<? extends Enum> enumType = (Class<? extends Enum>) javaType;
 
-            return Enum.valueOf(enumType, (String) value);
+            value = Enum.valueOf(enumType, (String) value);
         }
         else if (type instanceof GraphQLInputObjectType)
         {
-            final InputType inputType = typeRegistry.lookupInput(this.inputType.getName());
+            final InputType inputType = typeRegistry.lookupInput(type.getName());
 
             if (inputType == null)
             {
@@ -106,7 +130,6 @@ public class GraphQLValueProvider
             }
             value = convert(environment, inputType, (Map<String, Object>) value);
         }
-
         return value;
     }
 

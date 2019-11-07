@@ -23,6 +23,7 @@ import de.quinscape.domainql.logicimpl.FullDirectiveLogic;
 import de.quinscape.domainql.logicimpl.GenericDomainLogic;
 import de.quinscape.domainql.logicimpl.GenericDomainOutputLogic;
 import de.quinscape.domainql.logicimpl.GetterArgLogic;
+import de.quinscape.domainql.logicimpl.ListInputLogic;
 import de.quinscape.domainql.logicimpl.LogicWithEnums;
 import de.quinscape.domainql.logicimpl.LogicWithEnums2;
 import de.quinscape.domainql.logicimpl.NullForComplexValueLogic;
@@ -1681,5 +1682,134 @@ public class DomainQLExecutionTest
             JSON.defaultJSON().forValue(executionResult.getData()),
             is("{\"walkViewPojoRelationBackwards\":[{\"id\":\"target-id\",\"name\":\"target 9 name\",\"targetNineCounts\":{\"count\":234}}]}")
         );
+    }
+
+    @Test
+    public void testListOfDomainObjectScalarsInput()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new ListInputLogic()))
+            .withAdditionalInputType(Foo.class)
+            .withAdditionalScalar(DomainObject.class, DomainObjectScalar.newDomainObjectScalar())
+            .build();
+
+        //log.info(new SchemaPrinter().print(domainQL.getGraphQLSchema()));
+
+        GraphQL graphQL = GraphQL.newGraphQL(domainQL.getGraphQLSchema()).build();
+
+        List<Object> listOfDomainObjects = JSONUtil.DEFAULT_PARSER.parse(List.class, "[{\n" +
+            "    \"_type\" : \"Foo\",\n" +
+            "    \"id\": \"1612ed5a-3d49-41e9-b087-0d9c6e2d2e90\",\n" +
+            "    \"name\" : \"PurpleFoo\",\n" +
+            "    \"num\" : 2847,\n" +
+            "    \"created\" : \"2011-10-15T14:03:58.078" +
+            "Z\"\n" +
+            "},{\n" +
+            "    \"_type\" : \"Foo\",\n" +
+            "    \"id\": \"67c00a5a-ef33-4897-9e45-b4f0007e9f77\",\n" +
+            "    \"name\" : \"PinkFoo\",\n" +
+            "    \"num\" : 89578,\n" +
+            "    \"created\" : \"2012-10-15T14:03:58.078Z\"\n" +
+            "}" +
+            "]");
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("mutation testListOfDomainObjectScalars($domainObjects: [DomainObject]!)\n" +
+                "{\n" +
+                "    testListOfDomainObjectScalars(domainObjects: $domainObjects)\n" +
+                "}")
+            .variables(ImmutableMap.of("domainObjects", listOfDomainObjects))
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+        final String data = (String) ((Map<String, Object>) executionResult.getData()).get("testListOfDomainObjectScalars");
+
+
+        assertThat(data, is("[Foo (1612ed5a-3d49-41e9-b087-0d9c6e2d2e90, PurpleFoo, 2847, 2011-10-15 16:03:58.078), Foo (67c00a5a-ef33-4897-9e45-b4f0007e9f77, PinkFoo, 89578, 2012-10-15 16:03:58.078)]"));
+
+    }
+
+    @Test
+    public void testListOfDomainObjectsInput()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new ListInputLogic()))
+            .withAdditionalInputType(Foo.class)
+            .withAdditionalScalar(DomainObject.class, DomainObjectScalar.newDomainObjectScalar())
+            .build();
+
+        //log.info(new SchemaPrinter().print(domainQL.getGraphQLSchema()));
+
+        GraphQL graphQL = GraphQL.newGraphQL(domainQL.getGraphQLSchema()).build();
+
+        List<Object> listOfDomainObjects = JSONUtil.DEFAULT_PARSER.parse(List.class, "[{\n" +
+            "    \"value\" : \"Complex A\",\n" +
+            "    \"num\" : 3098\n" +
+            "},{\n" +
+            "    \"value\" : \"Complex B\",\n" +
+            "    \"num\" : -20487\n" +
+            "}" +
+            "]");
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("mutation testListOfDomainObjects($complexInputs: [ComplexInput]!)\n" +
+                "{\n" +
+                "    testListOfDomainObjects(complexInputs: $complexInputs)\n" +
+                "}")
+            .variables(ImmutableMap.of("complexInputs", listOfDomainObjects))
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+        final String data = (String) ((Map<String, Object>) executionResult.getData()).get("testListOfDomainObjects");
+
+
+        assertThat(data, is("ComplexInput: value = 'Complex A', num = 3098|ComplexInput: value = 'Complex B', num = -20487|"));
+
+    }
+
+    @Test
+    public void testListOfEnumsInput()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new ListInputLogic()))
+            .withAdditionalInputType(Foo.class)
+            .withAdditionalScalar(DomainObject.class, DomainObjectScalar.newDomainObjectScalar())
+            .build();
+
+        //log.info(new SchemaPrinter().print(domainQL.getGraphQLSchema()));
+
+        GraphQL graphQL = GraphQL.newGraphQL(domainQL.getGraphQLSchema()).build();
+
+        List<Object> listOfDomainObjects = JSONUtil.DEFAULT_PARSER.parse(List.class, "[\"B\",\"C\",\"A\"]");
+
+        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+            // language=GraphQL
+            .query("mutation testListOfEnums($enums: [MyEnum]!)\n" +
+                "{\n" +
+                "    testListOfEnums(enums: $enums)\n" +
+                "}")
+            .variables(ImmutableMap.of("enums", listOfDomainObjects))
+            .build();
+
+        ExecutionResult executionResult = graphQL.execute(executionInput);
+
+        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+        final String data = (String) ((Map<String, Object>) executionResult.getData()).get("testListOfEnums");
+
+
+        assertThat(data, is("B|C|A|"));
+
     }
 }

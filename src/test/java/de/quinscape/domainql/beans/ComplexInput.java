@@ -43,4 +43,14 @@ public class ComplexInput
     {
         this.num = num;
     }
+
+
+    @Override
+    public String toString()
+    {
+        return "ComplexInput: "
+            + "value = '" + value + '\''
+            + ", num = " + num
+            ;
+    }
 }
