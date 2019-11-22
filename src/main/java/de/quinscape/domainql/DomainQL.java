@@ -1818,7 +1818,14 @@ public class DomainQL
                 return relationModel;
             }
         }
-        throw new DomainQLException("Relation with id '" + id + "' not found");
+        throw new DomainQLException(
+            "Relation with id '" + id + "' not found. " +
+            "Valid relations are: " + relationModels.stream()
+                .map(r -> "'" + r.getId() + "'")
+                .collect(
+                    Collectors.joining(", ")
+                )
+        );
     }
 
 
