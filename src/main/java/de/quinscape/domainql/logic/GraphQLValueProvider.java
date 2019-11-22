@@ -82,17 +82,20 @@ public class GraphQLValueProvider
 
         if (inputType instanceof GraphQLList)
         {
-            final List<Object> valueList = (List<Object>) value;
-            final List<Object> converted  = new ArrayList<>(valueList.size());
-
-            for (Object o : valueList)
+            if (value != null)
             {
-                converted.add(
-                    convertObj(environment, o, ((GraphQLList) inputType).getWrappedType())
-                );
-            }
+                final List<Object> valueList = (List<Object>) value;
+                final List<Object> converted  = new ArrayList<>(valueList.size());
 
-            value = converted;
+                for (Object o : valueList)
+                {
+                    converted.add(
+                        convertObj(environment, o, ((GraphQLList) inputType).getWrappedType())
+                    );
+                }
+
+                value = converted;
+            }
         }
         else
         {

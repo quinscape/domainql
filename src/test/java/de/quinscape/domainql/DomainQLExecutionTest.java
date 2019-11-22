@@ -1812,4 +1812,64 @@ public class DomainQLExecutionTest
         assertThat(data, is("B|C|A|"));
 
     }
+
+    @Test
+    public void testNullableListOfScalarsInput()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new ListInputLogic()))
+            .withAdditionalInputType(Foo.class)
+            .withAdditionalScalar(DomainObject.class, DomainObjectScalar.newDomainObjectScalar())
+            .build();
+
+        //log.info(new SchemaPrinter().print(domainQL.getGraphQLSchema()));
+
+        GraphQL graphQL = GraphQL.newGraphQL(domainQL.getGraphQLSchema()).build();
+
+        {
+            List<Object> listOfStrings = JSONUtil.DEFAULT_PARSER.parse(List.class, "[\"AA\", \"BBB\", \"CCCC\"]");
+
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("mutation testNullableListOfScalars($strings: [String])\n" +
+                    "{\n" +
+                    "    testNullableListOfScalars(strings: $strings)\n" +
+                    "}")
+                .variables(ImmutableMap.of("strings", listOfStrings))
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+            final String data = (String) ((Map<String, Object>) executionResult.getData()).get("testNullableListOfScalars");
+
+
+            assertThat(data, is("[AA, BBB, CCCC]"));
+        }
+
+        {
+
+            final HashMap<String, Object> variables = new HashMap<>();
+            variables.put("strings", null);
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("mutation testNullableListOfScalars($strings: [String])\n" +
+                    "{\n" +
+                    "    testNullableListOfScalars(strings: $strings)\n" +
+                    "}")
+                .variables(variables)
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+            final String data = (String) ((Map<String, Object>) executionResult.getData()).get("testNullableListOfScalars");
+
+
+            assertThat(data, is("null"));
+        }
+    }
 }

@@ -47,4 +47,12 @@ public class ListInputLogic
         }
         return sb.toString();
     }
+
+    @GraphQLMutation
+    public String testNullableListOfScalars(
+        List<String> strings
+    )
+    {
+        return strings != null ? strings.toString() : "null";
+    }
 }
