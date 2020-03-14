@@ -132,7 +132,7 @@
         <dependency>
             <groupId>de.quinscape</groupId>
             <artifactId>spring-jsview</artifactId>
-            <version>0.2</version>
+            <version>0.6-SNAPSHOT</version>
         </dependency>
 
         <dependency>
