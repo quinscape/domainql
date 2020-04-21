@@ -2,14 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="10e81f3e-9475-49dc-a250-d341e7899a2c" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/domainql.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/logic/GraphQLValueProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/logic/GraphQLValueProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/DomainQLExecutionTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/DomainQLExecutionTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/beans/ComplexInput.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/beans/ComplexInput.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQLBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQLBuilder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/DomainQLNamingTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/DomainQLNamingTest.java" afterDir="false" />
     </list>
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -26,15 +24,12 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="MavenImportPreferences">
-    <option name="importingSettings">
-      <MavenImportingSettings>
-        <option name="importAutomatically" value="true" />
-      </MavenImportingSettings>
-    </option>
-  </component>
   <component name="ProjectId" id="1TI7qk0jnO2D7FtCM6mdOeZNhk1" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
   <component name="PropertiesComponent">
     <property name="GoToClass.includeLibraries" value="false" />
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
@@ -95,28 +90,16 @@
       <recent name="$PROJECT_DIR$/../domainql-process/src/test" />
     </key>
   </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
-  </component>
-  <component name="RunManager" selected="JUnit.All in domainql">
-    <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
-      <Host>localhost</Host>
-      <Port>5050</Port>
-    </configuration>
+  <component name="RunManager" selected="JUnit.DomainQLNamingTest">
     <configuration default="true" type="Applet">
       <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
+    </configuration>
+    <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
+      <Host>localhost</Host>
+      <Port>5050</Port>
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
@@ -136,66 +119,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="DomainQLExecutionTest.testEnumOperations" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="domainql" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="de.quinscape.domainql.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="de.quinscape.domainql" />
-      <option name="MAIN_CLASS_NAME" value="de.quinscape.domainql.DomainQLExecutionTest" />
-      <option name="METHOD_NAME" value="testEnumOperations" />
-      <option name="TEST_OBJECT" value="method" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="moduleWithDependencies" />
-      </option>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="DomainQLExecutionTest.testListOfDomainObjectInput" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="domainql" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="de.quinscape.domainql.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="de.quinscape.domainql" />
-      <option name="MAIN_CLASS_NAME" value="de.quinscape.domainql.DomainQLExecutionTest" />
-      <option name="METHOD_NAME" value="testListOfDomainObjectInput" />
-      <option name="TEST_OBJECT" value="method" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="moduleWithDependencies" />
-      </option>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="DomainQLExecutionTest.testListOfDomainObjetScalarInput" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="domainql" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="de.quinscape.domainql.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="de.quinscape.domainql" />
-      <option name="MAIN_CLASS_NAME" value="de.quinscape.domainql.DomainQLExecutionTest" />
-      <option name="METHOD_NAME" value="testListOfDomainObjetScalarInput" />
-      <option name="TEST_OBJECT" value="method" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="moduleWithDependencies" />
-      </option>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="DomainQLExecutionTest.testListOfEnumsInput" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="domainql" />
       <extension name="coverage">
@@ -207,6 +130,47 @@
       <option name="PACKAGE_NAME" value="de.quinscape.domainql" />
       <option name="MAIN_CLASS_NAME" value="de.quinscape.domainql.DomainQLExecutionTest" />
       <option name="METHOD_NAME" value="testListOfEnumsInput" />
+      <option name="TEST_OBJECT" value="method" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="moduleWithDependencies" />
+      </option>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="DomainQLNamingTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="domainql" />
+      <option name="PACKAGE_NAME" value="de.quinscape.domainql" />
+      <option name="MAIN_CLASS_NAME" value="de.quinscape.domainql.DomainQLNamingTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="moduleWithDependencies" />
+      </option>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="DomainQLNamingTest.testNamingFields" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="domainql" />
+      <option name="PACKAGE_NAME" value="de.quinscape.domainql" />
+      <option name="MAIN_CLASS_NAME" value="de.quinscape.domainql.DomainQLNamingTest" />
+      <option name="METHOD_NAME" value="testNamingFields" />
+      <option name="TEST_OBJECT" value="method" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="moduleWithDependencies" />
+      </option>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="DomainQLNamingTest.testNamingFieldsError" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="domainql" />
+      <option name="PACKAGE_NAME" value="de.quinscape.domainql" />
+      <option name="MAIN_CLASS_NAME" value="de.quinscape.domainql.DomainQLNamingTest" />
+      <option name="METHOD_NAME" value="testNamingFieldsError" />
       <option name="TEST_OBJECT" value="method" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="TEST_SEARCH_SCOPE">
@@ -249,18 +213,18 @@
     </configuration>
     <list>
       <item itemvalue="JUnit.All in domainql" />
-      <item itemvalue="JUnit.DomainQLExecutionTest.testListOfDomainObjetScalarInput" />
-      <item itemvalue="JUnit.DomainQLExecutionTest.testListOfDomainObjectInput" />
-      <item itemvalue="JUnit.DomainQLExecutionTest.testEnumOperations" />
       <item itemvalue="JUnit.DomainQLExecutionTest.testListOfEnumsInput" />
+      <item itemvalue="JUnit.DomainQLNamingTest.testNamingFields" />
+      <item itemvalue="JUnit.DomainQLNamingTest.testNamingFieldsError" />
+      <item itemvalue="JUnit.DomainQLNamingTest" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.DomainQLNamingTest" />
+        <item itemvalue="JUnit.DomainQLNamingTest.testNamingFields" />
+        <item itemvalue="JUnit.DomainQLNamingTest.testNamingFieldsError" />
         <item itemvalue="JUnit.All in domainql" />
         <item itemvalue="JUnit.DomainQLExecutionTest.testListOfEnumsInput" />
-        <item itemvalue="JUnit.DomainQLExecutionTest.testListOfDomainObjectInput" />
-        <item itemvalue="JUnit.DomainQLExecutionTest.testEnumOperations" />
-        <item itemvalue="JUnit.DomainQLExecutionTest.testListOfDomainObjetScalarInput" />
       </list>
     </recent_temporary>
   </component>
@@ -293,11 +257,20 @@
       <workItem from="1544121999003" duration="875000" />
       <workItem from="1544126432611" duration="9994000" />
       <workItem from="1573135951143" duration="5166000" />
+      <workItem from="1574690909556" duration="608000" />
+      <workItem from="1574788197921" duration="9000" />
+      <workItem from="1575920665275" duration="2976000" />
+      <workItem from="1575980025435" duration="9000" />
+      <workItem from="1583282835149" duration="185000" />
+      <workItem from="1584206189400" duration="616000" />
+      <workItem from="1584716337924" duration="844000" />
+      <workItem from="1587473794587" duration="758000" />
+      <workItem from="1587476771144" duration="4793000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="1" />
+    <option name="version" value="2" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -309,6 +282,73 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="100" y="127" width="1720" height="853" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog" timestamp="1587481466198">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state x="100" y="127" width="1720" height="853" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog/0.27.1920.1053@0.27.1920.1053" timestamp="1587481466198" />
+    <state x="718" y="302" key="#xdebugger.evaluate" timestamp="1587479823130">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state x="718" y="302" key="#xdebugger.evaluate/0.27.1920.1053@0.27.1920.1053" timestamp="1587479823130" />
+    <state width="1342" height="277" key="GridCell.Tab.0.bottom" timestamp="1587481469387">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state width="1342" height="277" key="GridCell.Tab.0.bottom/0.27.1920.1053@0.27.1920.1053" timestamp="1587481469387" />
+    <state width="1342" height="277" key="GridCell.Tab.0.center" timestamp="1587481469386">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state width="1342" height="277" key="GridCell.Tab.0.center/0.27.1920.1053@0.27.1920.1053" timestamp="1587481469386" />
+    <state width="1342" height="277" key="GridCell.Tab.0.left" timestamp="1587481469386">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state width="1342" height="277" key="GridCell.Tab.0.left/0.27.1920.1053@0.27.1920.1053" timestamp="1587481469386" />
+    <state width="1342" height="277" key="GridCell.Tab.0.right" timestamp="1587481469387">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state width="1342" height="277" key="GridCell.Tab.0.right/0.27.1920.1053@0.27.1920.1053" timestamp="1587481469387" />
+    <state width="1342" height="342" key="GridCell.Tab.1.bottom" timestamp="1587480144760">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state width="1342" height="342" key="GridCell.Tab.1.bottom/0.27.1920.1053@0.27.1920.1053" timestamp="1587480144760" />
+    <state width="1342" height="342" key="GridCell.Tab.1.center" timestamp="1587480144760">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state width="1342" height="342" key="GridCell.Tab.1.center/0.27.1920.1053@0.27.1920.1053" timestamp="1587480144760" />
+    <state width="1342" height="342" key="GridCell.Tab.1.left" timestamp="1587480144760">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state width="1342" height="342" key="GridCell.Tab.1.left/0.27.1920.1053@0.27.1920.1053" timestamp="1587480144760" />
+    <state width="1342" height="342" key="GridCell.Tab.1.right" timestamp="1587480144760">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state width="1342" height="342" key="GridCell.Tab.1.right/0.27.1920.1053@0.27.1920.1053" timestamp="1587480144760" />
+    <state x="689" y="284" width="564" height="524" key="StructurePopup" timestamp="1587480168116">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state x="689" y="284" width="564" height="524" key="StructurePopup/0.27.1920.1053@0.27.1920.1053" timestamp="1587480168116" />
+    <state width="498" height="445" key="SwitcherDM" timestamp="1587479639131">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state width="498" height="445" key="SwitcherDM/0.27.1920.1053@0.27.1920.1053" timestamp="1587479639131" />
+    <state x="665" y="311" width="589" height="484" key="find.popup" timestamp="1587479444350">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state x="665" y="311" width="589" height="484" key="find.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1587479444350" />
+    <state width="495" height="73" key="javadoc.popup.new" timestamp="1587480618197">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state width="495" height="73" key="javadoc.popup.new/0.27.1920.1053@0.27.1920.1053" timestamp="1587480618197" />
+    <state x="754" y="305" width="401" height="503" key="refactoring.ChangeSignatureDialog" timestamp="1587477025619">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state x="754" y="305" width="401" height="503" key="refactoring.ChangeSignatureDialog/0.27.1920.1053@0.27.1920.1053" timestamp="1587477025619" />
+    <state x="623" y="259" width="672" height="678" key="search.everywhere.popup" timestamp="1587481481658">
+      <screen x="0" y="27" width="1920" height="1053" />
+    </state>
+    <state x="623" y="259" width="672" height="678" key="search.everywhere.popup/0.27.1920.1053@0.27.1920.1053" timestamp="1587481481658" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -319,7 +359,7 @@
         </breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java</url>
-          <line>891</line>
+          <line>971</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -335,7 +375,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java</url>
-          <line>369</line>
+          <line>441</line>
           <option name="timeStamp" value="15" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -358,64 +398,13 @@
           <line>41</line>
           <option name="timeStamp" value="34" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java</url>
+          <line>196</line>
+          <option name="timeStamp" value="36" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
-  </component>
-  <component name="debuggerHistoryManager">
-    <expressions id="breakpointCondition">
-      <expression>
-        <expression-string>resolvedType == null</expression-string>
-        <language-id>JAVA</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-    </expressions>
-    <expressions id="evaluateExpression">
-      <expression>
-        <expression-string>((ParameterizedType) genericReturnType).getRawType()</expression-string>
-        <language-id>JAVA</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>((Class)parameterizedReturnType.getRawType()).getTypeParameters()</expression-string>
-        <language-id>JAVA</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>((Class)parameterizedReturnType.getRawType()).getGenericSuperclass().getTypeName()</expression-string>
-        <language-id>JAVA</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>parameterizedReturnType.getRawType()</expression-string>
-        <language-id>JAVA</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>parameterizedReturnType.getOwnerType()</expression-string>
-        <language-id>JAVA</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>parameterizedReturnType.toString()</expression-string>
-        <language-id>JAVA</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>parameterizedReturnType.getActualTypeArguments()</expression-string>
-        <language-id>JAVA</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>parameterizedReturnType</expression-string>
-        <language-id>JAVA</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>method.getGenericReturnType().</expression-string>
-        <language-id>JAVA</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-    </expressions>
   </component>
   <component name="masterDetails">
     <states>
