@@ -4,6 +4,9 @@
 package de.quinscape.domainql.testdomain;
 
 
+import de.quinscape.domainql.testdomain.tables.Bar;
+import de.quinscape.domainql.testdomain.tables.BarOrg;
+import de.quinscape.domainql.testdomain.tables.BarOwner;
 import de.quinscape.domainql.testdomain.tables.Foo;
 import de.quinscape.domainql.testdomain.tables.SourceEight;
 import de.quinscape.domainql.testdomain.tables.SourceFive;
@@ -49,12 +52,27 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 1392134475;
+    private static final long serialVersionUID = 1008014157;
 
     /**
      * The reference instance of <code>public</code>
      */
     public static final Public PUBLIC = new Public();
+
+    /**
+     * The table <code>public.bar</code>.
+     */
+    public final Bar BAR = de.quinscape.domainql.testdomain.tables.Bar.BAR;
+
+    /**
+     * The table <code>public.bar_org</code>.
+     */
+    public final BarOrg BAR_ORG = de.quinscape.domainql.testdomain.tables.BarOrg.BAR_ORG;
+
+    /**
+     * The table <code>public.bar_owner</code>.
+     */
+    public final BarOwner BAR_OWNER = de.quinscape.domainql.testdomain.tables.BarOwner.BAR_OWNER;
 
     /**
      * The table <code>public.foo</code>.
@@ -181,6 +199,9 @@ public class Public extends SchemaImpl {
 
     private final List<Table<?>> getTables0() {
         return Arrays.<Table<?>>asList(
+            Bar.BAR,
+            BarOrg.BAR_ORG,
+            BarOwner.BAR_OWNER,
             Foo.FOO,
             SourceEight.SOURCE_EIGHT,
             SourceFive.SOURCE_FIVE,

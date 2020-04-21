@@ -4,6 +4,9 @@
 package de.quinscape.domainql.testdomain;
 
 
+import de.quinscape.domainql.testdomain.tables.Bar;
+import de.quinscape.domainql.testdomain.tables.BarOrg;
+import de.quinscape.domainql.testdomain.tables.BarOwner;
 import de.quinscape.domainql.testdomain.tables.Foo;
 import de.quinscape.domainql.testdomain.tables.SourceEight;
 import de.quinscape.domainql.testdomain.tables.SourceFive;
@@ -40,6 +43,21 @@ import javax.annotation.Generated;
 )
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
+
+    /**
+     * The table <code>public.bar</code>.
+     */
+    public static final Bar BAR = de.quinscape.domainql.testdomain.tables.Bar.BAR;
+
+    /**
+     * The table <code>public.bar_org</code>.
+     */
+    public static final BarOrg BAR_ORG = de.quinscape.domainql.testdomain.tables.BarOrg.BAR_ORG;
+
+    /**
+     * The table <code>public.bar_owner</code>.
+     */
+    public static final BarOwner BAR_OWNER = de.quinscape.domainql.testdomain.tables.BarOwner.BAR_OWNER;
 
     /**
      * The table <code>public.foo</code>.

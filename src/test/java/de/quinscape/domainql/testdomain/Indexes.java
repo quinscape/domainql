@@ -4,6 +4,9 @@
 package de.quinscape.domainql.testdomain;
 
 
+import de.quinscape.domainql.testdomain.tables.Bar;
+import de.quinscape.domainql.testdomain.tables.BarOrg;
+import de.quinscape.domainql.testdomain.tables.BarOwner;
 import de.quinscape.domainql.testdomain.tables.Foo;
 import de.quinscape.domainql.testdomain.tables.SourceEight;
 import de.quinscape.domainql.testdomain.tables.SourceFive;
@@ -48,6 +51,9 @@ public class Indexes {
     // INDEX definitions
     // -------------------------------------------------------------------------
 
+    public static final Index PK_BAR = Indexes0.PK_BAR;
+    public static final Index PK_BAR_ORG = Indexes0.PK_BAR_ORG;
+    public static final Index PK_BAR_OWNER = Indexes0.PK_BAR_OWNER;
     public static final Index PK_FOO = Indexes0.PK_FOO;
     public static final Index PK_SOURCE_EIGHT = Indexes0.PK_SOURCE_EIGHT;
     public static final Index PK_SOURCE_FIVE = Indexes0.PK_SOURCE_FIVE;
@@ -75,6 +81,9 @@ public class Indexes {
     // -------------------------------------------------------------------------
 
     private static class Indexes0 {
+        public static Index PK_BAR = Internal.createIndex("pk_bar", Bar.BAR, new OrderField[] { Bar.BAR.ID }, true);
+        public static Index PK_BAR_ORG = Internal.createIndex("pk_bar_org", BarOrg.BAR_ORG, new OrderField[] { BarOrg.BAR_ORG.ID }, true);
+        public static Index PK_BAR_OWNER = Internal.createIndex("pk_bar_owner", BarOwner.BAR_OWNER, new OrderField[] { BarOwner.BAR_OWNER.ID }, true);
         public static Index PK_FOO = Internal.createIndex("pk_foo", Foo.FOO, new OrderField[] { Foo.FOO.ID }, true);
         public static Index PK_SOURCE_EIGHT = Internal.createIndex("pk_source_eight", SourceEight.SOURCE_EIGHT, new OrderField[] { SourceEight.SOURCE_EIGHT.ID }, true);
         public static Index PK_SOURCE_FIVE = Internal.createIndex("pk_source_five", SourceFive.SOURCE_FIVE, new OrderField[] { SourceFive.SOURCE_FIVE.ID }, true);

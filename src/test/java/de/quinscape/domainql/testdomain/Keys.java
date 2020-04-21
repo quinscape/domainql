@@ -4,6 +4,9 @@
 package de.quinscape.domainql.testdomain;
 
 
+import de.quinscape.domainql.testdomain.tables.Bar;
+import de.quinscape.domainql.testdomain.tables.BarOrg;
+import de.quinscape.domainql.testdomain.tables.BarOwner;
 import de.quinscape.domainql.testdomain.tables.Foo;
 import de.quinscape.domainql.testdomain.tables.SourceEight;
 import de.quinscape.domainql.testdomain.tables.SourceFive;
@@ -23,6 +26,9 @@ import de.quinscape.domainql.testdomain.tables.TargetSeven;
 import de.quinscape.domainql.testdomain.tables.TargetSix;
 import de.quinscape.domainql.testdomain.tables.TargetThree;
 import de.quinscape.domainql.testdomain.tables.TargetTwo;
+import de.quinscape.domainql.testdomain.tables.records.BarOrgRecord;
+import de.quinscape.domainql.testdomain.tables.records.BarOwnerRecord;
+import de.quinscape.domainql.testdomain.tables.records.BarRecord;
 import de.quinscape.domainql.testdomain.tables.records.FooRecord;
 import de.quinscape.domainql.testdomain.tables.records.SourceEightRecord;
 import de.quinscape.domainql.testdomain.tables.records.SourceFiveRecord;
@@ -73,6 +79,9 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final UniqueKey<BarRecord> PK_BAR = UniqueKeys0.PK_BAR;
+    public static final UniqueKey<BarOrgRecord> PK_BAR_ORG = UniqueKeys0.PK_BAR_ORG;
+    public static final UniqueKey<BarOwnerRecord> PK_BAR_OWNER = UniqueKeys0.PK_BAR_OWNER;
     public static final UniqueKey<FooRecord> PK_FOO = UniqueKeys0.PK_FOO;
     public static final UniqueKey<SourceEightRecord> PK_SOURCE_EIGHT = UniqueKeys0.PK_SOURCE_EIGHT;
     public static final UniqueKey<SourceFiveRecord> PK_SOURCE_FIVE = UniqueKeys0.PK_SOURCE_FIVE;
@@ -99,6 +108,8 @@ public class Keys {
     // FOREIGN KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final ForeignKey<BarRecord, BarOwnerRecord> BAR__FK_BAR_OWNER_ID = ForeignKeys0.BAR__FK_BAR_OWNER_ID;
+    public static final ForeignKey<BarOwnerRecord, BarOrgRecord> BAR_OWNER__FK_BAR_OWNER_ORG_ID = ForeignKeys0.BAR_OWNER__FK_BAR_OWNER_ORG_ID;
     public static final ForeignKey<SourceEightRecord, TargetEightRecord> SOURCE_EIGHT__FK_SOURCE_EIGHT_TARGET = ForeignKeys0.SOURCE_EIGHT__FK_SOURCE_EIGHT_TARGET;
     public static final ForeignKey<SourceFiveRecord, TargetFiveRecord> SOURCE_FIVE__FK_SOURCE_FIVE_TARGET_ID = ForeignKeys0.SOURCE_FIVE__FK_SOURCE_FIVE_TARGET_ID;
     public static final ForeignKey<SourceFourRecord, TargetFourRecord> SOURCE_FOUR__FK_SOURCE_FOUR_TARGET_ID = ForeignKeys0.SOURCE_FOUR__FK_SOURCE_FOUR_TARGET_ID;
@@ -115,6 +126,9 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     private static class UniqueKeys0 {
+        public static final UniqueKey<BarRecord> PK_BAR = Internal.createUniqueKey(Bar.BAR, "pk_bar", Bar.BAR.ID);
+        public static final UniqueKey<BarOrgRecord> PK_BAR_ORG = Internal.createUniqueKey(BarOrg.BAR_ORG, "pk_bar_org", BarOrg.BAR_ORG.ID);
+        public static final UniqueKey<BarOwnerRecord> PK_BAR_OWNER = Internal.createUniqueKey(BarOwner.BAR_OWNER, "pk_bar_owner", BarOwner.BAR_OWNER.ID);
         public static final UniqueKey<FooRecord> PK_FOO = Internal.createUniqueKey(Foo.FOO, "pk_foo", Foo.FOO.ID);
         public static final UniqueKey<SourceEightRecord> PK_SOURCE_EIGHT = Internal.createUniqueKey(SourceEight.SOURCE_EIGHT, "pk_source_eight", SourceEight.SOURCE_EIGHT.ID);
         public static final UniqueKey<SourceFiveRecord> PK_SOURCE_FIVE = Internal.createUniqueKey(SourceFive.SOURCE_FIVE, "pk_source_five", SourceFive.SOURCE_FIVE.ID);
@@ -139,6 +153,8 @@ public class Keys {
     }
 
     private static class ForeignKeys0 {
+        public static final ForeignKey<BarRecord, BarOwnerRecord> BAR__FK_BAR_OWNER_ID = Internal.createForeignKey(de.quinscape.domainql.testdomain.Keys.PK_BAR_OWNER, Bar.BAR, "bar__fk_bar_owner_id", Bar.BAR.OWNER_ID);
+        public static final ForeignKey<BarOwnerRecord, BarOrgRecord> BAR_OWNER__FK_BAR_OWNER_ORG_ID = Internal.createForeignKey(de.quinscape.domainql.testdomain.Keys.PK_BAR_ORG, BarOwner.BAR_OWNER, "bar_owner__fk_bar_owner_org_id", BarOwner.BAR_OWNER.ORG_ID);
         public static final ForeignKey<SourceEightRecord, TargetEightRecord> SOURCE_EIGHT__FK_SOURCE_EIGHT_TARGET = Internal.createForeignKey(de.quinscape.domainql.testdomain.Keys.TARGET_EIGHT_NAME_KEY, SourceEight.SOURCE_EIGHT, "source_eight__fk_source_eight_target", SourceEight.SOURCE_EIGHT.TARGET_NAME, SourceEight.SOURCE_EIGHT.TARGET_NUM);
         public static final ForeignKey<SourceFiveRecord, TargetFiveRecord> SOURCE_FIVE__FK_SOURCE_FIVE_TARGET_ID = Internal.createForeignKey(de.quinscape.domainql.testdomain.Keys.PK_TARGET_FIVE, SourceFive.SOURCE_FIVE, "source_five__fk_source_five_target_id", SourceFive.SOURCE_FIVE.TARGET_ID);
         public static final ForeignKey<SourceFourRecord, TargetFourRecord> SOURCE_FOUR__FK_SOURCE_FOUR_TARGET_ID = Internal.createForeignKey(de.quinscape.domainql.testdomain.Keys.PK_TARGET_FOUR, SourceFour.SOURCE_FOUR, "source_four__fk_source_four_target_id", SourceFour.SOURCE_FOUR.TARGET_ID);

@@ -37,6 +37,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -101,6 +102,9 @@ public class DomainQLBuilder
 
     private Set<String> relationIds = new HashSet<>();
 
+    private Map<String, List<String>> nameFields = new LinkedHashMap<>();
+
+
     DomainQLBuilder(DSLContext dslContext)
     {
         this.dslContext = dslContext;
@@ -153,6 +157,7 @@ public class DomainQLBuilder
                 DocsExtractor.normalize(typeDocs)
             ),
             fieldLookup,
+            Collections.unmodifiableMap(nameFields),
             fullSupported
         );
     }
@@ -645,6 +650,47 @@ public class DomainQLBuilder
             )
         );
         return withTypeDocs(typeDocs);
+    }
+
+    /**
+     * Convenience method to define a single name field for a number of types.
+     *
+     *
+     * @see #configureNameFields(Class, String...)
+     *
+     * @param nameField     Single representative name field for each type
+     * @param pojoTypes     varargs of simple POJO domain types
+     *
+     * @return  this builder
+     */
+    public DomainQLBuilder configureNameFieldForTypes(String nameField, Class<?>... pojoTypes)
+    {
+        for (Class<?> pojoType : pojoTypes)
+        {
+            DomainQL.ensurePojoType(pojoType);
+            configureNameFields(pojoType, nameField);
+        }
+        return this;
+    }
+
+
+
+    /**
+     * Configures the given name fields to be representative of the given domain type.
+     *
+     * This method is needed to define name fields on JOOQ generated POJOs.
+     *
+     * @param pojoClass     pojo type for the domain type
+     * @param nameFields    name fields.
+     *
+     * @return  this builder
+     */
+    public DomainQLBuilder configureNameFields(Class<?> pojoClass, String... nameFields)
+    {
+        DomainQL.ensurePojoType(pojoClass);
+
+        this.nameFields.put(pojoClass.getSimpleName(), Arrays.asList(nameFields));
+        return this;
     }
 }
 
