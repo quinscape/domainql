@@ -6,11 +6,15 @@ import graphql.schema.Coercing;
 import graphql.schema.CoercingParseLiteralException;
 import graphql.schema.CoercingParseValueException;
 import graphql.schema.CoercingSerializeException;
+import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLType;
+import graphql.schema.GraphQLTypeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public final class GenericScalarCoercing
@@ -42,14 +46,36 @@ public final class GenericScalarCoercing
             final String scalarTypeName = genericScalar.getType();
             final GraphQLType type = getScalarType(scalarTypeName);
 
-            final Object converted = ((GraphQLScalarType) type).getCoercing()
-                .serialize(((GenericScalar) result).getValue());
 
+            final Object converted;
+            if (type instanceof GraphQLList)
+            {
+                List<Object> l = (List<Object>) ((GenericScalar) result).getValue();
+                List<Object> out = new ArrayList<>(l.size());
+
+                final Coercing<?,?> coercing = ((GraphQLScalarType)(GraphQLTypeUtil.unwrapAll(type))).getCoercing();
+
+                for (Object elem : l)
+                {
+                    final Object convertedElem = coercing
+                        .parseValue(elem);
+                    out.add(convertedElem);
+                }
+
+                converted = out;
+            }
+            else
+            {
+                converted = ((GraphQLScalarType) type).getCoercing()
+                    .serialize(((GenericScalar) result).getValue());
+
+            }
             Map<String, Object> map = Maps.newHashMapWithExpectedSize(2);
             map.put("type", scalarTypeName);
             map.put("value", converted);
 
             return map;
+
         }
         catch (RuntimeException e)
         {
@@ -63,13 +89,23 @@ public final class GenericScalarCoercing
     }
 
 
-    private GraphQLType getScalarType(String scaleTypeName)
+    private GraphQLType getScalarType(String genericScalarType)
     {
-        final GraphQLType type = domainQL.getGraphQLSchema().getType(scaleTypeName);
+        if (genericScalarType.startsWith("[") && genericScalarType.endsWith("]"))
+        {
+            final GraphQLType type = getScalarInternal(genericScalarType.substring(1, genericScalarType.length() - 1));
+            return GraphQLList.list(type);
+        }
+        return getScalarInternal(genericScalarType);
+    }
+
+    private GraphQLType getScalarInternal(String genericScalarType)
+    {
+        final GraphQLType type = domainQL.getGraphQLSchema().getType(genericScalarType);
 
         if (!(type instanceof GraphQLScalarType))
         {
-            throw new IllegalStateException("Type '" + scaleTypeName + "' is not a scalar type: " + type);
+            throw new IllegalStateException("Type '" + genericScalarType + "' is not a scalar type: " + type);
         }
         return type;
     }
@@ -92,10 +128,31 @@ public final class GenericScalarCoercing
 
             final GraphQLType type = getScalarType(scalarTypeName);
 
-            final Object converted = ((GraphQLScalarType) type).getCoercing()
-                .parseValue(value);
+            if (type instanceof GraphQLList)
+            {
+                List<Object> l = (List<Object>) value;
+                List<Object> out = new ArrayList<>(l.size());
 
-            return new GenericScalar(scalarTypeName, converted);
+                final Coercing<?,?> coercing = ((GraphQLScalarType)(GraphQLTypeUtil.unwrapAll(type))).getCoercing();
+
+                for (Object elem : l)
+                {
+                    final Object converted = coercing
+                        .parseValue(elem);
+                    out.add(converted);
+                }
+
+                return new GenericScalar(scalarTypeName, out);
+            }
+            else
+            {
+                final Coercing<?,?> coercing = ((GraphQLScalarType) type).getCoercing();
+                final Object converted = coercing
+                    .parseValue(value);
+
+                return new GenericScalar(scalarTypeName, converted);
+            }
+
         }
         catch (RuntimeException e)
         {

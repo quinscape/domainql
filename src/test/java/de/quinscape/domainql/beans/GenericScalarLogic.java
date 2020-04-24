@@ -9,6 +9,9 @@ import graphql.Scalars;
 
 import java.sql.Timestamp;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @GraphQLLogic
 public class GenericScalarLogic
@@ -32,6 +35,21 @@ public class GenericScalarLogic
         }
     }
 
+    @GraphQLQuery
+    public GenericScalar genericList(GenericScalar input)
+    {
+        if (input != null && input.getType().equals("[Int]"))
+        {
+            List<Integer> l = (List<Integer>) input.getValue();
+            List<Integer> out = new ArrayList<>(l.size());
+            for (int i = 0; i < l.size(); i++)
+            {
+                out.add(l.get(i) * 3);
+            }
+            return new GenericScalar("[Int]", out);
+        }
+        return new GenericScalar("[Int]", Arrays.asList(0,3,6));
+    }
 
     /**
      * The types wrapped in a GenericScalar need to be used somewhere in GraphQL domain. For the purpose of the test

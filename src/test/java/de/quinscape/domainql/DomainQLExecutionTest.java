@@ -1416,6 +1416,31 @@ public class DomainQLExecutionTest
             assertThat(data.get("value"), is ("1970-01-01T02:00:00.000Z"));
 
         }
+
+        {
+            final Map inputJSON = JSONUtil.DEFAULT_PARSER.parse(Map.class, "{\n" +
+                "    \"type\": \"[Int]\",\n" +
+                "    \"value\": [1, 3, 5]\n" +
+                "}");
+            Map<String, Object> scalarJSON = (Map<String, Object>) inputJSON;
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("query genericList($input: GenericScalar!)\n" +
+                    "{\n" +
+                    "    genericList(input: $input)\n" +
+                    "}")
+                .variables(ImmutableMap.of("input", scalarJSON))
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+            final Map<String, Object> data = (Map<String, Object>) ((Map<String, Object>) executionResult.getData()).get("genericList");
+
+            assertThat(data.get("value"), is (Arrays.asList(3,9,15)));
+
+        }
     }
 
 
