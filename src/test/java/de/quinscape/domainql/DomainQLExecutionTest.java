@@ -62,6 +62,7 @@ import org.svenson.JSON;
 import org.svenson.util.JSONPathUtil;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -1363,6 +1364,7 @@ public class DomainQLExecutionTest
         final GraphQLSchema schema = DomainQL.newDomainQL(null)
             .logicBeans(Collections.singleton(new GenericScalarLogic()))
             .withAdditionalScalar(GenericScalar.class, GenericScalarType.newGenericScalar())
+            .withAdditionalScalar(DomainObject.class, DomainObjectScalar.newDomainObjectScalar())
             .buildGraphQLSchema();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
@@ -1895,6 +1897,55 @@ public class DomainQLExecutionTest
 
 
             assertThat(data, is("null"));
+        }
+    }
+
+    @Test
+    public void testListOfGenericDomainObjects()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new GenericScalarLogic()))
+            .withAdditionalScalar(GenericScalar.class, GenericScalarType.newGenericScalar())
+            .withAdditionalScalar(DomainObject.class, DomainObjectScalar.newDomainObjectScalar())
+            .build();
+
+        log.info("TYPES = {}", domainQL.getGraphQLSchema().getType("DomainObject"));
+
+        GraphQL graphQL = GraphQL.newGraphQL(domainQL.getGraphQLSchema()).build();
+
+        {
+            final String now = "2020-04-29T16:14:53.173Z";
+            final HashMap<String, Object> variables = new HashMap<>();
+            variables.put("time", now);
+
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("query deserializeObjs($time: Timestamp)\n" +
+                    "{\n" +
+                    "    deserializeObjs(time: $time)\n" +
+                    "}")
+                .variables(variables)
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+            final Map<String, Object> data = (Map<String, Object>) ((Map<String, Object>) executionResult.getData()).get("deserializeObjs");
+
+            assertThat(data.get("type"), is ("[DomainObject]"));
+            final List<Map<String, Object>> list = (List<Map<String, Object>>) data.get("value");
+            assertThat(list.size(), is (2));
+
+            assertThat(list.get(0).get("name"), is("Foo #1"));
+            assertThat(list.get(0).get("num"), is(1001));
+            assertThat(list.get(0).get("created"), is(now));
+
+            assertThat(list.get(1).get("name"), is("Foo #2"));
+            assertThat(list.get(1).get("num"), is(1002));
+            assertThat(list.get(1).get("created"), is(now));
+
         }
     }
 }

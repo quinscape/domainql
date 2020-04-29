@@ -3,15 +3,19 @@ package de.quinscape.domainql.beans;
 import de.quinscape.domainql.annotation.GraphQLLogic;
 import de.quinscape.domainql.annotation.GraphQLMutation;
 import de.quinscape.domainql.annotation.GraphQLQuery;
+import de.quinscape.domainql.generic.DomainObject;
+import de.quinscape.domainql.generic.GenericDomainObject;
 import de.quinscape.domainql.generic.GenericScalar;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import graphql.Scalars;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @GraphQLLogic
 public class GenericScalarLogic
@@ -49,6 +53,27 @@ public class GenericScalarLogic
             return new GenericScalar("[Int]", out);
         }
         return new GenericScalar("[Int]", Arrays.asList(0,3,6));
+    }
+
+    @GraphQLQuery
+    public GenericScalar deserializeObjs(DomainObject in, Timestamp time)
+    {
+        final Timestamp now = time != null ? time : Timestamp.from(Instant.now());
+        final GenericDomainObject obj = new GenericDomainObject();
+        obj.setProperty(DomainObject.DOMAIN_TYPE_PROPERTY, "Foo");
+        obj.setProperty("id", UUID.randomUUID().toString());
+        obj.setProperty("name", "Foo #1");
+        obj.setProperty("num", 1001);
+        obj.setProperty("created", now);
+
+        final GenericDomainObject obj2 = new GenericDomainObject();
+        obj2.setProperty(DomainObject.DOMAIN_TYPE_PROPERTY, "Foo");
+        obj2.setProperty("id", UUID.randomUUID().toString());
+        obj2.setProperty("name", "Foo #2");
+        obj2.setProperty("num", 1002);
+        obj2.setProperty("created", now);
+
+        return new GenericScalar("[DomainObject]", Arrays.asList(obj, obj2));
     }
 
     /**

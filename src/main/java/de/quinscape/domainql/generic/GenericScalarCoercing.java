@@ -58,7 +58,7 @@ public final class GenericScalarCoercing
                 for (Object elem : l)
                 {
                     final Object convertedElem = coercing
-                        .parseValue(elem);
+                        .serialize(elem);
                     out.add(convertedElem);
                 }
 

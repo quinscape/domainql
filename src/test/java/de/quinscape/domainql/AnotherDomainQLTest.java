@@ -1047,6 +1047,7 @@ public class AnotherDomainQLTest
         final GraphQLSchema schema = DomainQL.newDomainQL(null)
             .objectTypes(Public.PUBLIC)
             .withAdditionalScalar(GenericScalar.class, GenericScalarType.newGenericScalar())
+            .withAdditionalScalar(DomainObject.class, DomainObjectScalar.newDomainObjectScalar())
             .logicBeans(Collections.singleton(new GenericScalarLogic()))
             .buildGraphQLSchema();
 
