@@ -27,6 +27,7 @@ import de.quinscape.domainql.logicimpl.ListInputLogic;
 import de.quinscape.domainql.logicimpl.LogicWithEnums;
 import de.quinscape.domainql.logicimpl.LogicWithEnums2;
 import de.quinscape.domainql.logicimpl.NullForComplexValueLogic;
+import de.quinscape.domainql.logicimpl.NullPropInDomainObjectLogic;
 import de.quinscape.domainql.logicimpl.SumPerMonthLogic;
 import de.quinscape.domainql.logicimpl.TestLogic;
 import de.quinscape.domainql.logicimpl.TypeConversionLogic;
@@ -1946,6 +1947,72 @@ public class DomainQLExecutionTest
             assertThat(list.get(1).get("num"), is(1002));
             assertThat(list.get(1).get("created"), is(now));
 
+        }
+    }
+
+
+    @Test
+    public void testNullPropInDomainObject()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new NullPropInDomainObjectLogic()))
+            .withAdditionalScalar(DomainObject.class, DomainObjectScalar.newDomainObjectScalar())
+            .build();
+
+        GraphQL graphQL = GraphQL.newGraphQL(domainQL.getGraphQLSchema()).build();
+
+        {
+            final String now = "2020-04-29T16:14:53.173Z";
+
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("query fetch($name: String)\n" +
+                    "{\n" +
+                    "    fetch(name: $name)\n" +
+                    "}")
+                .variables(ImmutableMap.of("name", "Test-Foo"))
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+            final Map<String, Object> data = (Map<String, Object>) ((Map<String, Object>) executionResult.getData()).get("fetch");
+
+            assertThat(data.get("name"), is("Test-Foo"));
+            assertThat(data.get("id"), is("38fb6d2b-4946-4b96-8912-bfe81cce2fc0"));
+            assertThat(data.get("ownerId"), is("3ef7126b-ac62-4cb9-a01c-684eaeeb6b3a"));
+            assertThat(data.get("description"), is(nullValue()));
+
+        }
+    }
+    @Test
+    public void testNonNullViolationInDomainObject()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new NullPropInDomainObjectLogic()))
+            .withAdditionalScalar(DomainObject.class, DomainObjectScalar.newDomainObjectScalar())
+            .build();
+
+        GraphQL graphQL = GraphQL.newGraphQL(domainQL.getGraphQLSchema()).build();
+
+        {
+            final String now = "2020-04-29T16:14:53.173Z";
+
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("query fetch($name: String)\n" +
+                    "{\n" +
+                    "    fetch(name: $name)\n" +
+                    "}")
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            assertThat(executionResult.getErrors().size(), is(1));
+            assertThat(executionResult.getErrors().get(0).getMessage(), is("Can't serialize value (/fetch) : java.lang.IllegalStateException: Non-null field 'name' contains null value"));
         }
     }
 }

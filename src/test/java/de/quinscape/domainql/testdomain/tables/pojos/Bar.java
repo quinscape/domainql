@@ -35,11 +35,12 @@ import javax.validation.constraints.Size;
 })
 public class Bar extends GeneratedDomainObject implements Serializable {
 
-    private static final long serialVersionUID = -729302967;
+    private static final long serialVersionUID = -1992450712;
 
     private String id;
     private String name;
     private String ownerId;
+    private String description;
 
     public Bar() {}
 
@@ -47,16 +48,19 @@ public class Bar extends GeneratedDomainObject implements Serializable {
         this.id = value.id;
         this.name = value.name;
         this.ownerId = value.ownerId;
+        this.description = value.description;
     }
 
     public Bar(
         String id,
         String name,
-        String ownerId
+        String ownerId,
+        String description
     ) {
         this.id = id;
         this.name = name;
         this.ownerId = ownerId;
+        this.description = description;
     }
 
     @Id
@@ -93,6 +97,15 @@ public class Bar extends GeneratedDomainObject implements Serializable {
         this.ownerId = ownerId;
     }
 
+    @Column(name = "description")
+    public String getDescription() {
+        return this.description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Bar (");
@@ -100,6 +113,7 @@ public class Bar extends GeneratedDomainObject implements Serializable {
         sb.append(id);
         sb.append(", ").append(name);
         sb.append(", ").append(ownerId);
+        sb.append(", ").append(description);
 
         sb.append(")");
         return sb.toString();

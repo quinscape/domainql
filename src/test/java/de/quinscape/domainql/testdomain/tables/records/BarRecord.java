@@ -17,8 +17,8 @@ import javax.validation.constraints.Size;
 
 import org.jooq.Field;
 import org.jooq.Record1;
-import org.jooq.Record3;
-import org.jooq.Row3;
+import org.jooq.Record4;
+import org.jooq.Row4;
 import org.jooq.impl.UpdatableRecordImpl;
 
 
@@ -37,9 +37,9 @@ import org.jooq.impl.UpdatableRecordImpl;
 @Table(name = "bar", schema = "public", indexes = {
     @Index(name = "pk_bar", unique = true, columnList = "id ASC")
 })
-public class BarRecord extends UpdatableRecordImpl<BarRecord> implements Record3<String, String, String> {
+public class BarRecord extends UpdatableRecordImpl<BarRecord> implements Record4<String, String, String, String> {
 
-    private static final long serialVersionUID = -1478033185;
+    private static final long serialVersionUID = -948241150;
 
     /**
      * Setter for <code>public.bar.id</code>.
@@ -93,6 +93,21 @@ public class BarRecord extends UpdatableRecordImpl<BarRecord> implements Record3
         return (String) get(2);
     }
 
+    /**
+     * Setter for <code>public.bar.description</code>.
+     */
+    public void setDescription(String value) {
+        set(3, value);
+    }
+
+    /**
+     * Getter for <code>public.bar.description</code>.
+     */
+    @Column(name = "description")
+    public String getDescription() {
+        return (String) get(3);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -106,23 +121,23 @@ public class BarRecord extends UpdatableRecordImpl<BarRecord> implements Record3
     }
 
     // -------------------------------------------------------------------------
-    // Record3 type implementation
+    // Record4 type implementation
     // -------------------------------------------------------------------------
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Row3<String, String, String> fieldsRow() {
-        return (Row3) super.fieldsRow();
+    public Row4<String, String, String, String> fieldsRow() {
+        return (Row4) super.fieldsRow();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Row3<String, String, String> valuesRow() {
-        return (Row3) super.valuesRow();
+    public Row4<String, String, String, String> valuesRow() {
+        return (Row4) super.valuesRow();
     }
 
     /**
@@ -153,6 +168,14 @@ public class BarRecord extends UpdatableRecordImpl<BarRecord> implements Record3
      * {@inheritDoc}
      */
     @Override
+    public Field<String> field4() {
+        return Bar.BAR.DESCRIPTION;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String component1() {
         return getId();
     }
@@ -177,6 +200,14 @@ public class BarRecord extends UpdatableRecordImpl<BarRecord> implements Record3
      * {@inheritDoc}
      */
     @Override
+    public String component4() {
+        return getDescription();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String value1() {
         return getId();
     }
@@ -195,6 +226,14 @@ public class BarRecord extends UpdatableRecordImpl<BarRecord> implements Record3
     @Override
     public String value3() {
         return getOwnerId();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String value4() {
+        return getDescription();
     }
 
     /**
@@ -228,10 +267,20 @@ public class BarRecord extends UpdatableRecordImpl<BarRecord> implements Record3
      * {@inheritDoc}
      */
     @Override
-    public BarRecord values(String value1, String value2, String value3) {
+    public BarRecord value4(String value) {
+        setDescription(value);
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public BarRecord values(String value1, String value2, String value3, String value4) {
         value1(value1);
         value2(value2);
         value3(value3);
+        value4(value4);
         return this;
     }
 
@@ -249,11 +298,12 @@ public class BarRecord extends UpdatableRecordImpl<BarRecord> implements Record3
     /**
      * Create a detached, initialised BarRecord
      */
-    public BarRecord(String id, String name, String ownerId) {
+    public BarRecord(String id, String name, String ownerId, String description) {
         super(Bar.BAR);
 
         set(0, id);
         set(1, name);
         set(2, ownerId);
+        set(3, description);
     }
 }

@@ -46,13 +46,13 @@ public final class DomainObjectCoercing
         }
         catch(RuntimeException e)
         {
-            if (!(e instanceof CoercingParseValueException))
+            if (!(e instanceof CoercingSerializeException))
             {
                 // ensure stacktrace logging for GraphQL validation errors
                 log.error("Error serializing domain object", e);
             }
 
-            throw new CoercingParseValueException(e);
+            throw new CoercingSerializeException(e);
         }
     }
 
@@ -120,8 +120,20 @@ public final class DomainObjectCoercing
             // domain objects have only scalar types
             GraphQLScalarType scalarType = (GraphQLScalarType) GraphQLTypeUtil.unwrapAll(fieldDefinition.getType());
 
-            final Object converted = scalarType.getCoercing().serialize(value);
+            final Object converted;
+            if (value != null)
+            {
+                converted = scalarType.getCoercing().serialize(value);
+            }
+            else
+            {
+                if (GraphQLTypeUtil.isNonNull(fieldDefinition.getType()))
+                {
+                    throw new IllegalStateException("Non-null field '" + fieldDefinition.getName() + "' contains null value");
+                }
 
+                converted = null;
+            }
             convertedType.put(fieldName, converted);
         }
         return convertedType;
