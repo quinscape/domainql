@@ -1,7 +1,7 @@
 package de.quinscape.domainql.jooq;
 
-import org.jooq.codegen.DefaultGeneratorStrategy;
-import org.jooq.meta.Definition;
+import org.jooq.util.DefaultGeneratorStrategy;
+import org.jooq.util.Definition;
 
 /**
  * Makes all JOOQ POJOs extend the DomainObject interface.
