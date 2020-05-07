@@ -16,6 +16,7 @@ import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import graphql.schema.GraphQLTypeUtil;
+import graphql.schema.GraphQLUnmodifiedType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,26 +116,32 @@ public final class DomainObjectCoercing
         for (GraphQLFieldDefinition fieldDefinition : fieldDefinitions)
         {
             final String fieldName = fieldDefinition.getName();
-            final Object value = domainObject.getProperty(fieldName);
 
-            // domain objects have only scalar types
-            GraphQLScalarType scalarType = (GraphQLScalarType) GraphQLTypeUtil.unwrapAll(fieldDefinition.getType());
+            final GraphQLUnmodifiedType unwrapped = GraphQLTypeUtil.unwrapAll(fieldDefinition.getType());
 
-            final Object converted;
-            if (value != null)
+            // we only want to convert scalar types
+            if (unwrapped instanceof GraphQLScalarType)
             {
-                converted = scalarType.getCoercing().serialize(value);
-            }
-            else
-            {
-                if (GraphQLTypeUtil.isNonNull(fieldDefinition.getType()))
+                final Object value = domainObject.getProperty(fieldName);
+
+                GraphQLScalarType scalarType = (GraphQLScalarType) unwrapped;
+
+                final Object converted;
+                if (value != null)
                 {
-                    throw new IllegalStateException("Non-null field '" + fieldDefinition.getName() + "' contains null value");
+                    converted = scalarType.getCoercing().serialize(value);
                 }
+                else
+                {
+                    if (GraphQLTypeUtil.isNonNull(fieldDefinition.getType()))
+                    {
+                        throw new IllegalStateException("Non-null field '" + fieldDefinition.getName() + "' contains null value");
+                    }
 
-                converted = null;
+                    converted = null;
+                }
+                convertedType.put(fieldName, converted);
             }
-            convertedType.put(fieldName, converted);
         }
         return convertedType;
     }
