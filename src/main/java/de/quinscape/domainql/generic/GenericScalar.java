@@ -66,6 +66,19 @@ public class GenericScalar
     }
 
 
+    /**
+     * Returns true if the scalar value is of a list type.
+     *
+     * Does a quick check based on the GraphQL List-Type notation (e.g. "[Int]")
+     *
+     * @return true if the value is a list
+     */
+    public boolean isList()
+    {
+        return type.startsWith("[");
+    }
+
+
     @Override
     public int hashCode()
     {
