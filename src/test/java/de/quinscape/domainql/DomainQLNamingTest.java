@@ -73,4 +73,26 @@ public class DomainQLNamingTest
             .configureNameFields(Bar.class,"name", "wrong.name")
             .build();
     }
+
+    @Test
+    public void testConfiguringByName()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+
+            .configureRelation(BAR.OWNER_ID, SourceField.OBJECT_AND_SCALAR, TargetField.NONE)
+            .configureRelation(BAR_OWNER.ORG_ID, SourceField.OBJECT_AND_SCALAR, TargetField.NONE)
+
+            .configureNameField("name")
+            .configureNameFields(Bar.class,"name", "owner.name", "owner.org.name")
+            .build();
+
+
+        final Map<String, List<String>> nameFields = domainQL.getNameFields();
+
+        assertThat( nameFields.get("Bar"), is(Arrays.asList("name", "owner.name", "owner.org.name")) );
+        assertThat( nameFields.get("BarOwner"), is(Collections.singletonList("name")) );
+        assertThat( nameFields.get("BarOrg"), is(Collections.singletonList("name")) );
+        assertThat( nameFields.get("Foo"), is(Collections.singletonList("name")) );
+    }
 }

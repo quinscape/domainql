@@ -16,8 +16,11 @@ import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.Directives;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.GraphQLType;
+import org.apache.commons.collections.Bag;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Schema;
@@ -104,6 +107,8 @@ public class DomainQLBuilder
 
     private Map<String, List<String>> nameFields = new LinkedHashMap<>();
 
+    private Set<String> nameFieldsByName = new HashSet<>();
+
 
     DomainQLBuilder(DSLContext dslContext)
     {
@@ -157,7 +162,29 @@ public class DomainQLBuilder
                 DocsExtractor.normalize(typeDocs)
             ),
             fieldLookup,
-            Collections.unmodifiableMap(nameFields),
+            domainQL -> {
+                for (GraphQLType value : domainQL.getGraphQLSchema().getTypeMap().values())
+                {
+                    final String typeName = value.getName();
+                    if (value instanceof GraphQLObjectType && !typeName.startsWith("_"))
+                    {
+
+                        for (GraphQLFieldDefinition fieldDef : ((GraphQLObjectType) value).getFieldDefinitions())
+                        {
+                            final String name = fieldDef.getName();
+                            if (nameFieldsByName.contains(name))
+                            {
+                                if (!nameFields.containsKey(typeName))
+                                {
+                                    this.configureNameFieldForTypes(name, domainQL.getPojoType(typeName));
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+                return Collections.unmodifiableMap(nameFields);
+            },
             fullSupported
         );
     }
@@ -669,6 +696,24 @@ public class DomainQLBuilder
         {
             DomainQL.ensurePojoType(pojoType);
             configureNameFields(pojoType, nameField);
+        }
+        return this;
+    }
+
+
+    /**
+     * Convenience method to define one or more name fields to be automatically used as name field if they are present on the a type.
+     *
+     * The first field of a type that matches one of the fields will be configured as only name field. If you need multiple
+     * name fields on a single type, use {@link #configureNameFields(Class, String...)}.
+     *
+     * @return  this builder
+     */
+    public DomainQLBuilder configureNameField(String... nameFields)
+    {
+        if (nameFields != null)
+        {
+            Collections.addAll(this.nameFieldsByName, nameFields);
         }
         return this;
     }

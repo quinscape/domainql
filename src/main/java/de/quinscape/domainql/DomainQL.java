@@ -78,6 +78,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -145,7 +146,7 @@ public class DomainQL
         Set<Class<?>> additionalInputTypes,
         List<TypeDoc> typeDocs,
         Map<String, Field<?>> dbFieldLookup,
-        Map<String, List<String>> nameFields,
+        Function<DomainQL, Map<String, List<String>>> nameFieldsProvider,
         boolean fullSupported
     )
     {
@@ -166,12 +167,12 @@ public class DomainQL
 
         this.jooqTables = jooqTables;
         this.dbFieldLookup = dbFieldLookup;
-        this.nameFields = nameFields;
 
         genericTypes = new ArrayList<>();
 
         graphQLSchema = this.buildGraphQLSchema();
 
+        this.nameFields = nameFieldsProvider.apply(this);
         validateNameFields();
     }
 
