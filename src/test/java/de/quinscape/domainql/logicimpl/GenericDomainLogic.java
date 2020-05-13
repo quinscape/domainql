@@ -26,4 +26,15 @@ public class GenericDomainLogic
         }
         return JSONUtil.DEFAULT_GENERATOR.forValue(map);
     }
+
+    @GraphQLMutation
+    public DomainObject genericDomainObjectAsNull(DomainObject domainObject)
+    {
+
+        if (domainObject != null)
+        {
+            throw new IllegalArgumentException("domainObject must be null");
+        }
+        return null;
+    }
 }

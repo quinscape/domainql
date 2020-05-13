@@ -893,34 +893,61 @@ public class DomainQLExecutionTest
             .buildGraphQLSchema();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
+        {
 
-        Map<String, Object> domainObjectJSON = JSONUtil.DEFAULT_PARSER.parse(Map.class, "{\n" +
-            "    \"_type\" : \"Foo\",\n" +
-            "    \"id\": \"e7c103e7-f559-4896-ac44-702b8458f207\",\n" +
-            "    \"name\" : \"GreenFoo\",\n" +
-            "    \"num\" : 9384,\n" +
-            "    \"created\" : \"2018-10-15T14:03:58.078Z\"\n" +
-            "}");
-        ExecutionInput executionInput = ExecutionInput.newExecutionInput()
-            // language=GraphQL
-            .query("mutation store($domainObject: DomainObject!)\n" +
-                "{\n" +
-                "    store(domainObject: $domainObject)\n" +
-                "}")
-            .variables(ImmutableMap.of("domainObject", domainObjectJSON))
-            .build();
+            Map<String, Object> domainObjectJSON = JSONUtil.DEFAULT_PARSER.parse(Map.class, "{\n" +
+                "    \"_type\" : \"Foo\",\n" +
+                "    \"id\": \"e7c103e7-f559-4896-ac44-702b8458f207\",\n" +
+                "    \"name\" : \"GreenFoo\",\n" +
+                "    \"num\" : 9384,\n" +
+                "    \"created\" : \"2018-10-15T14:03:58.078Z\"\n" +
+                "}");
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("mutation store($domainObject: DomainObject!)\n" +
+                    "{\n" +
+                    "    store(domainObject: $domainObject)\n" +
+                    "}")
+                .variables(ImmutableMap.of("domainObject", domainObjectJSON))
+                .build();
 
-        ExecutionResult executionResult = graphQL.execute(executionInput);
+            ExecutionResult executionResult = graphQL.execute(executionInput);
 
-        assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
 
-        final Object data = ((Map<String, Object>) executionResult.getData()).get("store");
+            final Object data = ((Map<String, Object>) executionResult.getData()).get("store");
 
-        assertThat(
-            data,
-            is("{\"_javaType\":\"de.quinscape.domainql.testdomain.tables.pojos.Foo\",\"created\":\"=2018-10-15 16:03:58.078 (Timestamp)\",\"id\":\"=e7c103e7-f559-4896-ac44-702b8458f207 (String)\",\"name\":\"=GreenFoo (String)\",\"num\":\"=9384 (Integer)\"}")
-        );
+            assertThat(
+                data,
+                is("{\"_javaType\":\"de.quinscape.domainql.testdomain.tables.pojos.Foo\",\"created\":\"=2018-10-15 16:03:58.078 (Timestamp)\",\"id\":\"=e7c103e7-f559-4896-ac44-702b8458f207 (String)\",\"name\":\"=GreenFoo (String)\",\"num\":\"=9384 (Integer)\"}")
+            );
+        }
 
+        {
+
+            final Map<String, Object> vars = new HashMap<>();
+            vars.put("domainObject", null);
+
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("mutation genericDomainObjectAsNull($domainObject: DomainObject)\n" +
+                    "{\n" +
+                    "    genericDomainObjectAsNull(domainObject: $domainObject)\n" +
+                    "}")
+                .variables(vars)
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+            final Object data = ((Map<String, Object>) executionResult.getData()).get("genericDomainObjectAsNull");
+
+            assertThat(
+                data,
+                is(nullValue())
+            );
+        }
     }
 
 

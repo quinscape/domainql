@@ -80,6 +80,11 @@ public final class DomainObjectCoercing
 
     private Map<String, Object> serializeInternal(Object result)
     {
+        if (result == null)
+        {
+            return null;
+        }
+
         if (!(result instanceof DomainObject))
         {
             throw new IllegalArgumentException(result + " is not an instance of " + DomainObject.class.getName());
@@ -149,6 +154,11 @@ public final class DomainObjectCoercing
 
     private DomainObject parseValueInternal(Object input)
     {
+        if (input == null)
+        {
+            return null;
+        }
+
         if (!(input instanceof Map))
         {
             throw new CoercingParseValueException("Cannot coerce " + input + " to DomainObject");
