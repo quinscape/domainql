@@ -48,26 +48,35 @@ public final class GenericScalarCoercing
 
 
             final Object converted;
+            final Object value = ((GenericScalar) result).getValue();
             if (type instanceof GraphQLList)
             {
-                List<Object> l = (List<Object>) ((GenericScalar) result).getValue();
-                List<Object> out = new ArrayList<>(l.size());
 
-                final Coercing<?,?> coercing = ((GraphQLScalarType)(GraphQLTypeUtil.unwrapAll(type))).getCoercing();
-
-                for (Object elem : l)
+                List<Object> l = (List<Object>) value;
+                if (l == null)
                 {
-                    final Object convertedElem = coercing
-                        .serialize(elem);
-                    out.add(convertedElem);
-                }
+                    converted = null;
 
-                converted = out;
+                }
+                else
+                {
+                    List<Object> out = new ArrayList<>(l.size());
+
+                    final Coercing<?,?> coercing = ((GraphQLScalarType)(GraphQLTypeUtil.unwrapAll(type))).getCoercing();
+
+                    for (Object elem : l)
+                    {
+                        final Object convertedElem = coercing
+                            .serialize(elem);
+                        out.add(convertedElem);
+                    }
+
+                    converted = out;
+                }
             }
             else
             {
-                converted = ((GraphQLScalarType) type).getCoercing()
-                    .serialize(((GenericScalar) result).getValue());
+                converted = value != null ? ((GraphQLScalarType) type).getCoercing().serialize(value) : null;
 
             }
             Map<String, Object> map = Maps.newHashMapWithExpectedSize(2);
@@ -131,24 +140,31 @@ public final class GenericScalarCoercing
             if (type instanceof GraphQLList)
             {
                 List<Object> l = (List<Object>) value;
-                List<Object> out = new ArrayList<>(l.size());
-
-                final Coercing<?,?> coercing = ((GraphQLScalarType)(GraphQLTypeUtil.unwrapAll(type))).getCoercing();
-
-                for (Object elem : l)
+                if (l == null)
                 {
-                    final Object converted = coercing
-                        .parseValue(elem);
-                    out.add(converted);
+                    return new GenericScalar(scalarTypeName, null);
+                }
+                else
+                {
+                    List<Object> out = new ArrayList<>(l.size());
+
+                    final Coercing<?, ?> coercing = ((GraphQLScalarType) (GraphQLTypeUtil.unwrapAll(type))).getCoercing();
+
+                    for (Object elem : l)
+                    {
+                        final Object converted = coercing
+                            .parseValue(elem);
+                        out.add(converted);
+                    }
+                    return new GenericScalar(scalarTypeName, out);
                 }
 
-                return new GenericScalar(scalarTypeName, out);
             }
             else
             {
+
                 final Coercing<?,?> coercing = ((GraphQLScalarType) type).getCoercing();
-                final Object converted = coercing
-                    .parseValue(value);
+                final Object converted = value != null ? coercing.parseValue(value) : null;
 
                 return new GenericScalar(scalarTypeName, converted);
             }

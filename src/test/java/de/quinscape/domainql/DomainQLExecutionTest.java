@@ -1976,6 +1976,46 @@ public class DomainQLExecutionTest
 
         }
     }
+    @Test
+    public void testGenericScalarNull()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new GenericScalarLogic()))
+            .withAdditionalScalar(GenericScalar.class, GenericScalarType.newGenericScalar())
+            .withAdditionalScalar(DomainObject.class, DomainObjectScalar.newDomainObjectScalar())
+            .build();
+
+        log.info("TYPES = {}", domainQL.getGraphQLSchema().getType("DomainObject"));
+
+        GraphQL graphQL = GraphQL.newGraphQL(domainQL.getGraphQLSchema()).build();
+
+        {
+            final HashMap<String, Object> variables = new HashMap<>();
+            final HashMap<String, Object> genericScalar = new HashMap<>();
+            genericScalar.put("type","String");
+            variables.put("in", genericScalar);
+
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("query nullScalar($in: GenericScalar)\n" +
+                    "{\n" +
+                    "    nullScalar(in: $in)\n" +
+                    "}")
+                .variables(variables)
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+            final Map<String, Object> data = (Map<String, Object>) ((Map<String, Object>) executionResult.getData()).get("nullScalar");
+
+            assertThat(data.get("type"), is ("String"));
+            assertThat(data.get("value"), is (nullValue()));
+
+        }
+    }
 
 
     @Test

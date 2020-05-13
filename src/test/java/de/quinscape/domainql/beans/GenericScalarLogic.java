@@ -76,6 +76,18 @@ public class GenericScalarLogic
         return new GenericScalar("[DomainObject]", Arrays.asList(obj, obj2));
     }
 
+    @GraphQLQuery
+    public GenericScalar nullScalar(GenericScalar in)
+    {
+        if (in.getValue() != null)
+        {
+            throw new IllegalArgumentException("value must be null");
+        }
+
+        return new GenericScalar(in.getType(), null);
+
+    }
+
     /**
      * The types wrapped in a GenericScalar need to be used somewhere in GraphQL domain. For the purpose of the test
      * we artificially add them there, this should not be necessary in a normal domain.
