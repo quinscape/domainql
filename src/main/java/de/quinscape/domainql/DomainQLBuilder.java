@@ -20,7 +20,6 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
-import org.apache.commons.collections.Bag;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Schema;
@@ -176,7 +175,12 @@ public class DomainQLBuilder
                             {
                                 if (!nameFields.containsKey(typeName))
                                 {
-                                    this.configureNameFieldForTypes(name, domainQL.getPojoType(typeName));
+                                    final OutputType outputType = domainQL.getTypeRegistry().lookup(typeName);
+                                    if (outputType == null)
+                                    {
+                                        throw new IllegalStateException("Could find find type '" + typeName + "'");
+                                    }
+                                    this.configureNameFieldForTypes(name, outputType.getJavaType());
                                 }
                                 break;
                             }
@@ -188,6 +192,7 @@ public class DomainQLBuilder
             fullSupported
         );
     }
+
 
     private Map<String, Field<?>> createFieldLookup()
     {

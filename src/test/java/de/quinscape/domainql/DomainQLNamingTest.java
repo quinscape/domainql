@@ -2,6 +2,7 @@ package de.quinscape.domainql;
 
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
+import de.quinscape.domainql.logicimpl.ConfigureNonDBByNameLogic;
 import de.quinscape.domainql.testdomain.Public;
 import de.quinscape.domainql.testdomain.tables.pojos.Bar;
 import de.quinscape.domainql.testdomain.tables.pojos.BarOrg;
@@ -94,5 +95,29 @@ public class DomainQLNamingTest
         assertThat( nameFields.get("BarOwner"), is(Collections.singletonList("name")) );
         assertThat( nameFields.get("BarOrg"), is(Collections.singletonList("name")) );
         assertThat( nameFields.get("Foo"), is(Collections.singletonList("name")) );
+    }
+
+    @Test
+    public void testConfiguringNonDBByName()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .logicBeans(new ConfigureNonDBByNameLogic())
+            .objectTypes(Public.PUBLIC)
+
+            .configureRelation(BAR.OWNER_ID, SourceField.OBJECT_AND_SCALAR, TargetField.NONE)
+            .configureRelation(BAR_OWNER.ORG_ID, SourceField.OBJECT_AND_SCALAR, TargetField.NONE)
+
+            .configureNameField("name")
+            .configureNameFields(Bar.class,"name", "owner.name", "owner.org.name")
+            .build();
+
+
+        final Map<String, List<String>> nameFields = domainQL.getNameFields();
+
+        assertThat( nameFields.get("Bar"), is(Arrays.asList("name", "owner.name", "owner.org.name")) );
+        assertThat( nameFields.get("BarOwner"), is(Collections.singletonList("name")) );
+        assertThat( nameFields.get("BarOrg"), is(Collections.singletonList("name")) );
+        assertThat( nameFields.get("Foo"), is(Collections.singletonList("name")) );
+        assertThat( nameFields.get("FullResponse"), is(Collections.singletonList("name")) );
     }
 }
