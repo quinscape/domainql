@@ -697,6 +697,11 @@ public class DomainQLBuilder
      */
     public DomainQLBuilder configureNameFieldForTypes(String nameField, Class<?>... pojoTypes)
     {
+        if (pojoTypes == null || pojoTypes.length < 1)
+        {
+            throw new IllegalArgumentException("Need at least one POJO type");
+        }
+
         for (Class<?> pojoType : pojoTypes)
         {
             DomainQL.ensurePojoType(pojoType);
@@ -716,10 +721,13 @@ public class DomainQLBuilder
      */
     public DomainQLBuilder configureNameField(String... nameFields)
     {
-        if (nameFields != null)
+        if (nameFields == null || nameFields.length < 1)
         {
-            Collections.addAll(this.nameFieldsByName, nameFields);
+            throw new IllegalArgumentException("Need at least one name field");
         }
+
+        Collections.addAll(this.nameFieldsByName, nameFields);
+
         return this;
     }
 
@@ -737,6 +745,11 @@ public class DomainQLBuilder
      */
     public DomainQLBuilder configureNameFields(Class<?> pojoClass, String... nameFields)
     {
+        if (nameFields == null || nameFields.length < 1)
+        {
+            throw new IllegalArgumentException("Need at least one name field");
+        }
+
         DomainQL.ensurePojoType(pojoClass);
 
         this.nameFields.put(pojoClass.getSimpleName(), Arrays.asList(nameFields));
