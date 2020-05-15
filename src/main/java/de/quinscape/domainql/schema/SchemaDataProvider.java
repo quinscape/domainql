@@ -30,9 +30,13 @@ public final class SchemaDataProvider
 
     private static final String RELATIONS = "relations";
 
+    private static final String NAME_FIELDS = "nameFields";
+
     private final JSONHolder schemaData;
 
     private final String viewDataName;
+
+
 
     /**
      * Creates a new SchemaDataProvider that uses "schema" as view data name and adds generic type references.
@@ -41,7 +45,7 @@ public final class SchemaDataProvider
      */
     public SchemaDataProvider(DomainQL domainQL)
     {
-        this(domainQL, DEFAULT_VIEW_DATA_NAME, true, true);
+        this(domainQL, DEFAULT_VIEW_DATA_NAME, true, true, true);
     }
 
 
@@ -53,7 +57,7 @@ public final class SchemaDataProvider
      */
     public SchemaDataProvider(DomainQL domainQL, String viewDataName)
     {
-        this(domainQL, viewDataName, true, true);
+        this(domainQL, viewDataName, true, true,true);
     }
 
 
@@ -64,7 +68,7 @@ public final class SchemaDataProvider
      * @param viewDataName          name this provider will provide the schema data under
      * @param appendGenericTypes    true to add information about generic types to the provided schema data
      */
-    public SchemaDataProvider(DomainQL domainQL, String viewDataName, boolean appendGenericTypes, boolean appendRelations)
+    public SchemaDataProvider(DomainQL domainQL, String viewDataName, boolean appendGenericTypes, boolean appendRelations, boolean appendNameFields)
     {
 
         final Map<String, Object> data = IntrospectionUtil.introspect(domainQL.getGraphQLSchema());
@@ -78,6 +82,11 @@ public final class SchemaDataProvider
         if (appendRelations)
         {
             schemaRoot.put(RELATIONS, domainQL.getRelationModels());
+        }
+
+        if (appendRelations)
+        {
+            schemaRoot.put(NAME_FIELDS, domainQL.getNameFields());
         }
 
         this.schemaData = new JSONHolder(schemaRoot);
