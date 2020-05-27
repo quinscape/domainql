@@ -107,6 +107,8 @@ public class DomainQL
 
     private final Map<String, TableLookup> jooqTables;
 
+    private final Map<String, TableLookup> jooqTablesRO;
+
     private final Map<String, Field<?>> dbFieldLookup;
 
     private final List<RelationModel> relationModels;
@@ -166,6 +168,7 @@ public class DomainQL
         this.typeRegistry = new TypeRegistry(this, additionalScalarTypes);
 
         this.jooqTables = jooqTables;
+        this.jooqTablesRO = Collections.unmodifiableMap(jooqTables);
         this.dbFieldLookup = dbFieldLookup;
 
         genericTypes = new ArrayList<>();
@@ -2003,6 +2006,18 @@ public class DomainQL
     public Map<String, List<String>> getNameFields()
     {
         return nameFields;
+    }
+
+
+    /**
+     * Provides access to the lookup table for database types. The map maps type names to a TableLookup which provides
+     * both the JOOQ table as well as the POJO corresponding to it.
+     *
+     * @return read-only map of type names to table lookups
+     */
+    public Map<String, TableLookup> getJooqTables()
+    {
+        return jooqTablesRO;
     }
 }
 
