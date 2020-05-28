@@ -148,6 +148,9 @@ public final class DomainObjectCoercing
                 convertedType.put(fieldName, converted);
             }
         }
+
+        convertedType.put(DomainObject.DOMAIN_TYPE_PROPERTY, domainType);
+
         return convertedType;
     }
 
@@ -167,7 +170,7 @@ public final class DomainObjectCoercing
 
         final Map<String, Object> map = (Map<String, Object>) input;
 
-        final String domainType = (String) map.get("_type");
+        final String domainType = (String) map.get(DomainObject.DOMAIN_TYPE_PROPERTY);
         final String inputTypeName = DomainQL.getInputTypeName(domainType);
 
         final GraphQLSchema schema = domainQL.getGraphQLSchema();
