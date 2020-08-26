@@ -4,7 +4,7 @@
 
     <groupId>de.quinscape.domainql</groupId>
     <artifactId>domainql</artifactId>
-    <version>0.2.7-SNAPSHOT</version>
+    <version>0.2.7</version>
 
     <name>DomainQL</name>
     <description>
@@ -193,7 +193,7 @@
         <connection>scm:git:https://github.com/quinscape/domainql.git</connection>
         <developerConnection>scm:git:git@github.com:quinscape/domainql.git</developerConnection>
         <url>https://github.com/quinscape/domainql/</url>
-        <tag>HEAD</tag>
+        <tag>domainql-0.2.7</tag>
     </scm>
 
     <build>
