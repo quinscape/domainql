@@ -273,7 +273,7 @@ public class TypeRegistry
             final GraphQLField graphQLFieldAnno = JSONUtil.findAnnotation(info, GraphQLField.class);
 
 
-            if (!DomainQL.isNormalProperty(info))
+            if (!DomainQL.isNormalProperty(info) || type.isArray())
             {
                 continue;
             }

@@ -6,6 +6,7 @@ import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.generic.DomainObjectScalar;
 import de.quinscape.domainql.generic.GenericScalar;
 import de.quinscape.domainql.generic.GenericScalarType;
+import de.quinscape.domainql.logicimpl.BinaryDataLogic;
 import de.quinscape.domainql.logicimpl.CustomParameterProviderLogic;
 import de.quinscape.domainql.logicimpl.DegenerifyDBLogic;
 import de.quinscape.domainql.logicimpl.DegenerifiedContainerLogic;
@@ -39,6 +40,9 @@ import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.schema.SchemaDataProvider;
 import de.quinscape.domainql.testdomain.Public;
+import graphql.ExecutionInput;
+import graphql.ExecutionResult;
+import graphql.GraphQL;
 import graphql.Scalars;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLEnumType;
@@ -1104,6 +1108,23 @@ public class AnotherDomainQLTest
 
     }
 
+    @Test
+    public void testBinaryData()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new BinaryDataLogic()))
+            .build();
+
+        //log.info(new SchemaPrinter().print(domainQL.getGraphQLSchema()));
+
+        final GraphQLObjectType binaryBean = (GraphQLObjectType) domainQL.getGraphQLSchema().getType("BinaryBean");
+
+        final GraphQLOutputType type = binaryBean.getFieldDefinition("data").getType();
+        assertThat(type, is( instanceOf(GraphQLList.class)));
+        assertThat(GraphQLTypeUtil.unwrapAll(type).getName(), is( "Byte"));
+
+    }
 
 }
 

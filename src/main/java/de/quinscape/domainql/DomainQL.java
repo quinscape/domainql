@@ -1741,6 +1741,19 @@ public class DomainQL
             {
                 graphQLType = scalarType;
             }
+            else if (type.isArray())
+            {
+                final Class<?> elementType = type.getComponentType();
+
+                final GraphQLScalarType elementScalarType = typeRegistry.getGraphQLScalarFor(elementType, null);
+                if (elementScalarType == null)
+                {
+                    throw new DomainQLException("Unsupported array element type: " + elementType + " in " + type.getName());
+                }
+
+                log.info("{}", type);
+                graphQLType = GraphQLList.list(elementScalarType);
+            }
             else
             {
                 graphQLType = new GraphQLTypeReference(DegenerificationUtil.getType(

@@ -12,6 +12,7 @@ import de.quinscape.domainql.generic.DomainObjectScalar;
 import de.quinscape.domainql.generic.GenericScalar;
 import de.quinscape.domainql.generic.GenericScalarType;
 import de.quinscape.domainql.logicimpl.AccessDomainQLLogic;
+import de.quinscape.domainql.logicimpl.BinaryDataLogic;
 import de.quinscape.domainql.logicimpl.CustomFetcherLogic;
 import de.quinscape.domainql.logicimpl.DegenerifiedContainerLogic;
 import de.quinscape.domainql.logicimpl.DegenerifiedInputLogic;
@@ -2080,6 +2081,46 @@ public class DomainQLExecutionTest
 
             assertThat(executionResult.getErrors().size(), is(1));
             assertThat(executionResult.getErrors().get(0).getMessage(), is("Can't serialize value (/fetch) : java.lang.IllegalStateException: Non-null field 'name' contains null value"));
+        }
+    }
+
+    
+    @Test
+    public void testBinaryData()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new BinaryDataLogic()))
+            .build();
+
+        GraphQL graphQL = GraphQL.newGraphQL(domainQL.getGraphQLSchema()).build();
+
+        {
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("query binaryBean\n" +
+                    "{\n" +
+                    "    binaryBean\n" +
+                    "    {\n" +
+                    "    " +
+                    "    name" +
+                    "       \n" +
+                    "        data\n" +
+                    "    " +
+                    "}\n" +
+                    "}")
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            assertThat(executionResult.getErrors().size(), is(0));
+
+            final Map<String,Object> data = executionResult.getData();
+            final Map<String,Object> bb = (Map<String, Object>) data.get("binaryBean");
+
+            assertThat(bb.get("name"), is("Henry"));
+            assertThat(bb.get("data"), is( Arrays.asList((byte)72, (byte)69, (byte)76, (byte)76, (byte)79)));
+
         }
     }
 }
