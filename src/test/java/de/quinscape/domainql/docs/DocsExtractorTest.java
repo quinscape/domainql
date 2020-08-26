@@ -1,18 +1,15 @@
 package de.quinscape.domainql.docs;
 
 import com.github.javaparser.utils.SourceRoot;
-import com.google.common.collect.ImmutableSet;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.svenson.JSON;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
@@ -98,6 +95,55 @@ public class DocsExtractorTest
         assertThat(queryFields.get(2).getDescription(), is("Name desc from getter"));
         assertThat(queryFields.get(2).getParamDocs().size(), is(0));
         assertThat(queryFields.get(2).getParamDocs().size(), is(0));
+    }
+
+    @Test
+    public void testMerging() throws IOException
+    {
+        SourceRoot sourceRoot = new SourceRoot(Paths.get("./src/test/java/"));
+
+        final DocsExtractor docsExtractor = new DocsExtractor();
+
+        final TypeDoc otherDoc = new TypeDoc("DocumentedBean");
+        otherDoc.setDescription("Changed description");
+        otherDoc.setFieldDocs(Arrays.asList(new FieldDoc("name", "changed name desc")));
+        final List<TypeDoc> docs = docsExtractor.extract(sourceRoot,"", "de/quinscape/domainql/beans/DocumentedBean.java",
+            Arrays.asList(
+                otherDoc
+            ));
+
+        assertThat(docs.size(), is(1));
+
+        final Iterator<TypeDoc> i = docs.iterator();
+
+        final TypeDoc beanDoc = i.next();
+
+
+        assertThat(beanDoc.getName(), is("DocumentedBean"));
+
+        // {@link ... } are stripped
+        assertThat(beanDoc.getDescription(), is("Changed description"));
+
+        final List<FieldDoc> queryFields = beanDoc.getFieldDocs();
+        assertThat(queryFields.size(), is(3));
+        assertThat(queryFields.get(0).getName(), is("getFieldWithArgs"));
+        assertThat(queryFields.get(0).getDescription(), is("Field with args"));
+        assertThat(queryFields.get(0).getParamDocs().size(), is(2));
+        assertThat(queryFields.get(0).getParamDocs().get(0).getName(), is("name"));
+        assertThat(queryFields.get(0).getParamDocs().get(0).getDescription(), is("name desc"));
+        assertThat(queryFields.get(0).getParamDocs().get(1).getName(), is("num"));
+        assertThat(queryFields.get(0).getParamDocs().get(1).getDescription(), is("num desc"));
+
+        assertThat(queryFields.get(1).getName(), is("name"));
+        assertThat(queryFields.get(1).getDescription(), is("changed name desc"));
+        assertThat(queryFields.get(1).getParamDocs().size(), is(0));
+        assertThat(queryFields.get(1).getParamDocs().size(), is(0));
+
+        assertThat(queryFields.get(2).getName(), is("num"));
+        assertThat(queryFields.get(2).getDescription(), is("Num desc from setter"));
+        assertThat(queryFields.get(2).getParamDocs().size(), is(0));
+        assertThat(queryFields.get(2).getParamDocs().size(), is(0));
+
     }
 
 

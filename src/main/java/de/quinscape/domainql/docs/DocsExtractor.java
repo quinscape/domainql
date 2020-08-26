@@ -21,9 +21,12 @@ import de.quinscape.domainql.annotation.GraphQLMutation;
 import de.quinscape.domainql.annotation.GraphQLQuery;
 import org.apache.commons.io.FileUtils;
 import org.svenson.JSON;
+import org.svenson.JSONParser;
+import org.svenson.tokenize.InputStreamSource;
 
 import java.beans.Introspector;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -46,6 +49,11 @@ public class DocsExtractor
 
     public List<TypeDoc> extract(SourceRoot sourceRoot, Set<String> basePackages) throws IOException
     {
+        return extract(sourceRoot, basePackages, null);
+    }
+
+    public List<TypeDoc> extract(SourceRoot sourceRoot, Set<String> basePackages, List<TypeDoc> otherDocs) throws IOException
+    {
         final List<TypeDoc> docs = new ArrayList<>();
         for (String pkg : basePackages)
         {
@@ -61,11 +69,21 @@ public class DocsExtractor
             });
         }
 
+        if (otherDocs != null)
+        {
+            docs.addAll(otherDocs);
+        }
+
         return normalize(docs);
     }
 
 
     public List<TypeDoc> extract(SourceRoot sourceRoot, String basePackage, String fileName) throws IOException
+    {
+        return extract(sourceRoot, basePackage, fileName, null);
+    }
+
+    public List<TypeDoc> extract(SourceRoot sourceRoot, String basePackage, String fileName, List<TypeDoc> otherDocs) throws IOException
     {
         final DocsExtractor docsExtractor = new DocsExtractor();
 
@@ -79,6 +97,11 @@ public class DocsExtractor
             return SourceRoot.Callback.Result.DONT_SAVE;
         });
 
+        if (otherDocs != null)
+        {
+            docs.addAll(otherDocs);
+            return DocsExtractor.normalize(docs);
+        }
         return docs;
     }
 
@@ -407,13 +430,12 @@ public class DocsExtractor
 
         ensureUniqueFields(queryDoc);
         ensureUniqueFields(mutationDoc);
-        final List<TypeDoc> unique = removeDuplicateNames(typeDocs);
+        final List<TypeDoc> unique = mergeTypeDocs(typeDocs);
 
         // sort types by type name
         unique.sort(TypeDocComparator.INSTANCE);
 
-        queryDoc.getFieldDocs().sort(FieldDocComparator.INSTANCE);
-        mutationDoc.getFieldDocs().sort(FieldDocComparator.INSTANCE);
+        unique.forEach( doc -> doc.getFieldDocs().sort(FieldDocComparator.INSTANCE));
 
         return unique;
     }
@@ -440,13 +462,40 @@ public class DocsExtractor
      *
      * @return new set with unique names
      */
-    private static List<TypeDoc> removeDuplicateNames(List<TypeDoc> typeDocs)
+    private static List<TypeDoc> mergeTypeDocs(List<TypeDoc> typeDocs)
     {
         Map<String, TypeDoc> names = new LinkedHashMap<>();
         for (TypeDoc typeDoc : typeDocs)
         {
             final String name = typeDoc.getName();
-            names.put(name, typeDoc);
+            final TypeDoc existing = names.put(name, typeDoc);
+
+            if (existing != null)
+            {
+                final Set<String> fieldNames = typeDoc.getFieldDocs()
+                    .stream()
+                    .map(FieldDoc::getName)
+                    .collect(Collectors.toSet());
+
+                for (FieldDoc fieldDoc : existing.getFieldDocs())
+                {
+                    if (!fieldNames.contains(fieldDoc.getName()))
+                    {
+                        final List<FieldDoc> existingFieldDocs = typeDoc.getFieldDocs();
+
+                        if (existingFieldDocs instanceof ArrayList)
+                        {
+                            existingFieldDocs.add(fieldDoc);
+                        }
+                        else
+                        {
+                            final ArrayList<FieldDoc> fieldDocs = new ArrayList<>(existingFieldDocs);
+                            fieldDocs.add(fieldDoc);
+                            typeDoc.setFieldDocs(fieldDocs);
+                        }
+                    }
+                }
+            }
         }
         return new ArrayList<>(names.values());
     }
@@ -494,6 +543,9 @@ public class DocsExtractor
         "is print to stdout.")
     public String targetFile;
 
+    @com.beust.jcommander.Parameter(names = {"-m", "--merge"}, description = "Merge javadoc based documentation with documentation from other sources.")
+    public String mergeFile;
+
     @com.beust.jcommander.Parameter(names = {"--pretty"}, description = "Format JSON output")
     public boolean pretty;
 
@@ -508,9 +560,31 @@ public class DocsExtractor
         SourceRoot root = new SourceRoot(Paths.get(sourceRoot));
 
         final DocsExtractor extractor = new DocsExtractor();
+
+        final List<TypeDoc> otherDocs;
+        if (mergeFile != null)
+        {
+            final JSONParser parser = new JSONParser();
+            parser.addTypeHint("[]", TypeDoc.class);
+            otherDocs = parser.parse(
+                List.class,
+                new InputStreamSource(
+                    new FileInputStream(
+                        new File(mergeFile)
+                    ),
+                    true
+                )
+            );
+        }
+        else
+        {
+            otherDocs = null;
+        }
+
         final List<TypeDoc> typeDocs = extractor.extract(
             root,
-            new HashSet<>(basePackages)
+            new HashSet<>(basePackages),
+            otherDocs
         );
 
         String json = JSON.defaultJSON().forValue(typeDocs);
@@ -533,6 +607,4 @@ public class DocsExtractor
             );
         }
     }
-
-
 }
