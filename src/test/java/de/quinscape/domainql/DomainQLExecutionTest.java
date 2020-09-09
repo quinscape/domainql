@@ -2,6 +2,7 @@ package de.quinscape.domainql;
 
 
 import com.google.common.collect.ImmutableMap;
+import de.quinscape.domainql.beans.BDContainer;
 import de.quinscape.domainql.beans.GenericScalarLogic;
 import de.quinscape.domainql.beans.MyEnum;
 import de.quinscape.domainql.beans.SumPerMonth;
@@ -12,6 +13,7 @@ import de.quinscape.domainql.generic.DomainObjectScalar;
 import de.quinscape.domainql.generic.GenericScalar;
 import de.quinscape.domainql.generic.GenericScalarType;
 import de.quinscape.domainql.logicimpl.AccessDomainQLLogic;
+import de.quinscape.domainql.logicimpl.BigNumericLogic;
 import de.quinscape.domainql.logicimpl.BinaryDataLogic;
 import de.quinscape.domainql.logicimpl.CustomFetcherLogic;
 import de.quinscape.domainql.logicimpl.DegenerifiedContainerLogic;
@@ -35,6 +37,8 @@ import de.quinscape.domainql.logicimpl.TypeConversionLogic;
 import de.quinscape.domainql.logicimpl.TypeParamLogic;
 import de.quinscape.domainql.logicimpl.TypeParamMutationLogic;
 import de.quinscape.domainql.mock.TestProvider;
+import de.quinscape.domainql.scalar.BigDecimalScalar;
+import de.quinscape.domainql.scalar.BigIntegerScalar;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.domainql.testdomain.Public;
 import de.quinscape.domainql.testdomain.tables.pojos.Foo;
@@ -51,6 +55,7 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLSchema;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -63,6 +68,8 @@ import org.slf4j.LoggerFactory;
 import org.svenson.JSON;
 import org.svenson.util.JSONPathUtil;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Arrays;
@@ -2122,5 +2129,85 @@ public class DomainQLExecutionTest
             assertThat(bb.get("data"), is( Arrays.asList((byte)72, (byte)69, (byte)76, (byte)76, (byte)79)));
 
         }
+    }
+
+    @Test
+    public void testBigNumericTypes()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new BigNumericLogic()))
+            .withAdditionalScalar(BigDecimal.class, new BigDecimalScalar())
+            .withAdditionalScalar(BigInteger.class, new BigIntegerScalar())
+            .build();
+
+        //log.info(new SchemaPrinter().print(domainQL.getGraphQLSchema()));
+
+        GraphQL graphQL = GraphQL.newGraphQL(domainQL.getGraphQLSchema()).build();
+
+        {
+            Map<String, Object> input = new HashMap<>();
+            input.put("name", "Tom");
+            input.put("value", "123.45");
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("query bigDecimalQuery($in: BDContainerInput!)\n" +
+                    "{\n" +
+                    "    bigDecimalQuery(in: $in)\n" +
+                    "    {\n" +
+                    "    " +
+                    "    name" +
+                    "       \n" +
+                    "        value\n" +
+                    "    " +
+                    "}\n" +
+                    "}")
+                .variables(ImmutableMap.of("in", input))
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+            final Map<String,Object> data = executionResult.getData();
+            final Map<String,Object> bb = (Map<String, Object>) data.get("bigDecimalQuery");
+
+            assertThat(bb.get("name"), is("Tom"));
+            assertThat(bb.get("value"), is( "124.68"));
+
+        }
+
+        {
+            Map<String, Object> input = new HashMap<>();
+            input.put("name", "Jane");
+            input.put("value", "1000000000000000000000000000000");
+            ExecutionInput executionInput = ExecutionInput.newExecutionInput()
+                // language=GraphQL
+                .query("query bigDecimalQuery($in: BIContainerInput!)\n" +
+                    "{\n" +
+                    "    bigIntegerQuery(in: $in)\n" +
+                    "    {\n" +
+                    "    " +
+                    "    name" +
+                    "       \n" +
+                    "        value\n" +
+                    "    " +
+                    "}\n" +
+                    "}")
+                .variables(ImmutableMap.of("in", input))
+                .build();
+
+            ExecutionResult executionResult = graphQL.execute(executionInput);
+
+            assertThat(executionResult.getErrors(), is(Collections.emptyList()));
+
+            final Map<String,Object> data = executionResult.getData();
+            final Map<String,Object> bb = (Map<String, Object>) data.get("bigIntegerQuery");
+
+            assertThat(bb.get("name"), is("Jane"));
+            assertThat(bb.get("value"), is( "1000000000000000000000000000001"));
+
+        }
+
     }
 }

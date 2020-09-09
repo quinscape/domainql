@@ -6,6 +6,7 @@ import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.generic.DomainObjectScalar;
 import de.quinscape.domainql.generic.GenericScalar;
 import de.quinscape.domainql.generic.GenericScalarType;
+import de.quinscape.domainql.logicimpl.BigNumericLogic;
 import de.quinscape.domainql.logicimpl.BinaryDataLogic;
 import de.quinscape.domainql.logicimpl.CustomParameterProviderLogic;
 import de.quinscape.domainql.logicimpl.DegenerifyDBLogic;
@@ -38,6 +39,8 @@ import de.quinscape.domainql.logicimpl.TypeParamWithNamePatternLogic;
 import de.quinscape.domainql.logicimpl.TypeRepeatLogic;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
+import de.quinscape.domainql.scalar.BigDecimalScalar;
+import de.quinscape.domainql.scalar.BigIntegerScalar;
 import de.quinscape.domainql.schema.SchemaDataProvider;
 import de.quinscape.domainql.testdomain.Public;
 import graphql.ExecutionInput;
@@ -63,6 +66,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -1126,5 +1131,25 @@ public class AnotherDomainQLTest
 
     }
 
+    @Test
+    public void testBigNumericTypes()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new BigNumericLogic()))
+            .withAdditionalScalar(BigDecimal.class, new BigDecimalScalar())
+            .withAdditionalScalar(BigInteger.class, new BigIntegerScalar())
+            .build();
+
+        //log.info(new SchemaPrinter().print(domainQL.getGraphQLSchema()));
+
+        final GraphQLObjectType bdContainerType = (GraphQLObjectType) domainQL.getGraphQLSchema().getType("BDContainer");
+        final GraphQLOutputType bdValueType = bdContainerType.getFieldDefinition("value").getType();
+        assertThat(bdValueType.getName(), is( "BigDecimal"));
+
+        final GraphQLObjectType biContainerType = (GraphQLObjectType) domainQL.getGraphQLSchema().getType("BIContainer");
+        final GraphQLOutputType biValueType = biContainerType.getFieldDefinition("value").getType();
+        assertThat(biValueType.getName(), is( "BigInteger"));
+    }
 }
 

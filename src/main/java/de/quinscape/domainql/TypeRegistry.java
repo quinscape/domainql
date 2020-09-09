@@ -14,8 +14,6 @@ import org.svenson.info.JSONPropertyInfo;
 import org.svenson.info.JavaObjectPropertyInfo;
 
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -49,8 +47,6 @@ public class TypeRegistry
         map.put(Long.class, Scalars.GraphQLLong);
         map.put(Long.TYPE, Scalars.GraphQLLong);
         map.put(String.class, Scalars.GraphQLString);
-        map.put(BigDecimal.class, Scalars.GraphQLBigDecimal);
-        map.put(BigInteger.class, Scalars.GraphQLBigInteger);
         map.put(Timestamp.class, new GraphQLTimestampScalar());
         map.put(Date.class, new GraphQLDateScalar());
 
