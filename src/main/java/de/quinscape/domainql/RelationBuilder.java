@@ -430,7 +430,7 @@ public class RelationBuilder
 
             if (field == null)
             {
-                throw new DomainQLBuilderException("Cannot resolve field '" + key + "'" );
+                throw new DomainQLBuilderException("Cannot resolve field '" + key + "': Valid keys for " + sourceDomainType + " are " + getKeysOfTable(fieldLookup, sourceDomainType) );
             }
 
             list.add(
@@ -439,5 +439,22 @@ public class RelationBuilder
         }
 
         return list;
+    }
+
+
+    private List<String> getKeysOfTable(Map<String, Field<?>> fieldLookup, String sourceDomainType)
+    {
+        final String prefix = sourceDomainType + ":";
+
+        final List<String> keys = new ArrayList<>();
+
+        for (String key : fieldLookup.keySet())
+        {
+            if (key.startsWith(prefix))
+            {
+                keys.add(key);
+            }
+        }
+        return keys;
     }
 }
