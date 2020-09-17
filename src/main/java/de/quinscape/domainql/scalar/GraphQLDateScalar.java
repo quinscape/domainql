@@ -81,7 +81,19 @@ public class GraphQLDateScalar
 
     private static Date convert(String isoString)
     {
-        LocalDate data = LocalDate.parse(isoString);
+        LocalDate data = LocalDate.parse(stripTime(isoString));
         return new Date(data.toEpochDay() * MILLIS_PER_DAY);
+    }
+
+
+    private static String stripTime(String isoString)
+    {
+        final int pos = isoString.indexOf('T');
+        if (pos >= 0)
+        {
+            return isoString.substring(0, pos);
+
+        }
+        return isoString;
     }
 }
