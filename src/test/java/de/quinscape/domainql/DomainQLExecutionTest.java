@@ -62,6 +62,8 @@ import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.jooq.tools.jdbc.MockConnection;
 import org.jooq.tools.jdbc.MockDataProvider;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +79,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import static de.quinscape.domainql.testdomain.Tables.*;
 import static graphql.schema.GraphQLNonNull.*;
@@ -90,6 +93,11 @@ public class DomainQLExecutionTest
 {
     private final static Logger log = LoggerFactory.getLogger(DomainQLExecutionTest.class);
 
+    @Before
+    public void init()
+    {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    }
 
     private MockDataProvider provider = new TestProvider();
 
@@ -374,7 +382,7 @@ public class DomainQLExecutionTest
         assertThat(executionResult.getErrors(), is(Collections.emptyList()));
         assertThat(
             JSON.defaultJSON().forValue(executionResult.getData()),
-            is("{\"mutateConverted\":\"qwertz:1970-01-01 01:00:03.6\"}")
+            is("{\"mutateConverted\":\"qwertz:1970-01-01 00:00:03.6\"}")
         );
     }
 
@@ -927,7 +935,7 @@ public class DomainQLExecutionTest
 
             assertThat(
                 data,
-                is("{\"_javaType\":\"de.quinscape.domainql.testdomain.tables.pojos.Foo\",\"created\":\"=2018-10-15 16:03:58.078 (Timestamp)\",\"id\":\"=e7c103e7-f559-4896-ac44-702b8458f207 (String)\",\"name\":\"=GreenFoo (String)\",\"num\":\"=9384 (Integer)\"}")
+                is("{\"_javaType\":\"de.quinscape.domainql.testdomain.tables.pojos.Foo\",\"created\":\"=2018-10-15 14:03:58.078 (Timestamp)\",\"id\":\"=e7c103e7-f559-4896-ac44-702b8458f207 (String)\",\"name\":\"=GreenFoo (String)\",\"num\":\"=9384 (Integer)\"}")
             );
         }
 
@@ -1793,7 +1801,7 @@ public class DomainQLExecutionTest
         final String data = (String) ((Map<String, Object>) executionResult.getData()).get("testListOfDomainObjectScalars");
 
 
-        assertThat(data, is("[Foo (1612ed5a-3d49-41e9-b087-0d9c6e2d2e90, PurpleFoo, 2847, 2011-10-15 16:03:58.078), Foo (67c00a5a-ef33-4897-9e45-b4f0007e9f77, PinkFoo, 89578, 2012-10-15 16:03:58.078)]"));
+        assertThat(data, is("[Foo (1612ed5a-3d49-41e9-b087-0d9c6e2d2e90, PurpleFoo, 2847, 2011-10-15 14:03:58.078), Foo (67c00a5a-ef33-4897-9e45-b4f0007e9f77, PinkFoo, 89578, 2012-10-15 14:03:58.078)]"));
 
     }
 

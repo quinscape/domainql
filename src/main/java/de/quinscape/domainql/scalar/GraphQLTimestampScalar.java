@@ -74,10 +74,7 @@ public class GraphQLTimestampScalar
 
     public static String toISO8601(Timestamp dataFetcherResult)
     {
-        TimeZone tz = TimeZone.getTimeZone("UTC");
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        df.setTimeZone(tz);
-
         return df.format(dataFetcherResult);
     }
 

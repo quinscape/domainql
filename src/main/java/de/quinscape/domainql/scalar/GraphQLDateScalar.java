@@ -11,7 +11,6 @@ import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,11 +32,7 @@ public class GraphQLDateScalar
                 {
                     try
                     {
-
-                        TimeZone tz = TimeZone.getTimeZone("UTC");
                         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-                        df.setTimeZone(tz);
-
                         return df.format(dataFetcherResult);
                     }
                     catch (RuntimeException e)
