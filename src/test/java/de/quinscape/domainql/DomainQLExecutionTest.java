@@ -745,9 +745,8 @@ public class DomainQLExecutionTest
 
 
         final GraphQLInputObjectType sourceOneInput = (GraphQLInputObjectType) schema.getType("PagedPayloadInput");
-        assertThat(sourceOneInput.getField("rowCount").getType(), is(nonNull(Scalars.GraphQLInt)));
-        assertThat(sourceOneInput.getField("rows").getType(),
-            is(nonNull(new GraphQLList(schema.getType("PayloadInput")))));
+        assertThat(sourceOneInput.getField("rowCount").getType().toString(), is("Int!"));
+        assertThat(sourceOneInput.getField("rows").getType().toString(),is("[PayloadInput]!"));
 
 
         GraphQL graphQL = GraphQL.newGraphQL(schema).build();
@@ -2095,7 +2094,7 @@ public class DomainQLExecutionTest
             ExecutionResult executionResult = graphQL.execute(executionInput);
 
             assertThat(executionResult.getErrors().size(), is(1));
-            assertThat(executionResult.getErrors().get(0).getMessage(), is("Can't serialize value (/fetch) : java.lang.IllegalStateException: Non-null field 'name' contains null value"));
+            assertThat(executionResult.getErrors().get(0).getMessage(), is("Can't serialize value (/fetch) : null"));
         }
     }
 

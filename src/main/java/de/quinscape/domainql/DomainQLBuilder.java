@@ -16,6 +16,7 @@ import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.Directives;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLNamedType;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
@@ -162,9 +163,13 @@ public class DomainQLBuilder
             ),
             fieldLookup,
             domainQL -> {
-                for (GraphQLType value : domainQL.getGraphQLSchema().getTypeMap().values())
+                final GraphQLSchema schema = domainQL.getGraphQLSchema();
+
+
+
+                for (GraphQLType value : schema.getTypeMap().values())
                 {
-                    final String typeName = value.getName();
+                    final String typeName = ((GraphQLNamedType)value).getName();
                     if (value instanceof GraphQLObjectType && !typeName.startsWith("_"))
                     {
 

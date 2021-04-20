@@ -12,6 +12,7 @@ import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLList;
+import graphql.schema.GraphQLNamedType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import org.slf4j.Logger;
@@ -100,7 +101,7 @@ public class GraphQLValueProvider
         else
         {
             // inputType is a GraphQLTypeReference, so we have to get the actual type
-            final GraphQLType type = schema.getType(inputType.getName());
+            final GraphQLType type = schema.getType(((GraphQLNamedType)inputType).getName());
             value = convertObj(environment, value, type);
         }
         return value;
@@ -111,7 +112,7 @@ public class GraphQLValueProvider
     {
         if (type instanceof GraphQLEnumType && value instanceof String)
         {
-            final InputType inputType = typeRegistry.lookupInput(type.getName());
+            final InputType inputType = typeRegistry.lookupInput(((GraphQLNamedType)type).getName());
 
             final Class<?> javaType = inputType.getJavaType();
             if (!Enum.class.isAssignableFrom(javaType))
@@ -125,11 +126,11 @@ public class GraphQLValueProvider
         }
         else if (type instanceof GraphQLInputObjectType)
         {
-            final InputType inputType = typeRegistry.lookupInput(type.getName());
+            final InputType inputType = typeRegistry.lookupInput(((GraphQLNamedType)type).getName());
 
             if (inputType == null)
             {
-                throw new IllegalStateException("Could not find input type '" + this.inputType.getName() + "'");
+                throw new IllegalStateException("Could not find input type '" + ((GraphQLNamedType)this.inputType).getName() + "'");
             }
             value = convert(environment, inputType, (Map<String, Object>) value);
         }
