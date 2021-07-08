@@ -44,4 +44,15 @@ public class OutputType
     {
         return isEnum;
     }
+
+
+    @Override
+    public String toString()
+    {
+        return super.toString() + ": "
+            + "typeContext = " + typeContext
+            + ", javaType = " + javaType
+            + ", isEnum = " + isEnum
+            ;
+    }
 }

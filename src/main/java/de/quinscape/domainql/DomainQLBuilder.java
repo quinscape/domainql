@@ -20,7 +20,6 @@ import graphql.schema.GraphQLNamedType;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
-import graphql.schema.GraphQLType;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Schema;
@@ -68,6 +67,7 @@ public class DomainQLBuilder
         Set<GraphQLDirective> map = new LinkedHashSet<>();
         map.add(Directives.IncludeDirective);
         map.add(Directives.SkipDirective);
+        map.add(DomainQLDirectives.ComputedDirective);
         STANDARD_DIRECTIVES = map;
     }
 
@@ -165,11 +165,9 @@ public class DomainQLBuilder
             domainQL -> {
                 final GraphQLSchema schema = domainQL.getGraphQLSchema();
 
-
-
-                for (GraphQLType value : schema.getTypeMap().values())
+                for (GraphQLNamedType value : schema.getTypeMap().values())
                 {
-                    final String typeName = ((GraphQLNamedType)value).getName();
+                    final String typeName = value.getName();
                     if (value instanceof GraphQLObjectType && !typeName.startsWith("_"))
                     {
 

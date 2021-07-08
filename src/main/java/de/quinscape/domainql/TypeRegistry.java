@@ -1,5 +1,6 @@
 package de.quinscape.domainql;
 
+import de.quinscape.domainql.annotation.GraphQLComputed;
 import de.quinscape.domainql.annotation.GraphQLField;
 import de.quinscape.domainql.scalar.GraphQLDateScalar;
 import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
@@ -267,9 +268,9 @@ public class TypeRegistry
             final Class<Object> type = info.getType();
 
             final GraphQLField graphQLFieldAnno = JSONUtil.findAnnotation(info, GraphQLField.class);
+            final GraphQLComputed computedAnno = JSONUtil.findAnnotation(info, GraphQLComputed.class);
 
-
-            if (!DomainQL.isNormalProperty(info) || type.isArray())
+            if (!DomainQL.isNormalProperty(info) || type.isArray() || computedAnno != null)
             {
                 continue;
             }

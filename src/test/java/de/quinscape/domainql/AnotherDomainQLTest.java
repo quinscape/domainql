@@ -2,6 +2,7 @@ package de.quinscape.domainql;
 
 import de.quinscape.domainql.beans.GenericScalarLogic;
 import de.quinscape.domainql.beans.SumPerMonth;
+import de.quinscape.domainql.beans.TargetSeven;
 import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.generic.DomainObjectScalar;
 import de.quinscape.domainql.generic.GenericScalar;
@@ -31,8 +32,10 @@ import de.quinscape.domainql.logicimpl.LogicWithWrongInjection;
 import de.quinscape.domainql.logicimpl.LogicWithWrongInjection2;
 import de.quinscape.domainql.logicimpl.MinimalLogic;
 import de.quinscape.domainql.logicimpl.NoMirrorLogic;
+import de.quinscape.domainql.logicimpl.OutputTypeOverrideByParamLogic;
 import de.quinscape.domainql.logicimpl.SumPerMonthLogic;
 import de.quinscape.domainql.logicimpl.TestLogic;
+import de.quinscape.domainql.logicimpl.OutputTypeOverrideLogic;
 import de.quinscape.domainql.logicimpl.TypeParamLogic;
 import de.quinscape.domainql.logicimpl.TypeParamMutationLogic;
 import de.quinscape.domainql.logicimpl.TypeParamWithNamePatternLogic;
@@ -41,17 +44,14 @@ import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.scalar.BigDecimalScalar;
 import de.quinscape.domainql.scalar.BigIntegerScalar;
-import de.quinscape.domainql.schema.SchemaDataProvider;
 import de.quinscape.domainql.testdomain.Public;
-import graphql.ExecutionInput;
-import graphql.ExecutionResult;
-import graphql.GraphQL;
 import graphql.Scalars;
 import graphql.schema.GraphQLArgument;
+import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLInputObjectField;
 import graphql.schema.GraphQLInputObjectType;
-import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNamedType;
 import graphql.schema.GraphQLNonNull;
@@ -62,7 +62,6 @@ import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import graphql.schema.GraphQLTypeUtil;
 import graphql.schema.idl.SchemaPrinter;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,10 +71,8 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static de.quinscape.domainql.testdomain.Tables.*;
-import static graphql.schema.GraphQLNonNull.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
@@ -1151,6 +1148,61 @@ public class AnotherDomainQLTest
         final GraphQLObjectType biContainerType = (GraphQLObjectType) domainQL.getGraphQLSchema().getType("BIContainer");
         final GraphQLOutputType biValueType = biContainerType.getFieldDefinition("value").getType();
         assertThat(((GraphQLNamedType)biValueType).getName(), is( "BigInteger"));
+    }
+
+    @Test
+    public void testOutputTypeOverride()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new OutputTypeOverrideLogic()))
+            .build();
+        final GraphQLSchema schema = domainQL.getGraphQLSchema();
+
+
+        final OutputType ot = domainQL.getTypeRegistry().lookup("TargetSeven");
+        assertThat(ot.getJavaType().getName(), is(TargetSeven.class.getName()));
+
+        final GraphQLObjectType gqlType = (GraphQLObjectType) schema.getType("TargetSeven");
+        final GraphQLFieldDefinition fieldDef = gqlType.getFieldDefinition("concat");
+
+        final GraphQLDirective computed = fieldDef.getDirective("computed");
+        assertThat(computed, is(notNullValue()));
+
+        final GraphQLScalarType scalarType = (GraphQLScalarType) fieldDef.getType();
+        assertThat(scalarType.getName(), is("String"));
+        assertThat(gqlType.getFieldDefinitions().size(), is(3));
+
+        final GraphQLInputObjectType inputType = (GraphQLInputObjectType) schema.getType("TargetSevenInput");
+        final GraphQLInputObjectField concat = inputType.getFieldDefinition("concat");
+        assertThat(concat, is( nullValue()));
+
+    }
+
+    @Test
+    public void testOutputTypeOverrideByParam()
+    {
+        // checks that output type overriding works via @GraphQLTypeParam, too
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new OutputTypeOverrideByParamLogic()))
+            .build();
+        final GraphQLSchema schema = domainQL.getGraphQLSchema();
+
+
+        final OutputType ot = domainQL.getTypeRegistry().lookup("TargetSeven");
+        assertThat(ot.getJavaType().getName(), is(TargetSeven.class.getName()));
+
+        final GraphQLObjectType gqlType = (GraphQLObjectType) schema.getType("TargetSeven");
+        final GraphQLFieldDefinition fieldDef = gqlType.getFieldDefinition("concat");
+
+        final GraphQLDirective computed = fieldDef.getDirective("computed");
+        assertThat(computed, is(notNullValue()));
+
+        final GraphQLScalarType scalarType = (GraphQLScalarType) fieldDef.getType();
+        assertThat(scalarType.getName(), is("String"));
+        assertThat(gqlType.getFieldDefinitions().size(), is(3));
+
     }
 }
 

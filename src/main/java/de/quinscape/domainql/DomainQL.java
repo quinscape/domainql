@@ -2,6 +2,7 @@ package de.quinscape.domainql;
 
 import com.esotericsoftware.reflectasm.MethodAccess;
 import com.google.common.collect.Maps;
+import de.quinscape.domainql.annotation.GraphQLComputed;
 import de.quinscape.domainql.annotation.GraphQLFetcher;
 import de.quinscape.domainql.annotation.GraphQLField;
 import de.quinscape.domainql.annotation.GraphQLScalar;
@@ -74,7 +75,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -105,6 +105,7 @@ public class DomainQL
     public static final String QUERY_TYPE = "QueryType";
 
     public static final String MUTATION_TYPE = "MutationType";
+
 
     private final Collection<ParameterProviderFactory> parameterProviderFactories;
 
@@ -141,6 +142,7 @@ public class DomainQL
     private final List<GenericTypeReference> genericTypes;
 
     private final Map<String, List<String>> nameFields;
+
 
 
     DomainQL(
@@ -917,25 +919,34 @@ public class DomainQL
         Set<String> typesForJooqDomain
     )
     {
-        // define types for the JOOQ Tables
-        for (TableLookup table : jooqTables.values())
-        {
+
+        final LogicBeanAnalyzer analyzer = new LogicBeanAnalyzer(
+            this,
+            parameterProviderFactories,
+            logicBeans,
+            typeRegistry
+        );
+
+        final Set<OutputTypeAndTable> outputTypes = jooqTables.values().stream().map(table -> {
             final Class<?> pojoType = table.getPojoType();
-            typeRegistry.register(new TypeContext(null, pojoType));
-            defineTypeForTable(builder, codeRegistryBuilder, table.getTable(), pojoType, typesForJooqDomain);
-        }
+            return new OutputTypeAndTable(
+                typeRegistry.register(new TypeContext(null, pojoType)),
+                table.getTable()
+            );
+
+        }).collect(Collectors.toSet());
 
         for (Class<?> inputType : additionalInputTypes)
         {
             typeRegistry.registerInput(new TypeContext(null, inputType));
         }
 
-        return new LogicBeanAnalyzer(
-            this,
-            parameterProviderFactories,
-            logicBeans,
-            typeRegistry
-        );
+
+        for (OutputTypeAndTable e : outputTypes)
+        {
+            defineTypeForTable(builder, codeRegistryBuilder, e.table, e.outputType.getJavaType(), typesForJooqDomain);
+        }
+        return analyzer;
     }
 
 
@@ -1029,7 +1040,9 @@ public class DomainQL
 
         for (JSONPropertyInfo info : classInfo.getPropertyInfos())
         {
-            if (!isNormalProperty(info))
+            final GraphQLComputed computedAnno = JSONUtil.findAnnotation(info, GraphQLComputed.class);
+
+            if (!isNormalProperty(info) || computedAnno != null)
             {
                 continue;
             }
@@ -1790,6 +1803,7 @@ public class DomainQL
         final Column jpaColumnAnno = JSONUtil.findAnnotation(info, Column.class);
         final GraphQLField fieldAnno = JSONUtil.findAnnotation(info, GraphQLField.class);
         final GraphQLFetcher fetcherAnno = JSONUtil.findAnnotation(info, GraphQLFetcher.class);
+        final GraphQLComputed computedAnno = JSONUtil.findAnnotation(info, GraphQLComputed.class);
 
         final Method getterMethod = ((JavaObjectPropertyInfo) info).getGetterMethod();
 
@@ -1867,13 +1881,19 @@ public class DomainQL
 
         final FieldDoc fieldDoc = lookupFieldDoc(typeDoc, fieldName);
 
-        fieldDef = GraphQLFieldDefinition.newFieldDefinition()
+        final GraphQLFieldDefinition.Builder fieldbuilder = GraphQLFieldDefinition.newFieldDefinition()
             .name(fieldName)
             .description(
                 fieldDoc != null ? fieldDoc.getDescription() : defaultDescription
             )
-            .type(isNotNull ? GraphQLNonNull.nonNull(graphQLType) : (GraphQLOutputType) graphQLType)
-            .build();
+            .type(isNotNull ? nonNull(graphQLType) : (GraphQLOutputType) graphQLType);
+
+        if (computedAnno != null)
+        {
+            fieldbuilder.withDirective(DomainQLDirectives.ComputedDirective);
+        }
+
+        fieldDef = fieldbuilder.build();
 
         codeRegistryBuilder
             .dataFetcher(
@@ -2140,6 +2160,17 @@ public class DomainQL
         public T get(DataFetchingEnvironment environment) throws Exception
         {
             return null;
+        }
+    }
+
+    private static class OutputTypeAndTable
+    {
+        public final OutputType outputType;
+        public final Table<?> table;
+        private OutputTypeAndTable(OutputType outputType, Table<?> table)
+        {
+            this.outputType = outputType;
+            this.table = table;
         }
     }
 }

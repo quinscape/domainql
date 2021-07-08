@@ -33,6 +33,7 @@ import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -58,6 +59,8 @@ class LogicBeanAnalyzer
 
     private final TypeRegistry typeRegistry;
 
+    private final Map<String,Class<?>> outputTypeOverrides;
+
     LogicBeanAnalyzer(
         DomainQL domainQL,
         Collection<ParameterProviderFactory> parameterProviderFactories,
@@ -68,8 +71,9 @@ class LogicBeanAnalyzer
         this.domainQL = domainQL;
         this.parameterProviderFactories = parameterProviderFactories;
         this.typeRegistry = typeRegistry;
-        logicBeans.forEach(this::discover);
+        this.outputTypeOverrides = new HashMap<>();
 
+        logicBeans.forEach(this::discover);
     }
 
 
