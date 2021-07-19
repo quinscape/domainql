@@ -179,4 +179,27 @@ public class RelationModel
     {
         return id;
     }
+
+
+    @Override
+    public String toString()
+    {
+        return super.toString() + ": "
+            + "id = '" + id + '\''
+            + ", targetFields = " + targetFields
+            + ", sourceField = " + sourceField
+            + ", targetField = " + targetField
+            + ", leftSideObjectName = '" + leftSideObjectName + '\''
+            + ", rightSideObjectName = '" + rightSideObjectName + '\''
+            + ", sourceTable = " + sourceTable
+            + ", sourcePojoClass = " + sourcePojoClass
+            + ", sourceDBFields = " + sourceDBFields
+            + ", sourceFields = " + sourceFields
+            + ", targetTable = " + targetTable
+            + ", targetPojoClass = " + targetPojoClass
+            + ", targetDBFields = " + targetDBFields
+            + ", targetType = '" + targetType + '\''
+            + ", sourceType = '" + sourceType + '\''
+            ;
+    }
 }

@@ -8,18 +8,26 @@ import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.docs.DocsExtractor;
 import de.quinscape.domainql.docs.TypeDoc;
+import de.quinscape.domainql.meta.DomainQLMeta;
+import de.quinscape.domainql.meta.MetadataProvider;
 import de.quinscape.domainql.param.DataFetchingEnvironmentProviderFactory;
 import de.quinscape.domainql.param.ParameterProviderFactory;
 import de.quinscape.domainql.param.TypeParameterProviderFactory;
 import de.quinscape.domainql.scalar.GraphQLCurrencyScalar;
 import de.quinscape.spring.jsview.util.JSONUtil;
+import de.quinscape.spring.jsview.util.Util;
 import graphql.Directives;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNamedType;
 import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.GraphQLType;
+import graphql.schema.GraphQLTypeUtil;
+import graphql.schema.GraphQLUnmodifiedType;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Schema;
@@ -62,6 +70,8 @@ public class DomainQLBuilder
      * Standard GraphQL directives. Are registered by default, unless {@link #withoutStandardDirectives()} is called.
      */
     private final static Set<GraphQLDirective> STANDARD_DIRECTIVES;
+
+
     static
     {
         Set<GraphQLDirective> map = new LinkedHashSet<>();
@@ -71,12 +81,16 @@ public class DomainQLBuilder
         STANDARD_DIRECTIVES = map;
     }
 
+
     private final static JSONParser typeDocParser;
+
+
     static
     {
         typeDocParser = new JSONParser();
         typeDocParser.addTypeHint("[]", TypeDoc.class);
     }
+
 
     private final DSLContext dslContext;
 
@@ -90,7 +104,8 @@ public class DomainQLBuilder
 
     private Map<String, TableLookup> jooqTables = new HashMap<>();
 
-    private Set<GraphQLFieldDefinition> additionalQueries  = new LinkedHashSet<>();
+    private Set<GraphQLFieldDefinition> additionalQueries = new LinkedHashSet<>();
+
     private Set<GraphQLFieldDefinition> additionalMutations = new LinkedHashSet<>();
 
     private Set<Class<?>> additionalInputTypes = new LinkedHashSet<>();
@@ -108,6 +123,8 @@ public class DomainQLBuilder
     private Map<String, List<String>> nameFields = new LinkedHashMap<>();
 
     private Set<String> nameFieldsByName = new HashSet<>();
+
+    private Set<MetadataProvider> metadataProviders = new HashSet<>();
 
 
     DomainQLBuilder(DSLContext dslContext)
@@ -133,9 +150,9 @@ public class DomainQLBuilder
 
 
     /**
-     * Builds the configured DomainQL helper. 
+     * Builds the configured DomainQL helper.
      *
-     * @return  DomainQL helper
+     * @return DomainQL helper
      */
     public DomainQL build()
     {
@@ -146,7 +163,11 @@ public class DomainQLBuilder
             .map(b -> b.build(jooqTables, fieldLookup, options, relationIds))
             .collect(Collectors.toList());
 
-        return new DomainQL(
+
+        final HashSet<MetadataProvider> effectiveMetadataProviders = new HashSet<>(new HashSet<>(metadataProviders));
+        effectiveMetadataProviders.add(new NameFieldProvider());
+
+        final DomainQL domainQL = new DomainQL(
             dslContext,
             Collections.unmodifiableSet(logicBeans),
             Collections.unmodifiableMap(jooqTables),
@@ -162,38 +183,13 @@ public class DomainQLBuilder
                 DocsExtractor.normalize(typeDocs)
             ),
             fieldLookup,
-            domainQL -> {
-                final GraphQLSchema schema = domainQL.getGraphQLSchema();
-
-                for (GraphQLNamedType value : schema.getTypeMap().values())
-                {
-                    final String typeName = value.getName();
-                    if (value instanceof GraphQLObjectType && !typeName.startsWith("_"))
-                    {
-
-                        for (GraphQLFieldDefinition fieldDef : ((GraphQLObjectType) value).getFieldDefinitions())
-                        {
-                            final String name = fieldDef.getName();
-                            if (nameFieldsByName.contains(name))
-                            {
-                                if (!nameFields.containsKey(typeName))
-                                {
-                                    final OutputType outputType = domainQL.getTypeRegistry().lookup(typeName);
-                                    if (outputType == null)
-                                    {
-                                        throw new IllegalStateException("Could find find type '" + typeName + "'");
-                                    }
-                                    this.configureNameFieldForTypes(name, outputType.getJavaType());
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
-                return Collections.unmodifiableMap(nameFields);
-            },
+            Collections.unmodifiableSet(effectiveMetadataProviders),
             fullSupported
         );
+
+        validateNameFields(domainQL.getGraphQLSchema());
+
+        return domainQL;
     }
 
 
@@ -208,7 +204,7 @@ public class DomainQLBuilder
 
             final Map<String, Field<?>> fields = createFieldLookupForType(pojoType, table);
 
-            log.debug("createFieldLookup {}: {}", pojoType.getSimpleName(), fields );
+            log.debug("createFieldLookup {}: {}", pojoType.getSimpleName(), fields);
 
             map.putAll(fields);
         }
@@ -253,15 +249,17 @@ public class DomainQLBuilder
         return fieldsForType;
     }
 
+
     static String fieldLookupKey(String domainType, String fieldName)
     {
         return domainType + ":" + fieldName;
     }
 
+
     /**
      * Adds the given collection of parameter provider factories to the DomainQL configuration.
      *
-     * @param parameterProviderFactories    collection of parameter provider factories
+     * @param parameterProviderFactories collection of parameter provider factories
      *
      * @return this builder
      */
@@ -271,10 +269,11 @@ public class DomainQLBuilder
         return this;
     }
 
+
     /**
      * Adds the given parameter provider factory to the DomainQL configuration.
      *
-     * @param parameterProviderFactories    parameter provider factory
+     * @param parameterProviderFactories parameter provider factory
      *
      * @return this builder
      */
@@ -299,18 +298,17 @@ public class DomainQLBuilder
     /**
      * Configures the source and target field generation to use for the given JOOQ foreign key.
      *
-     * @param fkField           field contained in a foreign key
-     * @param sourceField       source field configuration
-     * @param targetField       target field configuration
+     * @param fkField     field contained in a foreign key
+     * @param sourceField source field configuration
+     * @param targetField target field configuration
      *
      * @return this builder
-     *
+     * <p>
      * This is the old API, which is less powerful but more succinct for simple cases.
-     *
+     * <p>
      * More complex configuration is provided by {@link #withRelation(RelationBuilder)}
      *
-     * @see #withRelation(RelationBuilder) 
-     *
+     * @see #withRelation(RelationBuilder)
      */
     public DomainQLBuilder configureRelation(
         TableField<?, ?> fkField, SourceField sourceField, TargetField targetField
@@ -330,6 +328,7 @@ public class DomainQLBuilder
      * Adds a new relation based on the given relation configuration.
      *
      * @param relationBuilder
+     *
      * @return
      */
     public DomainQLBuilder withRelation(RelationBuilder relationBuilder)
@@ -343,18 +342,18 @@ public class DomainQLBuilder
      * Configures the source and target field generation to use for the given JOOQ foreign key and the
      * field names to generate on both sides.
      * <p>
-     *     If one of the field configurations is NONE, the corresponding name will be ignored.
+     * If one of the field configurations is NONE, the corresponding name will be ignored.
      * </p>
      *
-     * @param fkField           field contained in a foreign key
-     * @param sourceField       source field configuration
-     * @param targetField       target field configuration
-     * @param leftSideObjectName      object name for the left-hand / source side
-     * @param rightSideObjectName     object name for the right-hand / target side
-     *
-     * This is the old API, which is less powerful but more succinct for simple cases.
-     *
-     * More complex configuration is provided by {@link #withRelation(RelationBuilder)}
+     * @param fkField             field contained in a foreign key
+     * @param sourceField         source field configuration
+     * @param targetField         target field configuration
+     * @param leftSideObjectName  object name for the left-hand / source side
+     * @param rightSideObjectName object name for the right-hand / target side
+     *                            <p>
+     *                            This is the old API, which is less powerful but more succinct for simple cases.
+     *                            <p>
+     *                            More complex configuration is provided by {@link #withRelation(RelationBuilder)}
      *
      * @return this builder
      */
@@ -376,11 +375,13 @@ public class DomainQLBuilder
         );
     }
 
+
     /**
-     * Configures the set of @{@link GraphQLLogic} annotated spring beans to check for query and mutation implementations.
+     * Configures the set of @{@link GraphQLLogic} annotated spring beans to check for query and mutation
+     * implementations.
      *
-     * @param logicBeans    collection of beans annotated with @{@link GraphQLLogic}.
-     *                      
+     * @param logicBeans collection of beans annotated with @{@link GraphQLLogic}.
+     *
      * @return this builder
      */
     public DomainQLBuilder logicBeans(Collection<Object> logicBeans)
@@ -389,10 +390,12 @@ public class DomainQLBuilder
         return this;
     }
 
+
     /**
-     * Configures the given @{@link GraphQLLogic} annotated spring beans to check for query and mutation implementations.
+     * Configures the given @{@link GraphQLLogic} annotated spring beans to check for query and mutation
+     * implementations.
      *
-     * @param logicBeans   beans var args annotated with @{@link GraphQLLogic}.
+     * @param logicBeans beans var args annotated with @{@link GraphQLLogic}.
      *
      * @return this builder
      */
@@ -415,8 +418,8 @@ public class DomainQLBuilder
     /**
      * Adds all tables of the given JOOQ schema to the DomainQL schema.
      *
-     * @param schema    JOOQ schema
-     *                  
+     * @param schema JOOQ schema
+     *
      * @return this builder
      */
     public DomainQLBuilder objectTypes(Schema schema)
@@ -431,10 +434,11 @@ public class DomainQLBuilder
         return this;
     }
 
+
     /**
      * Adds the given tables to the DomainQL schema.
      *
-     * @param tables    tables varargs
+     * @param tables tables varargs
      *
      * @return this builder
      */
@@ -451,13 +455,14 @@ public class DomainQLBuilder
 
     /**
      * Adds a custom SQL type based on a sql table-like name and a POJO class.
-     *
-     * The POJO must have a {@link javax.persistence.Table} annotation defining the table-like and {@link javax.persistence.Table}
+     * <p>
+     * The POJO must have a {@link javax.persistence.Table} annotation defining the table-like and
+     * {@link javax.persistence.Table}
      * annotations on the properties defining the column names.
-     *
+     * <p>
      * {@link javax.validation.constraints.NotNull} annotations can be used to mark non-null fields.
      *
-     * @param cls           POJO type.
+     * @param cls POJO type.
      *
      * @return this builder
      */
@@ -467,7 +472,8 @@ public class DomainQLBuilder
         if (anno == null)
         {
             throw new DomainQLTypeException(
-                "Custom SQL based type must have a @javax.persistence.Table annotation defining the name of the table-like"
+                "Custom SQL based type must have a @javax.persistence.Table annotation defining the name of the " +
+                    "table-like"
             );
         }
 
@@ -475,10 +481,11 @@ public class DomainQLBuilder
         final Table<?> table = schema.length() > 0 ?
             DSL.table(DSL.name(schema, anno.name())) :
             DSL.table(DSL.name(anno.name()));
-        
+
         jooqTables.put(cls.getSimpleName(), new TableLookup(cls, table));
         return this;
     }
+
 
     /**
      * Adds additional query fields to DomainQL query type.
@@ -493,6 +500,7 @@ public class DomainQLBuilder
 
         return this;
     }
+
 
     /**
      * Adds additional mutation fields to DomainQL query type.
@@ -512,8 +520,9 @@ public class DomainQLBuilder
     /**
      * Add additional directives for the GraphQL schema.
      *
-     * @param additionalDirectives     directives
-     * @return  this builder
+     * @param additionalDirectives directives
+     *
+     * @return this builder
      */
     public DomainQLBuilder withDirectives(GraphQLDirective... additionalDirectives)
     {
@@ -521,22 +530,25 @@ public class DomainQLBuilder
         return this;
     }
 
+
     /**
      * Add additional directives for the GraphQL schema.
      *
-     * @param additionalDirectives     directives
-     * @return  this builder
+     * @param additionalDirectives directives
+     *
+     * @return this builder
      */
     public DomainQLBuilder withDirective(GraphQLDirective additionalDirectives)
     {
-        this.additionalDirectives.add( additionalDirectives);
+        this.additionalDirectives.add(additionalDirectives);
         return this;
     }
+
 
     /**
      * Removes the registration for the standard directives.
      *
-     * @return  this builder
+     * @return this builder
      */
     public DomainQLBuilder withoutStandardDirectives()
     {
@@ -550,10 +562,11 @@ public class DomainQLBuilder
         return fullSupported;
     }
 
+
     /**
      * Configures whether to support the @full directive for this DomainQL service or not.
      *
-     * @return  this builder
+     * @return this builder
      */
 
     public DomainQLBuilder withFullDirectiveSupported(boolean fullSupported)
@@ -572,12 +585,12 @@ public class DomainQLBuilder
     /**
      * Adds an additional scalar type
      *
-     * @param cls           Java type for the scalar
-     * @param scalarType    scalar type
+     * @param cls        Java type for the scalar
+     * @param scalarType scalar type
      *
      * @return this builder
      */
-    public DomainQLBuilder withAdditionalScalar( Class<?> cls, GraphQLScalarType scalarType)
+    public DomainQLBuilder withAdditionalScalar(Class<?> cls, GraphQLScalarType scalarType)
     {
         this.additionalScalarTypes.put(cls, scalarType);
         return this;
@@ -592,13 +605,14 @@ public class DomainQLBuilder
 
     /**
      * Adds an additional input type.
-     *
+     * <p>
      * This can be useful to define additional client-side types without actually accepting them anywhere. Or to
      * define all possible generic domain types.
      *
-     * @param inputType     java type to add an input type for. <code>Input</code> will be added to the end of the simple name if the name does not already end in <code>Input</code>.
+     * @param inputType java type to add an input type for. <code>Input</code> will be added to the end of the simple
+     *                 name if the name does not already end in <code>Input</code>.
      *
-     * @return  this builder
+     * @return this builder
      */
     public DomainQLBuilder withAdditionalInputType(Class<?> inputType)
     {
@@ -607,15 +621,17 @@ public class DomainQLBuilder
         return this;
     }
 
+
     /**
      * Adds additional input types.
-     *
+     * <p>
      * This can be useful to define additional client-side types without actually accepting them anywhere. Or to
      * define all possible generic domain types.
      *
-     * @param inputTypes     java types to add an input type for. <code>Input</code> will be added to the end of the simple name if the name does not already end in <code>Input</code>.
+     * @param inputTypes java types to add an input type for. <code>Input</code> will be added to the end of the
+     *                   simple name if the name does not already end in <code>Input</code>.
      *
-     * @return  this builder
+     * @return this builder
      */
     public DomainQLBuilder withAdditionalInputTypes(Class<?>... inputTypes)
     {
@@ -627,12 +643,12 @@ public class DomainQLBuilder
 
     /**
      * Read DomainQL type docs from the given input stream to use as source for schema descriptions.
-     *
+     * <p>
      * Multiple sources will be merged.
      *
-     * @param file    file to read JSON data from
+     * @param file file to read JSON data from
      *
-     * @return  this builder
+     * @return this builder
      */
     public DomainQLBuilder withTypeDocsFrom(File file) throws FileNotFoundException
     {
@@ -648,10 +664,10 @@ public class DomainQLBuilder
 
     /**
      * Use the given typeDocs as documentation source
-     *
+     * <p>
      * Multiple sources will be merged.
      *
-     * @return  this builder
+     * @return this builder
      */
     public DomainQLBuilder withTypeDocs(List<TypeDoc> typeDocs)
     {
@@ -662,12 +678,12 @@ public class DomainQLBuilder
 
     /**
      * Read DomainQL type docs from the given input stream to use as source for schema descriptions.
-     *
+     * <p>
      * Multiple sources will be merged.
      *
-     * @param is    input stream
+     * @param is input stream
      *
-     * @return  this builder
+     * @return this builder
      */
     public DomainQLBuilder withTypeDocsFrom(InputStream is)
     {
@@ -687,16 +703,16 @@ public class DomainQLBuilder
         return withTypeDocs(typeDocs);
     }
 
+
     /**
      * Convenience method to define a single name field for a number of types.
      *
+     * @param nameField Single representative name field for each type
+     * @param pojoTypes varargs of simple POJO domain types
+     *
+     * @return this builder
      *
      * @see #configureNameFields(Class, String...)
-     *
-     * @param nameField     Single representative name field for each type
-     * @param pojoTypes     varargs of simple POJO domain types
-     *
-     * @return  this builder
      */
     public DomainQLBuilder configureNameFieldForTypes(String nameField, Class<?>... pojoTypes)
     {
@@ -715,12 +731,14 @@ public class DomainQLBuilder
 
 
     /**
-     * Convenience method to define one or more name fields to be automatically used as name field if they are present on the a type.
-     *
-     * The first field of a type that matches one of the fields will be configured as only name field. If you need multiple
+     * Convenience method to define one or more name fields to be automatically used as name field if they are
+     * present on the a type.
+     * <p>
+     * The first field of a type that matches one of the fields will be configured as only name field. If you need
+     * multiple
      * name fields on a single type, use {@link #configureNameFields(Class, String...)}.
      *
-     * @return  this builder
+     * @return this builder
      */
     public DomainQLBuilder configureNameField(String... nameFields)
     {
@@ -735,16 +753,30 @@ public class DomainQLBuilder
     }
 
 
+    /**
+     * Adds the given meta data provider instances to be used for DomainQL schema metadata creation.
+     *
+     * @param metadataProviders Varargs of meta data provider instances.
+     *
+     * @return this builder
+     */
+    public DomainQLBuilder withMetadataProviders(MetadataProvider... metadataProviders)
+    {
+        Collections.addAll(this.metadataProviders, metadataProviders);
+
+        return this;
+    }
+
 
     /**
      * Configures the given name fields to be representative of the given domain type.
-     *
+     * <p>
      * This method is needed to define name fields on JOOQ generated POJOs.
      *
-     * @param pojoClass     pojo type for the domain type
-     * @param nameFields    name fields.
+     * @param pojoClass  pojo type for the domain type
+     * @param nameFields name fields.
      *
-     * @return  this builder
+     * @return this builder
      */
     public DomainQLBuilder configureNameFields(Class<?> pojoClass, String... nameFields)
     {
@@ -758,5 +790,124 @@ public class DomainQLBuilder
         this.nameFields.put(pojoClass.getSimpleName(), Arrays.asList(nameFields));
         return this;
     }
+
+
+    /**
+     * Adapter that write the internal name field configuration into the DomainQL meta data.
+     */
+    private class NameFieldProvider
+        implements MetadataProvider
+    {
+
+        @Override
+        public void provideMetaData(DomainQL domainQL, DomainQLMeta meta)
+        {
+
+            final GraphQLSchema schema = domainQL.getGraphQLSchema();
+
+            for (GraphQLNamedType value : schema.getTypeMap().values())
+            {
+                final String typeName = value.getName();
+                if (value instanceof GraphQLObjectType && !typeName.startsWith("_"))
+                {
+
+                    for (GraphQLFieldDefinition fieldDef : ((GraphQLObjectType) value).getFieldDefinitions())
+                    {
+                        final String name = fieldDef.getName();
+                        if (nameFieldsByName.contains(name))
+                        {
+                            if (!nameFields.containsKey(typeName))
+                            {
+                                final OutputType outputType = domainQL.getTypeRegistry().lookup(typeName);
+                                if (outputType == null)
+                                {
+                                    throw new IllegalStateException("Could find find type '" + typeName + "'");
+                                }
+
+                                meta.getTypeMeta(outputType.getName()).setMeta(
+                                    "nameFields",
+                                    Collections.singletonList(name)
+                                );
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
+            for (Map.Entry<String, List<String>> e : nameFields.entrySet())
+            {
+                meta.getTypeMeta(e.getKey()).setMeta(DomainQLMeta.NAME_FIELDS, e.getValue());
+            }
+
+        }
+    }
+
+    /**
+     * Makes sure that all types and fields declared in {@link #nameFields} actually exist
+     * @param graphQLSchema
+     */
+    private void validateNameFields(GraphQLSchema graphQLSchema)
+    {
+        for (Map.Entry<String, List<String>> e : nameFields.entrySet())
+        {
+            final String typeName = e.getKey();
+            final List<String> fields = e.getValue();
+
+            final GraphQLType type = graphQLSchema.getType(typeName);
+            if (!(type instanceof GraphQLObjectType))
+            {
+                throw new DomainQLTypeException("Could find named type " + typeName);
+            }
+
+            for (String path : fields)
+            {
+                final List<String> parts = Util.split(path, ".");
+
+                final int numberOfParts = parts.size();
+                if (numberOfParts > 0)
+                {
+
+                    GraphQLObjectType current = (GraphQLObjectType) type;
+                    for (int i = 0; i < numberOfParts - 1; i++)
+                    {
+                        final GraphQLFieldDefinition fieldDef = current.getFieldDefinition(parts.get(
+                            i));
+                        if (fieldDef == null)
+                        {
+                            throw new DomainQLTypeException("Could not find name object field '" + path + "' for type" +
+                                " " + typeName);
+                        }
+
+                        final GraphQLOutputType fieldType = fieldDef.getType();
+
+                        if (GraphQLTypeUtil.unwrapNonNull(fieldType) instanceof GraphQLList)
+                        {
+                            throw new DomainQLTypeException("The naming field mechanism does not allow following many-to-many relations");
+                        }
+
+                        final GraphQLUnmodifiedType newType = GraphQLTypeUtil.unwrapAll(fieldType);
+                        if (!(newType instanceof GraphQLObjectType))
+                        {
+                            throw new DomainQLTypeException("Could not find name object field '" + path + "' for " +
+                                "type" +
+                                " " + typeName);
+                        }
+
+                        current = (GraphQLObjectType) newType;
+                    }
+
+
+                }
+                final GraphQLFieldDefinition fieldDef = ((GraphQLObjectType) type).getFieldDefinition(parts.get(
+                    numberOfParts - 1));
+                if (fieldDef == null || !(GraphQLTypeUtil.unwrapNonNull(fieldDef.getType()) instanceof GraphQLScalarType))
+                {
+                    throw new DomainQLTypeException("Could not find name scalar field '" + path + "' for type " + typeName);
+                }
+            }
+        }
+    }
+
 }
 

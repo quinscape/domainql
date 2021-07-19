@@ -13,6 +13,7 @@ import graphql.schema.SchemaUtil;
 import graphql.schema.idl.SchemaPrinter;
 import org.svenson.util.JSONBuilder;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -26,11 +27,9 @@ public final class SchemaDataProvider
     /**
      * Property under which the generic type references are provided.
      */
-    private static final String GENERIC_TYPES = "genericTypes";
+    public static final String SCHEMA = "schema";
 
-    private static final String RELATIONS = "relations";
-
-    private static final String NAME_FIELDS = "nameFields";
+    public static final String META = "meta";
 
     private final JSONHolder schemaData;
 
@@ -74,22 +73,13 @@ public final class SchemaDataProvider
         final Map<String, Object> data = IntrospectionUtil.introspect(domainQL.getGraphQLSchema());
         final Map<String, Object> schema = (Map<String, Object>) data.get("data");
         final Map<String, Object> schemaRoot = (Map<String, Object>) schema.get("__schema");
-        if (appendGenericTypes)
-        {
-            schemaRoot.put(GENERIC_TYPES, domainQL.getGenericTypes());
-        }
 
-        if (appendRelations)
-        {
-            schemaRoot.put(RELATIONS, domainQL.getRelationModels());
-        }
 
-        if (appendRelations)
-        {
-            schemaRoot.put(NAME_FIELDS, domainQL.getNameFields());
-        }
+        final Map<String, Object> root = new HashMap<>();
+        root.put(SCHEMA, schemaRoot);
+        root.put(META, domainQL.getMetaData());
 
-        this.schemaData = new JSONHolder(schemaRoot);
+        this.schemaData = new JSONHolder(root);
         this.viewDataName = viewDataName;
     }
 

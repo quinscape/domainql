@@ -3,7 +3,6 @@ package de.quinscape.domainql.schema;
 import de.quinscape.domainql.DomainQL;
 import de.quinscape.domainql.RelationBuilder;
 import de.quinscape.domainql.config.SourceField;
-import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.logicimpl.DegenerifyLogic;
 import de.quinscape.domainql.util.Paged;
@@ -52,14 +51,16 @@ public class SchemaDataProviderTest
 
         final JSON gen = JSONUtil.DEFAULT_GENERATOR;
         final JSONParser parser = JSONUtil.DEFAULT_PARSER;
-        final Map<String, Object> schemaData =
+        final Map<String, Object> root =
             parser.parse(
                 Map.class,
                 gen.forValue(ctx.getViewData().get("schema")
                 )
             );
 
-        //log.info("{}", JSONUtil.DEFAULT_GENERATOR.dumpObjectFormatted(schemaData));
+        final Map<String, Object> schemaData = (Map<String, Object>) root.get(SchemaDataProvider.SCHEMA);
+        final Map<String, Object> metaData = (Map<String, Object>) root.get(SchemaDataProvider.META);
+        log.info("{}", JSONUtil.DEFAULT_GENERATOR.dumpObjectFormatted(metaData));
 
         List<Object> types = (List<Object>) pathUtil.getPropertyPath(schemaData, "types");
 
@@ -71,11 +72,11 @@ public class SchemaDataProviderTest
         assertThat(pathUtil.getPropertyPath(sourceTwoType, "fields[0].name"), is(DomainObject.ID));
         assertThat(pathUtil.getPropertyPath(sourceTwoType, "fields[1].name"), is("targetId"));
 
-        final List<String> genericTypes = (List<String>) pathUtil.getPropertyPath(schemaData, "genericTypes");
+        final List<String> genericTypes = (List<String>) pathUtil.getPropertyPath(metaData, "genericTypes");
         assertThat(genericTypes.size(), is(1));
-        assertThat(pathUtil.getPropertyPath(schemaData, "genericTypes[0].genericType"), is( Paged.class.getName()));
-        assertThat(pathUtil.getPropertyPath(schemaData, "genericTypes[0].type"), is( "PagedPayload"));
-        assertThat(pathUtil.getPropertyPath(schemaData, "genericTypes[0].typeParameters[0]"), is( "Payload"));
+        assertThat(pathUtil.getPropertyPath(metaData, "genericTypes[0].genericType"), is( Paged.class.getName()));
+        assertThat(pathUtil.getPropertyPath(metaData, "genericTypes[0].type"), is( "PagedPayload"));
+        assertThat(pathUtil.getPropertyPath(metaData, "genericTypes[0].typeParameters[0]"), is( "Payload"));
 
         final Object stringType = findNamed(types, "String");
         assertThat(stringType, is(notNullValue()));

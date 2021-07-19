@@ -21,12 +21,14 @@ import de.quinscape.domainql.logic.DomainQLMethod;
 import de.quinscape.domainql.logic.GraphQLValueProvider;
 import de.quinscape.domainql.logic.Mutation;
 import de.quinscape.domainql.logic.Query;
+import de.quinscape.domainql.meta.DomainQLMeta;
+import de.quinscape.domainql.meta.DomainQLTypeMeta;
+import de.quinscape.domainql.meta.MetadataProvider;
 import de.quinscape.domainql.param.ParameterProvider;
 import de.quinscape.domainql.param.ParameterProviderFactory;
 import de.quinscape.domainql.schema.DomainQLAware;
 import de.quinscape.domainql.util.DegenerificationUtil;
 import de.quinscape.spring.jsview.util.JSONUtil;
-import de.quinscape.spring.jsview.util.Util;
 import graphql.introspection.Introspection;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -48,8 +50,6 @@ import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import graphql.schema.GraphQLTypeReference;
-import graphql.schema.GraphQLTypeUtil;
-import graphql.schema.GraphQLUnmodifiedType;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -77,12 +77,12 @@ import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -141,9 +141,7 @@ public class DomainQL
 
     private final List<GenericTypeReference> genericTypes;
 
-    private final Map<String, List<String>> nameFields;
-
-
+    private final DomainQLMeta metaData;
 
     DomainQL(
         DSLContext dslContext,
@@ -159,7 +157,7 @@ public class DomainQL
         Set<Class<?>> additionalInputTypes,
         List<TypeDoc> typeDocs,
         Map<String, Field<?>> dbFieldLookup,
-        Function<DomainQL, Map<String, List<String>>> nameFieldsProvider,
+        Set<MetadataProvider> metadataProviders,
         boolean fullSupported
     )
     {
@@ -186,76 +184,29 @@ public class DomainQL
 
         graphQLSchema = this.buildGraphQLSchema();
 
-        this.nameFields = nameFieldsProvider.apply(this);
-        validateNameFields();
-    }
+        final Map<String, DomainQLTypeMeta> types = new HashMap<>();
 
-
-    /**
-     * Makes sure that all types and fields declared in {@link #nameFields} actually exist
-     */
-    private void validateNameFields()
-    {
-        for (Map.Entry<String, List<String>> e : nameFields.entrySet())
+        for (OutputType outputType : typeRegistry.getOutputTypes())
         {
-            final String typeName = e.getKey();
-            final List<String> fields = e.getValue();
-
+            final String typeName = outputType.getName();
             final GraphQLType type = graphQLSchema.getType(typeName);
-            if (!(type instanceof GraphQLObjectType))
+            if (type instanceof GraphQLObjectType)
             {
-                throw new DomainQLTypeException("Could find named type " + typeName);
-            }
-
-            for (String path : fields)
-            {
-                final List<String> parts = Util.split(path, ".");
-
-                final int numberOfParts = parts.size();
-                if (numberOfParts > 0)
-                {
-
-                    GraphQLObjectType current = (GraphQLObjectType) type;
-                    for (int i = 0; i < numberOfParts - 1; i++)
-                    {
-                        final GraphQLFieldDefinition fieldDef = current.getFieldDefinition(parts.get(
-                            i));
-                        if (fieldDef == null)
-                        {
-                            throw new DomainQLTypeException("Could not find name object field '" + path + "' for type" +
-                                " " + typeName);
-                        }
-
-                        final GraphQLOutputType fieldType = fieldDef.getType();
-
-                        if (GraphQLTypeUtil.unwrapNonNull(fieldType) instanceof GraphQLList)
-                        {
-                            throw new DomainQLTypeException("The naming field mechanism does not allow following many-to-many relations");
-                        }
-
-                        final GraphQLUnmodifiedType newType = GraphQLTypeUtil.unwrapAll(fieldType);
-                        if (!(newType instanceof GraphQLObjectType))
-                        {
-                            throw new DomainQLTypeException("Could not find name object field '" + path + "' for " +
-                                "type" +
-                                " " + typeName);
-                        }
-
-                        current = (GraphQLObjectType) newType;
-                    }
-
-
-                }
-                final GraphQLFieldDefinition fieldDef = ((GraphQLObjectType) type).getFieldDefinition(parts.get(
-                    numberOfParts - 1));
-                if (fieldDef == null || !(GraphQLTypeUtil.unwrapNonNull(fieldDef.getType()) instanceof GraphQLScalarType))
-                {
-                    throw new DomainQLTypeException("Could not find name scalar field '" + path + "' for type " + typeName);
-                }
+                types.put(
+                    typeName,
+                    new DomainQLTypeMeta(typeName)
+                );
             }
         }
-    }
 
+        metaData = new DomainQLMeta(types);
+
+        metaData.addAddendum("genericTypes", genericTypes);
+        metaData.addAddendum("relations", relationModels);
+
+
+        metadataProviders.forEach( p -> p.provideMetaData(this, metaData));
+    }
 
     Map<String, Field<?>> getFieldLookup()
     {
@@ -457,18 +408,6 @@ public class DomainQL
     }
 
 
-    private Column getColumnAnnotation(Class<?> pojoType, JSONPropertyInfo info)
-    {
-        final Column jpaColumnAnno = JSONUtil.findAnnotation(info, Column.class);
-        if (jpaColumnAnno == null)
-        {
-            throw new IllegalStateException(
-                "No @Column annotation on property " + pojoType.getSimpleName() + "." + info.getJavaPropertyName());
-        }
-        return jpaColumnAnno;
-    }
-
-
     private JSONPropertyInfo findPropertyInfoForField(Class<?> pojoType, TableField<?, ?> tableField)
     {
         final JSONClassInfo classInfo = JSONUtil.getClassInfo(pojoType);
@@ -484,10 +423,10 @@ public class DomainQL
                 continue;
             }
 
-            final Column jpaColumnAnno = getColumnAnnotation(pojoType, info);
+            final Column jpaColumnAnno = JSONUtil.findAnnotation(info, Column.class);
 
             final String fieldName = tableField.getName();
-            if (fieldName.equals(jpaColumnAnno.name()))
+            if (jpaColumnAnno != null && fieldName.equals(jpaColumnAnno.name()))
             {
                 return info;
             }
@@ -2124,22 +2063,7 @@ public class DomainQL
     {
         return new DomainQLBuilder(dslContext);
     }
-
-
-    /**
-     * Returns the map of name field configuration-
-     *
-     * The map contains domain type names mapped to a list of name fields representative of that type.
-     *
-     * Note that the fields might contain a dot notation to express GraphQL type paths.
-     *
-     * @return  name field map
-     */
-    public Map<String, List<String>> getNameFields()
-    {
-        return nameFields;
-    }
-
+    
 
     /**
      * Provides access to the lookup table for database types. The map maps type names to a TableLookup which provides
@@ -2150,6 +2074,12 @@ public class DomainQL
     public Map<String, TableLookup> getJooqTables()
     {
         return jooqTablesRO;
+    }
+
+
+    public DomainQLMeta getMetaData()
+    {
+        return metaData;
     }
 
 
