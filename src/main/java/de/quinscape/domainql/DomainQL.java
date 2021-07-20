@@ -59,6 +59,7 @@ import org.jooq.TableField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.util.StringUtils;
 import org.svenson.JSONProperty;
 import org.svenson.info.JSONClassInfo;
 import org.svenson.info.JSONPropertyInfo;
@@ -206,7 +207,40 @@ public class DomainQL
 
 
         metadataProviders.forEach( p -> p.provideMetaData(this, metaData));
+
+        logTypeReport();
+
+
     }
+
+
+    private void logTypeReport()
+    {
+        if (log.isDebugEnabled())
+        {
+            final int maxNameLength = Stream.concat(
+                typeRegistry.getOutputTypes().stream(),
+                typeRegistry.getInputTypes().stream()
+            ).mapToInt(t -> t.getName().length()).reduce(
+                0,
+                Math::max
+            ) + 1;
+
+
+            log.debug("DomainQL initialized");
+            for (OutputType outputType : typeRegistry.getOutputTypes())
+            {
+                final TypeContext typeContext = outputType.getTypeContext();
+                log.debug("OUPUT {}: Java-Type {}", String.format("%-" + maxNameLength + "s", outputType.getName()), typeContext.describe());
+            }
+            for (InputType inputType : typeRegistry.getInputTypes())
+            {
+                final TypeContext typeContext = inputType.getTypeContext();
+                log.debug("INPUT {}: Java-Type {}", String.format("%-" + maxNameLength + "s", inputType.getName()), typeContext.describe());
+            }
+        }
+    }
+
 
     Map<String, Field<?>> getFieldLookup()
     {
