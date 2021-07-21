@@ -5,13 +5,6 @@ import de.quinscape.domainql.util.IntrospectionUtil;
 import de.quinscape.domainql.util.JSONHolder;
 import de.quinscape.spring.jsview.JsViewContext;
 import de.quinscape.spring.jsview.JsViewProvider;
-import de.quinscape.spring.jsview.util.JSONUtil;
-import graphql.ExecutionInput;
-import graphql.ExecutionResult;
-import graphql.GraphQL;
-import graphql.schema.SchemaUtil;
-import graphql.schema.idl.SchemaPrinter;
-import org.svenson.util.JSONBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,13 +15,12 @@ import java.util.Map;
 public final class SchemaDataProvider
     implements JsViewProvider
 {
-    private static final String DEFAULT_VIEW_DATA_NAME = "schema";
-
     /**
      * Property under which the generic type references are provided.
      */
-    public static final String SCHEMA = "schema";
+    public static final String DOMAIN_QL = "domainQL";
 
+    public static final String SCHEMA = "schema";
     public static final String META = "meta";
 
     private final JSONHolder schemaData;
@@ -44,7 +36,7 @@ public final class SchemaDataProvider
      */
     public SchemaDataProvider(DomainQL domainQL)
     {
-        this(domainQL, DEFAULT_VIEW_DATA_NAME, true, true, true);
+        this(domainQL, DOMAIN_QL, true, true, true);
     }
 
 

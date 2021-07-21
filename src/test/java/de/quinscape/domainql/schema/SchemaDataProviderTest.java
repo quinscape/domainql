@@ -54,7 +54,7 @@ public class SchemaDataProviderTest
         final Map<String, Object> root =
             parser.parse(
                 Map.class,
-                gen.forValue(ctx.getViewData().get("schema")
+                gen.forValue(ctx.getViewData().get("domainQL")
                 )
             );
 
