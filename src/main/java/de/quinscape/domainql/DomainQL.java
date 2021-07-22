@@ -202,8 +202,8 @@ public class DomainQL
 
         metaData = new DomainQLMeta(types);
 
-        metaData.addAddendum("genericTypes", genericTypes);
-        metaData.addAddendum("relations", relationModels);
+        metaData.addAddendum(DomainQLMeta.GENERIC_TYPES, Collections.unmodifiableList(genericTypes));
+        metaData.addAddendum(DomainQLMeta.RELATIONS, this.relationModels);
 
 
         metadataProviders.forEach( p -> p.provideMetaData(this, metaData));

@@ -1,9 +1,12 @@
 package de.quinscape.domainql.meta;
 
+import de.quinscape.domainql.GenericTypeReference;
+import de.quinscape.domainql.config.RelationModel;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import org.svenson.JSONable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,7 +20,20 @@ public class DomainQLMeta
 {
     private final Map<String, Object> data;
 
+    /**
+     * Name of the builtin name fields type meta
+     */
     public final static String NAME_FIELDS = "nameFields";
+
+    /**
+     * Name of the builtin relations addendum
+     */
+    public final static String RELATIONS = "relations";
+
+    /**
+     * Name of the builtin generic types addendum
+     */
+    public final static String GENERIC_TYPES = "genericTypes";
 
     public DomainQLMeta(Map<String, DomainQLTypeMeta> types)
     {
@@ -54,6 +70,16 @@ public class DomainQLMeta
         return data;
     }
 
+
+    public List<RelationModel> getRelationModels()
+    {
+        return (List<RelationModel>) data.get(RELATIONS);
+    }
+
+    public List<GenericTypeReference> getGenericTypes()
+    {
+        return (List<GenericTypeReference>) data.get(GENERIC_TYPES);
+    }
 
     @Override
     public String toJSON()
