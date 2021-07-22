@@ -170,9 +170,11 @@ public class DomainQLBuilder
         final DomainQL domainQL = new DomainQL(
             dslContext,
             Collections.unmodifiableSet(logicBeans),
-            Collections.unmodifiableMap(jooqTables),
+            // XXX: we might need to update the table lookup with overloaded types, so we can't make it unmodifiable it here
+            jooqTables,
             Collections.unmodifiableCollection(parameterProviderFactories),
-            Collections.unmodifiableList(relationModels),
+            // XXX: we might need to update the relations with overloaded types, so we can't make it unmodifiable it here
+            relationModels,
             options,
             Collections.unmodifiableSet(additionalQueries),
             Collections.unmodifiableSet(additionalMutations),

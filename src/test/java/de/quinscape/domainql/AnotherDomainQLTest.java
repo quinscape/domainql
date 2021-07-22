@@ -1,6 +1,7 @@
 package de.quinscape.domainql;
 
 import de.quinscape.domainql.beans.GenericScalarLogic;
+import de.quinscape.domainql.beans.SourceSeven;
 import de.quinscape.domainql.beans.SumPerMonth;
 import de.quinscape.domainql.beans.TargetSeven;
 import de.quinscape.domainql.generic.DomainObject;
@@ -1156,6 +1157,14 @@ public class AnotherDomainQLTest
         final DomainQL domainQL = DomainQL.newDomainQL(null)
             .objectTypes(Public.PUBLIC)
             .logicBeans(Collections.singleton(new OutputTypeOverrideLogic()))
+            .withRelation(
+                new RelationBuilder()
+                    .withId("SourceSeven-renamedTarget")
+                    .withForeignKeyFields(SOURCE_SEVEN.TARGET)
+                    .withSourceField(SourceField.OBJECT)
+                    .withTargetField(TargetField.NONE)
+                    .withLeftSideObjectName("targetObj")
+            )
             .build();
         final GraphQLSchema schema = domainQL.getGraphQLSchema();
 
@@ -1177,6 +1186,11 @@ public class AnotherDomainQLTest
         final GraphQLInputObjectField concat = inputType.getFieldDefinition("concat");
         assertThat(concat, is( nullValue()));
 
+        assertThat(domainQL.getMetaData().getRelationModels().get(0).getSourcePojoClass().getName(), is(SourceSeven.class.getName()));
+        assertThat(domainQL.getMetaData().getRelationModels().get(0).getTargetPojoClass().getName(), is(TargetSeven.class.getName()));
+
+        assertThat(domainQL.lookupType("SourceSeven").getPojoType().getName(), is(SourceSeven.class.getName()));
+        assertThat(domainQL.lookupType("TargetSeven").getPojoType().getName(), is(TargetSeven.class.getName()));
     }
 
     @Test
@@ -1186,6 +1200,14 @@ public class AnotherDomainQLTest
         final DomainQL domainQL = DomainQL.newDomainQL(null)
             .objectTypes(Public.PUBLIC)
             .logicBeans(Collections.singleton(new OutputTypeOverrideByParamLogic()))
+            .withRelation(
+                new RelationBuilder()
+                    .withId("SourceSeven-renamedTarget")
+                    .withForeignKeyFields(SOURCE_SEVEN.TARGET)
+                    .withSourceField(SourceField.OBJECT)
+                    .withTargetField(TargetField.NONE)
+                    .withLeftSideObjectName("targetObj")
+            )
             .build();
         final GraphQLSchema schema = domainQL.getGraphQLSchema();
 

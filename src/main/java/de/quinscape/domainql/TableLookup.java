@@ -8,6 +8,7 @@ import org.jooq.Table;
 public final class TableLookup
 {
     private final Class<?> pojoType;
+
     private final Table<?> table;
 
 
@@ -40,8 +41,11 @@ public final class TableLookup
         return table;
     }
 
+
     public String getDomainType()
     {
         return pojoType.getSimpleName();
     }
+
+
 }

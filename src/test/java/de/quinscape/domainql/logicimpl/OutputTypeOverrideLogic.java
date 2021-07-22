@@ -2,6 +2,7 @@ package de.quinscape.domainql.logicimpl;
 
 import de.quinscape.domainql.annotation.GraphQLLogic;
 import de.quinscape.domainql.annotation.GraphQLQuery;
+import de.quinscape.domainql.beans.SourceSeven;
 import de.quinscape.domainql.beans.TargetSeven;
 
 import java.util.UUID;
@@ -21,5 +22,11 @@ public class OutputTypeOverrideLogic
             targetSeven.setName("Unnamed");
         }
         return targetSeven;
+    }
+
+    @GraphQLQuery
+    public SourceSeven sourceSevenOverload(SourceSeven in)
+    {
+        return null;
     }
 }

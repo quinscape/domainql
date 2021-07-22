@@ -59,7 +59,6 @@ import org.jooq.TableField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopProxyUtils;
-import org.springframework.util.StringUtils;
 import org.svenson.JSONProperty;
 import org.svenson.info.JSONClassInfo;
 import org.svenson.info.JSONPropertyInfo;
@@ -164,7 +163,6 @@ public class DomainQL
     {
         this.dslContext = dslContext;
         this.logicBeans = logicBeans;
-        this.relationModels = relationModels;
         this.additionalQueries = additionalQueries;
         this.additionalMutations = additionalMutations;
         this.additionalDirectives = additionalDirectives;
@@ -174,6 +172,8 @@ public class DomainQL
         this.parameterProviderFactories = parameterProviderFactories;
         this.options = options;
 
+        // we store the unmodifiable version in the field 
+        this.relationModels = Collections.unmodifiableList(relationModels);
 
         this.typeRegistry = new TypeRegistry(this, additionalScalarTypes);
 
@@ -183,7 +183,7 @@ public class DomainQL
 
         genericTypes = new ArrayList<>();
 
-        graphQLSchema = this.buildGraphQLSchema();
+        graphQLSchema = this.buildGraphQLSchema(relationModels);
 
         final Map<String, DomainQLTypeMeta> types = new HashMap<>();
 
@@ -205,12 +205,11 @@ public class DomainQL
         metaData.addAddendum(DomainQLMeta.GENERIC_TYPES, Collections.unmodifiableList(genericTypes));
         metaData.addAddendum(DomainQLMeta.RELATIONS, this.relationModels);
 
-
-        metadataProviders.forEach( p -> p.provideMetaData(this, metaData));
+        metadataProviders.forEach(
+            p -> p.provideMetaData(this, metaData)
+        );
 
         logTypeReport();
-
-
     }
 
 
@@ -258,14 +257,27 @@ public class DomainQL
      * Builds a graphql schema instance from the given DomainQL configuration.
      *
      * @return GraphQL schema
+     * @param relationModels
      */
-    private GraphQLSchema buildGraphQLSchema()
+    private GraphQLSchema buildGraphQLSchema(
+        List<RelationModel> relationModels
+    )
     {
         final GraphQLSchema.Builder builder = GraphQLSchema.newSchema();
         final GraphQLCodeRegistry.Builder codeRegistryBuilder = GraphQLCodeRegistry.newCodeRegistry();
 
         Set<String> typesForJooqDomain = new HashSet<>();
-        final LogicBeanAnalyzer analyzer = registerTypes(builder, codeRegistryBuilder, typesForJooqDomain);
+
+        final LogicBeanAnalyzer analyzer = new LogicBeanAnalyzer(
+            this,
+            parameterProviderFactories,
+            logicBeans,
+            typeRegistry
+        );
+
+        updateTableLookups();
+
+        registerTypes(builder, codeRegistryBuilder, typesForJooqDomain, relationModels);
 
         defineEnumTypes(builder);
 
@@ -309,6 +321,32 @@ public class DomainQL
         this.register(schema);
 
         return schema;
+    }
+
+
+    /**
+     * Makes sure that all POJO references in the table lookup correctly reference overridden output types.
+     */
+    private void updateTableLookups()
+    {
+        for (String name : jooqTables.keySet())
+        {
+            final TableLookup tableLookup = jooqTables.get(name);
+
+            TableLookup newLookup;
+
+            // if we find a class with the name of JOOQ type at this point, it must be a GraphQL method override
+            final Class<?> override = typeRegistry.getOutputOverride(tableLookup.getPojoType());
+            if (override != null)
+            {
+                // so we update the lookup
+                newLookup = new TableLookup(
+                    override,
+                    tableLookup.getTable()
+                );
+                jooqTables.put(name, newLookup);
+            }
+        }
     }
 
 
@@ -886,20 +924,13 @@ public class DomainQL
     }
 
 
-    private LogicBeanAnalyzer registerTypes(
+    private void registerTypes(
         GraphQLSchema.Builder builder,
         GraphQLCodeRegistry.Builder codeRegistryBuilder,
-        Set<String> typesForJooqDomain
+        Set<String> typesForJooqDomain,
+        List<RelationModel> relationModels
     )
     {
-
-        final LogicBeanAnalyzer analyzer = new LogicBeanAnalyzer(
-            this,
-            parameterProviderFactories,
-            logicBeans,
-            typeRegistry
-        );
-
         final Set<OutputTypeAndTable> outputTypes = jooqTables.values().stream().map(table -> {
             final Class<?> pojoType = table.getPojoType();
             return new OutputTypeAndTable(
@@ -914,12 +945,20 @@ public class DomainQL
             typeRegistry.registerInput(new TypeContext(null, inputType));
         }
 
+        for (int i = 0, relationModelsSize = relationModels.size(); i < relationModelsSize; i++)
+        {
+            RelationModel relationModel = relationModels.get(i);
+            final RelationModel updated = relationModel.update(this);
+            if (updated != relationModel)
+            {
+                relationModels.set(i, updated);
+            }
+        }
 
         for (OutputTypeAndTable e : outputTypes)
         {
             defineTypeForTable(builder, codeRegistryBuilder, e.table, e.outputType.getJavaType(), typesForJooqDomain);
         }
-        return analyzer;
     }
 
 
@@ -2138,5 +2177,3 @@ public class DomainQL
         }
     }
 }
-
-

@@ -360,4 +360,18 @@ public class TypeRegistry
         }
         return scalarTypeByClass.get(cls);
     }
+
+
+    /**
+     * Checks a given POJO type for override by resolving its simple name again.
+     *
+     * @param pojoClass     POJO type to check
+     *
+     * @return overriding type or identical type
+     */
+    public Class<?> getOutputOverride(Class<?> pojoClass)
+    {
+        final OutputType outputType = lookup(pojoClass.getSimpleName());
+        return outputType != null ? outputType.getJavaType() : null;
+    }
 }
