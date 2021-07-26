@@ -5,9 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="10e81f3e-9475-49dc-a250-d341e7899a2c" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/domainql.iml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/resources/simplelogger.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/resources/simplelogger.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQLBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQLBuilder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/TableLookup.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/TableLookup.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/TypeRegistry.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/TypeRegistry.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/config/RelationModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/config/RelationModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/meta/DomainQLTypeMeta.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/meta/DomainQLTypeMeta.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/AnotherDomainQLTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/AnotherDomainQLTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -80,8 +85,8 @@
   </component>
   <component name="RecentsManager">
     <key name="CreateClassDialog.RecentsKey">
-      <recent name="de.quinscape.domainql.meta" />
       <recent name="de.quinscape.domainql" />
+      <recent name="de.quinscape.domainql.meta" />
       <recent name="de.quinscape.domainql.schema" />
       <recent name="de.quinscape.domainql.logicimpl" />
       <recent name="de.quinscape.domainql.logic" />
@@ -109,6 +114,7 @@
       <recent name="de.quinscape.domainql.meta" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="de.quinscape.domainql.beans" />
       <recent name="de.quinscape.domainql.logicimpl" />
       <recent name="de.quinscape.domainql.annotation" />
       <recent name="de.quinscape.specrunner.runtime" />
@@ -131,23 +137,24 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="ArquillianTestNG" factoryName="" nameIsGenerated="true">
-      <option name="arquillianRunConfiguration">
-        <value>
-          <option name="containerStateName" value="" />
-        </value>
-      </option>
-      <option name="TEST_OBJECT" value="CLASS" />
-      <properties />
-      <listeners />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="All in domainql" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="domainql" />
       <option name="PACKAGE_NAME" value="" />
       <option name="TEST_OBJECT" value="package" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="moduleWithDependencies" />
+      </option>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="AnotherDomainQLTest.testOutputTypeOverride" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="domainql" />
+      <option name="PACKAGE_NAME" value="de.quinscape.domainql" />
+      <option name="MAIN_CLASS_NAME" value="de.quinscape.domainql.AnotherDomainQLTest" />
+      <option name="METHOD_NAME" value="testOutputTypeOverride" />
+      <option name="TEST_OBJECT" value="method" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="TEST_SEARCH_SCOPE">
         <value defaultName="moduleWithDependencies" />
@@ -161,20 +168,6 @@
       <option name="PACKAGE_NAME" value="de.quinscape.domainql.meta" />
       <option name="MAIN_CLASS_NAME" value="de.quinscape.domainql.meta.DomainQLMetaTest" />
       <option name="TEST_OBJECT" value="class" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="moduleWithDependencies" />
-      </option>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="DomainQLMetaTest.testRelationModelMetadata" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="domainql" />
-      <option name="PACKAGE_NAME" value="de.quinscape.domainql.meta" />
-      <option name="MAIN_CLASS_NAME" value="de.quinscape.domainql.meta.DomainQLMetaTest" />
-      <option name="METHOD_NAME" value="testRelationModelMetadata" />
-      <option name="TEST_OBJECT" value="method" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="TEST_SEARCH_SCOPE">
         <value defaultName="moduleWithDependencies" />
@@ -243,18 +236,18 @@
     </configuration>
     <list>
       <item itemvalue="JUnit.DomainQLMetaTest" />
-      <item itemvalue="JUnit.DomainQLMetaTest.testRelationModelMetadata" />
       <item itemvalue="JUnit.All in domainql" />
       <item itemvalue="JUnit.SchemaDataProviderTest" />
       <item itemvalue="JUnit.SchemaDataProviderTest.testSchemaProviding" />
+      <item itemvalue="JUnit.AnotherDomainQLTest.testOutputTypeOverride" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="JUnit.All in domainql" />
-        <item itemvalue="JUnit.SchemaDataProviderTest.testSchemaProviding" />
+        <item itemvalue="JUnit.AnotherDomainQLTest.testOutputTypeOverride" />
         <item itemvalue="JUnit.SchemaDataProviderTest" />
+        <item itemvalue="JUnit.SchemaDataProviderTest.testSchemaProviding" />
         <item itemvalue="JUnit.DomainQLMetaTest" />
-        <item itemvalue="JUnit.DomainQLMetaTest.testRelationModelMetadata" />
       </list>
     </recent_temporary>
   </component>
@@ -307,7 +300,17 @@
       <workItem from="1626425092365" duration="1245000" />
       <workItem from="1626697139359" duration="1470000" />
       <workItem from="1626713337165" duration="6406000" />
-      <workItem from="1626779246320" duration="2875000" />
+      <workItem from="1626779246320" duration="6453000" />
+      <workItem from="1626804907328" duration="2667000" />
+      <workItem from="1626861048381" duration="1276000" />
+      <workItem from="1626866995339" duration="1861000" />
+      <workItem from="1626871916591" duration="1368000" />
+      <workItem from="1626877101141" duration="2559000" />
+      <workItem from="1626951162852" duration="3452000" />
+      <workItem from="1626959304072" duration="2652000" />
+      <workItem from="1627038742718" duration="4776000" />
+      <workItem from="1627166021378" duration="9000" />
+      <workItem from="1627303683013" duration="31000" />
     </task>
     <servers />
   </component>
@@ -345,7 +348,7 @@
         </breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java</url>
-          <line>955</line>
+          <line>990</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -361,7 +364,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java</url>
-          <line>428</line>
+          <line>462</line>
           <option name="timeStamp" value="15" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
