@@ -195,7 +195,7 @@ public class DomainQL
             {
                 types.put(
                     typeName,
-                    new DomainQLTypeMeta(typeName)
+                    new DomainQLTypeMeta()
                 );
             }
         }

@@ -14,17 +14,10 @@ import java.util.Set;
 public class DomainQLTypeMeta
 {
 
-    private final String name;
-
     private final Map<String, Object> meta = new HashMap<>();
     private final Map<String, Object> metaRO = Collections.unmodifiableMap(meta);
     private final Map<String, Map<String,Object>> fields = new HashMap<>();
     private final Map<String, Map<String,Object>> fieldsRO = Collections.unmodifiableMap(fields);
-
-    public DomainQLTypeMeta(String name)
-    {
-        this.name = name;
-    }
 
 
     /**
@@ -88,17 +81,6 @@ public class DomainQLTypeMeta
             return null;
         }
         return (T) map.get(meta);
-    }
-
-
-    /**
-     * Returns the GraphQL type name.
-     *
-     * @return GraphQL type name
-     */
-    public String getName()
-    {
-        return name;
     }
 
 
