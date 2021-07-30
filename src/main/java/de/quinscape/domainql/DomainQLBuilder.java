@@ -8,8 +8,9 @@ import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.docs.DocsExtractor;
 import de.quinscape.domainql.docs.TypeDoc;
-import de.quinscape.domainql.meta.DomainQLMeta;
+import de.quinscape.domainql.meta.ComputedMetadataProvider;
 import de.quinscape.domainql.meta.MetadataProvider;
+import de.quinscape.domainql.meta.NameFieldProvider;
 import de.quinscape.domainql.param.DataFetchingEnvironmentProviderFactory;
 import de.quinscape.domainql.param.ParameterProviderFactory;
 import de.quinscape.domainql.param.TypeParameterProviderFactory;
@@ -20,7 +21,6 @@ import graphql.Directives;
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLNamedType;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLScalarType;
@@ -77,7 +77,6 @@ public class DomainQLBuilder
         Set<GraphQLDirective> map = new LinkedHashSet<>();
         map.add(Directives.IncludeDirective);
         map.add(Directives.SkipDirective);
-        map.add(DomainQLDirectives.ComputedDirective);
         STANDARD_DIRECTIVES = map;
     }
 
@@ -165,7 +164,8 @@ public class DomainQLBuilder
 
 
         final HashSet<MetadataProvider> effectiveMetadataProviders = new HashSet<>(new HashSet<>(metadataProviders));
-        effectiveMetadataProviders.add(new NameFieldProvider());
+        effectiveMetadataProviders.add(new NameFieldProvider(nameFields, nameFieldsByName));
+        effectiveMetadataProviders.add(new ComputedMetadataProvider());
 
         final DomainQL domainQL = new DomainQL(
             dslContext,
@@ -795,57 +795,6 @@ public class DomainQLBuilder
 
 
     /**
-     * Adapter that write the internal name field configuration into the DomainQL meta data.
-     */
-    private class NameFieldProvider
-        implements MetadataProvider
-    {
-
-        @Override
-        public void provideMetaData(DomainQL domainQL, DomainQLMeta meta)
-        {
-
-            final GraphQLSchema schema = domainQL.getGraphQLSchema();
-
-            for (GraphQLNamedType value : schema.getTypeMap().values())
-            {
-                final String typeName = value.getName();
-                if (value instanceof GraphQLObjectType && !typeName.startsWith("_"))
-                {
-
-                    for (GraphQLFieldDefinition fieldDef : ((GraphQLObjectType) value).getFieldDefinitions())
-                    {
-                        final String name = fieldDef.getName();
-                        if (nameFieldsByName.contains(name))
-                        {
-                            if (!nameFields.containsKey(typeName))
-                            {
-                                final OutputType outputType = domainQL.getTypeRegistry().lookup(typeName);
-                                if (outputType == null)
-                                {
-                                    throw new IllegalStateException("Could find find type '" + typeName + "'");
-                                }
-
-                                meta.getTypeMeta(outputType.getName()).setMeta(
-                                    "nameFields",
-                                    Collections.singletonList(name)
-                                );
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-
-            for (Map.Entry<String, List<String>> e : nameFields.entrySet())
-            {
-                meta.getTypeMeta(e.getKey()).setMeta(DomainQLMeta.NAME_FIELDS, e.getValue());
-            }
-
-        }
-    }
-
-    /**
      * Makes sure that all types and fields declared in {@link #nameFields} actually exist
      * @param graphQLSchema
      */
@@ -910,6 +859,5 @@ public class DomainQLBuilder
             }
         }
     }
-
 }
 

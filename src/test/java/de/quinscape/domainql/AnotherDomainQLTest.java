@@ -1175,9 +1175,6 @@ public class AnotherDomainQLTest
         final GraphQLObjectType gqlType = (GraphQLObjectType) schema.getType("TargetSeven");
         final GraphQLFieldDefinition fieldDef = gqlType.getFieldDefinition("concat");
 
-        final GraphQLDirective computed = fieldDef.getDirective("computed");
-        assertThat(computed, is(notNullValue()));
-
         final GraphQLScalarType scalarType = (GraphQLScalarType) fieldDef.getType();
         assertThat(scalarType.getName(), is("String"));
         assertThat(gqlType.getFieldDefinitions().size(), is(3));
@@ -1188,6 +1185,9 @@ public class AnotherDomainQLTest
 
         assertThat(domainQL.getMetaData().getRelationModels().get(0).getSourcePojoClass().getName(), is(SourceSeven.class.getName()));
         assertThat(domainQL.getMetaData().getRelationModels().get(0).getTargetPojoClass().getName(), is(TargetSeven.class.getName()));
+
+        assertThat(domainQL.getMetaData().getTypeMeta("SourceSeven").getFieldMeta("concat", "computed"), is(Boolean.TRUE));
+        assertThat(domainQL.getMetaData().getTypeMeta("SourceSeven").getFieldMeta("target", "computed"), is(nullValue()));
 
         assertThat(domainQL.lookupType("SourceSeven").getPojoType().getName(), is(SourceSeven.class.getName()));
         assertThat(domainQL.lookupType("TargetSeven").getPojoType().getName(), is(TargetSeven.class.getName()));
@@ -1217,9 +1217,6 @@ public class AnotherDomainQLTest
 
         final GraphQLObjectType gqlType = (GraphQLObjectType) schema.getType("TargetSeven");
         final GraphQLFieldDefinition fieldDef = gqlType.getFieldDefinition("concat");
-
-        final GraphQLDirective computed = fieldDef.getDirective("computed");
-        assertThat(computed, is(notNullValue()));
 
         final GraphQLScalarType scalarType = (GraphQLScalarType) fieldDef.getType();
         assertThat(scalarType.getName(), is("String"));

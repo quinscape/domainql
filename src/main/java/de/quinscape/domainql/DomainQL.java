@@ -810,7 +810,7 @@ public class DomainQL
     }
 
 
-    static boolean isNormalProperty(JSONPropertyInfo info)
+    public static boolean isNormalProperty(JSONPropertyInfo info)
     {
         return !info.isReadOnly() && !Class.class.isAssignableFrom(info.getType()) && ((JavaObjectPropertyInfo) info).getGetterMethod() != null && !info
             .isIgnore();
@@ -1815,10 +1815,8 @@ public class DomainQL
         final Column jpaColumnAnno = JSONUtil.findAnnotation(info, Column.class);
         final GraphQLField fieldAnno = JSONUtil.findAnnotation(info, GraphQLField.class);
         final GraphQLFetcher fetcherAnno = JSONUtil.findAnnotation(info, GraphQLFetcher.class);
-        final GraphQLComputed computedAnno = JSONUtil.findAnnotation(info, GraphQLComputed.class);
 
         final Method getterMethod = ((JavaObjectPropertyInfo) info).getGetterMethod();
-
 
         if (options.isUseDatabaseFieldNames() && jpaColumnAnno == null)
         {
@@ -1899,11 +1897,6 @@ public class DomainQL
                 fieldDoc != null ? fieldDoc.getDescription() : defaultDescription
             )
             .type(isNotNull ? nonNull(graphQLType) : (GraphQLOutputType) graphQLType);
-
-        if (computedAnno != null)
-        {
-            fieldbuilder.withDirective(DomainQLDirectives.ComputedDirective);
-        }
 
         fieldDef = fieldbuilder.build();
 
