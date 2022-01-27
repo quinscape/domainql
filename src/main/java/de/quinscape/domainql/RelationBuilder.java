@@ -16,6 +16,7 @@ import javax.persistence.Column;
 import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,6 +47,8 @@ public class RelationBuilder
     private String leftSideObjectName;
 
     private String rightSideObjectName;
+
+    private List<String> metaTags = Collections.emptyList();
 
 
     /**
@@ -161,6 +164,26 @@ public class RelationBuilder
     {
         this.rightSideObjectName = rightSideObjectName;
         return this;
+    }
+
+
+    /**
+     * Configures the given meta tags for this relation
+     *
+     * @param metaTags  vargs of a meta tag strings
+     *                  
+     * @return this builder
+     */
+    public RelationBuilder withMetaTags(String... metaTags)
+    {
+        this.metaTags = Arrays.asList(metaTags);
+        return this;
+    }
+
+
+    public List<String> getMetaTags()
+    {
+        return metaTags;
     }
 
 
@@ -285,7 +308,8 @@ public class RelationBuilder
                 sourceField,
                 targetField,
                 leftSideObjectName,
-                rightSideObjectName
+                rightSideObjectName,
+                metaTags
             );
         }
         else
@@ -346,7 +370,8 @@ public class RelationBuilder
                 sourceField,
                 targetField,
                 leftSideObjectName,
-                rightSideObjectName
+                rightSideObjectName,
+                metaTags
             );
 
         }

@@ -7,6 +7,7 @@ import org.jooq.TableField;
 import org.svenson.JSONProperty;
 
 import javax.validation.constraints.NotNull;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -46,6 +47,8 @@ public class RelationModel
 
     private final String targetType;
 
+    private final List<String> metaTags;
+
     private final String sourceType;
 
 
@@ -62,7 +65,8 @@ public class RelationModel
         @NotNull SourceField sourceField,
         @NotNull TargetField targetField,
         String leftSideObjectName,
-        String rightSideObjectName
+        String rightSideObjectName,
+        List<String> tags
     )
     {
         this.id = id;
@@ -81,6 +85,7 @@ public class RelationModel
 
         this.sourceType = sourcePojoClass.getSimpleName();
         this.targetType = targetPojoClass.getSimpleName();
+        this.metaTags = Collections.unmodifiableList(tags);
     }
 
 
@@ -219,9 +224,17 @@ public class RelationModel
             sourceField,
             targetField,
             leftSideObjectName,
-            rightSideObjectName
+            rightSideObjectName,
+            metaTags
         );
     }
+
+
+    public List<String> getMetaTags()
+    {
+        return metaTags;
+    }
+
 
     @Override
     public String toString()

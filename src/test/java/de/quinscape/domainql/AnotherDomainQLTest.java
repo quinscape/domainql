@@ -4,6 +4,7 @@ import de.quinscape.domainql.beans.GenericScalarLogic;
 import de.quinscape.domainql.beans.SourceSeven;
 import de.quinscape.domainql.beans.SumPerMonth;
 import de.quinscape.domainql.beans.TargetSeven;
+import de.quinscape.domainql.config.RelationModel;
 import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.generic.DomainObjectScalar;
 import de.quinscape.domainql.generic.GenericScalar;
@@ -1222,6 +1223,26 @@ public class AnotherDomainQLTest
         assertThat(scalarType.getName(), is("String"));
         assertThat(gqlType.getFieldDefinitions().size(), is(3));
 
+    }
+
+    @Test
+    public void testMetaTags()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new TestLogic()))
+
+            // source variants
+            .withRelation(
+                new RelationBuilder()
+                    .withForeignKeyFields(SOURCE_ONE.TARGET_ID)
+                    .withSourceField(SourceField.OBJECT_AND_SCALAR)
+                    .withMetaTags("foo", "bar")
+            ).build();
+
+        final RelationModel relationModel = domainQL.getMetaData().getRelationModels().get(0);
+        assertThat(relationModel.getId(), is("SourceOne-target"));
+        assertThat(relationModel.getMetaTags(), is(Arrays.asList("foo", "bar")));
     }
 }
 
