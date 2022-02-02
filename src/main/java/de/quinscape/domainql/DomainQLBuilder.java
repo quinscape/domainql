@@ -364,7 +364,8 @@ public class DomainQLBuilder
         SourceField sourceField,
         TargetField targetField,
         String leftSideObjectName,
-        String rightSideObjectName
+        String rightSideObjectName,
+        String ... metaTags
     )
     {
         return withRelation(
@@ -374,6 +375,7 @@ public class DomainQLBuilder
                 .withTargetField(targetField)
                 .withLeftSideObjectName(leftSideObjectName)
                 .withRightSideObjectName(rightSideObjectName)
+                .withMetaTags(metaTags)
         );
     }
 

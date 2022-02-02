@@ -1238,11 +1238,19 @@ public class AnotherDomainQLTest
                     .withForeignKeyFields(SOURCE_ONE.TARGET_ID)
                     .withSourceField(SourceField.OBJECT_AND_SCALAR)
                     .withMetaTags("foo", "bar")
-            ).build();
+            )
+
+            .configureRelation(SOURCE_TWO.TARGET_ID, SourceField.SCALAR, TargetField.NONE, null, null, "baz")
+
+            .build();
 
         final RelationModel relationModel = domainQL.getMetaData().getRelationModels().get(0);
         assertThat(relationModel.getId(), is("SourceOne-target"));
         assertThat(relationModel.getMetaTags(), is(Arrays.asList("foo", "bar")));
+
+        final RelationModel relationModel2 = domainQL.getMetaData().getRelationModels().get(1);
+        assertThat(relationModel2.getId(), is("SourceTwo-target"));
+        assertThat(relationModel2.getMetaTags(), is(Collections.singletonList("baz")));
     }
 }
 
