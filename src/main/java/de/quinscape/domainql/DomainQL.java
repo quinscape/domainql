@@ -30,6 +30,7 @@ import de.quinscape.domainql.schema.DomainQLAware;
 import de.quinscape.domainql.util.DegenerificationUtil;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.introspection.Introspection;
+import graphql.schema.Coercing;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.FieldCoordinates;
@@ -2106,6 +2107,11 @@ public class DomainQL
             if (scalarType instanceof DomainQLAware)
             {
                 ((DomainQLAware) scalarType).setDomainQL(this);
+            }
+            final Coercing coercing = scalarType.getCoercing();
+            if (coercing instanceof DomainQLAware)
+            {
+                ((DomainQLAware) coercing).setDomainQL(this);
             }
         }
     }
