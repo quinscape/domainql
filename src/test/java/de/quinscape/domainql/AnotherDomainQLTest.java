@@ -49,7 +49,6 @@ import de.quinscape.domainql.scalar.BigIntegerScalar;
 import de.quinscape.domainql.testdomain.Public;
 import graphql.Scalars;
 import graphql.schema.GraphQLArgument;
-import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectField;
@@ -61,7 +60,6 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
-import graphql.schema.GraphQLType;
 import graphql.schema.GraphQLTypeUtil;
 import graphql.schema.idl.SchemaPrinter;
 import org.junit.Test;
@@ -1137,8 +1135,8 @@ public class AnotherDomainQLTest
         final DomainQL domainQL = DomainQL.newDomainQL(null)
             .objectTypes(Public.PUBLIC)
             .logicBeans(Collections.singleton(new BigNumericLogic()))
-            .withAdditionalScalar(BigDecimal.class, new BigDecimalScalar())
-            .withAdditionalScalar(BigInteger.class, new BigIntegerScalar())
+            .withAdditionalScalar(BigDecimal.class, BigDecimalScalar.newScalar())
+            .withAdditionalScalar(BigInteger.class, BigIntegerScalar.newScalar())
             .build();
 
         //log.info(new SchemaPrinter().print(domainQL.getGraphQLSchema()));

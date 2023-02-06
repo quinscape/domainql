@@ -2,8 +2,11 @@ package de.quinscape.domainql.generic;
 
 import de.quinscape.domainql.DomainQL;
 import de.quinscape.domainql.jooq.DomainObjectGeneratorStrategy;
+import de.quinscape.domainql.scalar.BigIntegerScalar;
 import de.quinscape.domainql.schema.DomainQLAware;
+import graphql.schema.GraphQLScalarType;
 
+import java.math.BigInteger;
 import java.util.Map;
 
 /**
@@ -18,31 +21,19 @@ import java.util.Map;
  * @see DomainObject
  */
 public class DomainObjectScalar
-    extends graphql.schema.GraphQLScalarType
-    implements DomainQLAware
-
 {
-    private final DelayedCoercing<DomainObject, Map<String, Object>> coercing;
-
-
-    private DomainObjectScalar(DelayedCoercing<DomainObject, Map<String, Object>> coercing)
+    private DomainObjectScalar()
     {
-
-        super(
-            "DomainObject", "Container for generic domain objects as scalar", coercing
-        );
-
-        this.coercing = coercing;
+        // no instances
     }
 
 
-    public static DomainObjectScalar newDomainObjectScalar()
+    public static GraphQLScalarType newDomainObjectScalar()
     {
-        return new DomainObjectScalar(new DelayedCoercing<>());
-    }
-
-    public void setDomainQL(DomainQL domainQL)
-    {
-        this.coercing.setTarget(new DomainObjectCoercing(domainQL));
+        return GraphQLScalarType.newScalar()
+            .name("DomainObject")
+            .description("Container for generic domain objects as scalar")
+            .coercing(new DomainObjectCoercing())
+            .build();
     }
 }

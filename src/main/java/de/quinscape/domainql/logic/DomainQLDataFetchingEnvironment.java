@@ -1,6 +1,7 @@
 package de.quinscape.domainql.logic;
 
 import de.quinscape.domainql.DomainQL;
+import graphql.GraphQLContext;
 import graphql.cachecontrol.CacheControl;
 import graphql.execution.ExecutionContext;
 import graphql.execution.ExecutionId;
@@ -87,6 +88,13 @@ public class DomainQLDataFetchingEnvironment
     public <T> T getContext()
     {
         return env.getContext();
+    }
+
+
+    @Override
+    public GraphQLContext getGraphQlContext()
+    {
+        return env.getGraphQlContext();
     }
 
 

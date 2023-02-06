@@ -2,8 +2,10 @@ package de.quinscape.domainql;
 
 import de.quinscape.domainql.annotation.GraphQLComputed;
 import de.quinscape.domainql.annotation.GraphQLField;
-import de.quinscape.domainql.scalar.GraphQLDateScalar;
-import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
+import de.quinscape.domainql.scalar.ByteScalar;
+import de.quinscape.domainql.scalar.DateScalar;
+import de.quinscape.domainql.scalar.TimestampScalar;
+import de.quinscape.domainql.scalar.LongScalar;
 import de.quinscape.domainql.util.DegenerificationUtil;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.Scalars;
@@ -37,19 +39,22 @@ public class TypeRegistry
 
         map.put(Boolean.class, Scalars.GraphQLBoolean);
         map.put(Boolean.TYPE, Scalars.GraphQLBoolean);
-        map.put(Byte.class, Scalars.GraphQLByte);
-        map.put(Byte.TYPE, Scalars.GraphQLByte);
-        map.put(Short.class, Scalars.GraphQLShort);
-        map.put(Short.TYPE, Scalars.GraphQLShort);
         map.put(Integer.class, Scalars.GraphQLInt);
         map.put(Integer.TYPE, Scalars.GraphQLInt);
         map.put(Double.class, Scalars.GraphQLFloat);
         map.put(Double.TYPE, Scalars.GraphQLFloat);
-        map.put(Long.class, Scalars.GraphQLLong);
-        map.put(Long.TYPE, Scalars.GraphQLLong);
         map.put(String.class, Scalars.GraphQLString);
-        map.put(Timestamp.class, new GraphQLTimestampScalar());
-        map.put(Date.class, new GraphQLDateScalar());
+        map.put(Timestamp.class, TimestampScalar.newScalar());
+        map.put(Date.class, DateScalar.newScalar());
+
+        final GraphQLScalarType longScalar = LongScalar.newScalar();
+        map.put(Long.class, longScalar);
+        map.put(Long.TYPE, longScalar);
+
+        final GraphQLScalarType byteScalar = ByteScalar.newScalar();
+
+        map.put(Byte.class, byteScalar);
+        map.put(Byte.TYPE, byteScalar);
 
         JAVA_TYPE_TO_GRAPHQL = Collections.unmodifiableMap(map);
     }

@@ -6,7 +6,7 @@ import de.quinscape.domainql.annotation.GraphQLQuery;
 import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.generic.GenericDomainObject;
 import de.quinscape.domainql.generic.GenericScalar;
-import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
+import de.quinscape.domainql.scalar.TimestampScalar;
 import graphql.Scalars;
 
 import java.sql.Timestamp;
@@ -27,11 +27,11 @@ public class GenericScalarLogic
         {
             return new GenericScalar(Scalars.GraphQLInt.getName(), ((int)value.getValue()) + 1);
         }
-        else if (value.getType().equals(GraphQLTimestampScalar.NAME))
+        else if (value.getType().equals(TimestampScalar.NAME))
         {
             final Timestamp timestamp = (Timestamp)value.getValue();
             final Timestamp hourLater = new Timestamp(timestamp.toInstant().plus(1, ChronoUnit.HOURS).toEpochMilli());
-            return new GenericScalar(GraphQLTimestampScalar.NAME,hourLater);
+            return new GenericScalar(TimestampScalar.NAME,hourLater);
         }
         else
         {

@@ -1,7 +1,6 @@
 package de.quinscape.domainql.scalar;
 
 import graphql.language.StringValue;
-import graphql.schema.Coercing;
 import graphql.schema.CoercingParseLiteralException;
 import graphql.schema.CoercingParseValueException;
 import graphql.schema.CoercingSerializeException;
@@ -16,16 +15,28 @@ import java.util.concurrent.TimeUnit;
 /**
  * GraphQL Scalar implementation for java.sql.Date.
  */
-public class GraphQLDateScalar
-    extends GraphQLScalarType
+public class DateScalar
 {
 
-    public static String NAME = "Date";
-
-    public GraphQLDateScalar()
+    private DateScalar()
     {
-        super(NAME, "SQL date equivalent", new Coercing<Date, String>(){
-            @Override
+        // no instances
+    }
+
+
+    public static GraphQLScalarType newScalar()
+    {
+        return GraphQLScalarType.newScalar()
+            .name("Date")
+            .description("SQL date equivalent")
+            .coercing(new Coercing())
+            .build();
+    }
+
+
+    public static class Coercing
+        implements graphql.schema.Coercing<Date, String>
+    {    @Override
             public String serialize(Object dataFetcherResult) throws CoercingSerializeException
             {
                 if (dataFetcherResult instanceof Date)
@@ -69,7 +80,6 @@ public class GraphQLDateScalar
                 }
                 return convert(((StringValue) input).getValue());
             }
-        });
     }
 
     private final static long MILLIS_PER_DAY = TimeUnit.DAYS.toMillis(1);
