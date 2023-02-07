@@ -2,7 +2,6 @@ package de.quinscape.domainql;
 
 
 import com.google.common.collect.ImmutableMap;
-import de.quinscape.domainql.beans.BDContainer;
 import de.quinscape.domainql.beans.GenericScalarLogic;
 import de.quinscape.domainql.beans.MyEnum;
 import de.quinscape.domainql.beans.SumPerMonth;
@@ -39,7 +38,7 @@ import de.quinscape.domainql.logicimpl.TypeParamMutationLogic;
 import de.quinscape.domainql.mock.TestProvider;
 import de.quinscape.domainql.scalar.BigDecimalScalar;
 import de.quinscape.domainql.scalar.BigIntegerScalar;
-import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
+import de.quinscape.domainql.scalar.TimestampScalar;
 import de.quinscape.domainql.testdomain.Public;
 import de.quinscape.domainql.testdomain.tables.pojos.Foo;
 import de.quinscape.domainql.testdomain.tables.pojos.TargetNine;
@@ -53,9 +52,7 @@ import graphql.Scalars;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectType;
-import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLSchema;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -63,7 +60,6 @@ import org.jooq.impl.DSL;
 import org.jooq.tools.jdbc.MockConnection;
 import org.jooq.tools.jdbc.MockDataProvider;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +69,6 @@ import org.svenson.util.JSONPathUtil;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -82,7 +77,6 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import static de.quinscape.domainql.testdomain.Tables.*;
-import static graphql.schema.GraphQLNonNull.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
@@ -370,7 +364,7 @@ public class DomainQLExecutionTest
 
         variables.put(
             "target",
-            ImmutableMap.of("name", "qwertz", "created", GraphQLTimestampScalar.toISO8601(new Timestamp(3600)))
+            ImmutableMap.of("name", "qwertz", "created", TimestampScalar.toISO8601(new Timestamp(3600)))
         );
         ExecutionInput executionInput = ExecutionInput.newExecutionInput()
             // language=GraphQL
@@ -457,7 +451,7 @@ public class DomainQLExecutionTest
                     "        modifiedValue(arg: $arg, num: $num)" +
                     "    } \n" +
                     "}")
-                .variables(ImmutableMap.of("arg", "bbb", "num", "1111"))
+                .variables(ImmutableMap.of("arg", "bbb", "num", 1111))
                 .build();
 
             ExecutionResult executionResult = graphQL.execute(executionInput);
@@ -2144,8 +2138,8 @@ public class DomainQLExecutionTest
         final DomainQL domainQL = DomainQL.newDomainQL(null)
             .objectTypes(Public.PUBLIC)
             .logicBeans(Collections.singleton(new BigNumericLogic()))
-            .withAdditionalScalar(BigDecimal.class, new BigDecimalScalar())
-            .withAdditionalScalar(BigInteger.class, new BigIntegerScalar())
+            .withAdditionalScalar(BigDecimal.class, BigDecimalScalar.newScalar())
+            .withAdditionalScalar(BigInteger.class, BigIntegerScalar.newScalar())
             .build();
 
         //log.info(new SchemaPrinter().print(domainQL.getGraphQLSchema()));

@@ -2,6 +2,7 @@ package de.quinscape.domainql.generic;
 
 import com.google.common.collect.Maps;
 import de.quinscape.domainql.DomainQL;
+import de.quinscape.domainql.schema.DomainQLAware;
 import graphql.schema.Coercing;
 import graphql.schema.CoercingParseLiteralException;
 import graphql.schema.CoercingParseValueException;
@@ -18,17 +19,16 @@ import java.util.List;
 import java.util.Map;
 
 public final class GenericScalarCoercing
-    implements Coercing<GenericScalar, Map<String, Object>>
+    implements Coercing<GenericScalar, Map<String, Object>>, DomainQLAware
 {
     private final static Logger log = LoggerFactory.getLogger(GenericScalarCoercing.class);
 
 
-    private final DomainQL domainQL;
+    private DomainQL domainQL;
 
 
-    public GenericScalarCoercing(DomainQL domainQL)
+    public GenericScalarCoercing()
     {
-        this.domainQL = domainQL;
     }
 
 
@@ -187,5 +187,12 @@ public final class GenericScalarCoercing
     {
         // XXX: this should be possible
         throw new CoercingParseLiteralException("Cannot coerce GenericScalarType from literal");
+    }
+
+
+    @Override
+    public void setDomainQL(DomainQL domainQL)
+    {
+        this.domainQL = domainQL;
     }
 }

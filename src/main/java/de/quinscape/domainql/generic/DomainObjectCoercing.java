@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import de.quinscape.domainql.DomainQL;
 import de.quinscape.domainql.DomainQLException;
 import de.quinscape.domainql.InputType;
+import de.quinscape.domainql.schema.DomainQLAware;
 import graphql.schema.Coercing;
 import graphql.schema.CoercingParseLiteralException;
 import graphql.schema.CoercingParseValueException;
@@ -24,17 +25,16 @@ import java.util.List;
 import java.util.Map;
 
 public final class DomainObjectCoercing
-    implements Coercing<DomainObject, Map<String, Object>>
+    implements Coercing<DomainObject, Map<String, Object>>, DomainQLAware
 {
     private final static Logger log = LoggerFactory.getLogger(DomainObjectCoercing.class);
 
 
-    private final DomainQL domainQL;
+    private DomainQL domainQL;
 
 
-    public DomainObjectCoercing(DomainQL domainQL)
+    public DomainObjectCoercing()
     {
-        this.domainQL = domainQL;
     }
 
 
@@ -226,5 +226,12 @@ public final class DomainObjectCoercing
     public DomainObject parseLiteral(Object input) throws CoercingParseLiteralException
     {
         throw new CoercingParseLiteralException("Cannot coerce DomainObject from literal");
+    }
+
+
+    @Override
+    public void setDomainQL(DomainQL domainQL)
+    {
+        this.domainQL = domainQL;
     }
 }

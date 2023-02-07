@@ -1867,7 +1867,6 @@ public class DomainQL
                     throw new DomainQLException("Unsupported array element type: " + elementType + " in " + type.getName());
                 }
 
-                log.info("{}", type);
                 graphQLType = GraphQLList.list(elementScalarType);
             }
             else
@@ -2104,10 +2103,6 @@ public class DomainQL
     {
         for (GraphQLScalarType scalarType : getTypeRegistry().getScalarTypes())
         {
-            if (scalarType instanceof DomainQLAware)
-            {
-                ((DomainQLAware) scalarType).setDomainQL(this);
-            }
             final Coercing coercing = scalarType.getCoercing();
             if (coercing instanceof DomainQLAware)
             {

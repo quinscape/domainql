@@ -5,6 +5,7 @@ import graphql.schema.Coercing;
 import graphql.schema.CoercingParseLiteralException;
 import graphql.schema.CoercingParseValueException;
 import graphql.schema.CoercingSerializeException;
+import graphql.schema.GraphQLScalarType;
 
 import java.math.BigDecimal;
 
@@ -12,59 +13,72 @@ import java.math.BigDecimal;
 /**
  * Alternative BigDecimal scalar implementation that uses string values as serialized format.
  * <p>
- *     This simplifies handling of decimal values by not requiring special JSON parsing to handle the values safely.
- *     Both in terms of value range as well as in terms of the IEEE float immanent numeric representation problems.
+ * This simplifies handling of decimal values by not requiring special JSON parsing to handle the values safely.
+ * Both in terms of value range as well as in terms of the IEEE float immanent numeric representation problems.
  * </p>
  */
 public class BigDecimalScalar
-    extends graphql.schema.GraphQLScalarType
 {
-    public BigDecimalScalar()
+    private BigDecimalScalar()
     {
-        super("BigDecimal", "BigDecimal wrapped as string", new Coercing<BigDecimal, String>(){
-            @Override
-            public String serialize(Object dataFetcherResult) throws CoercingSerializeException
+        // no instances
+    }
+
+    public static GraphQLScalarType newScalar()
+    {
+        return GraphQLScalarType.newScalar()
+            .name("BigDecimal")
+            .description("BigDecimal wrapped as string")
+            .coercing(new Coercing())
+            .build();
+    }
+
+
+    public static class Coercing
+        implements graphql.schema.Coercing<BigDecimal, String>
+    {
+        @Override
+        public String serialize(Object dataFetcherResult) throws CoercingSerializeException
+        {
+            if (dataFetcherResult instanceof BigDecimal)
             {
-                if (dataFetcherResult instanceof BigDecimal)
+                try
                 {
-                    try
-                    {
-                        return dataFetcherResult.toString();
-                    }
-                    catch (RuntimeException e)
-                    {
-                        throw new CoercingSerializeException("Error converting " + dataFetcherResult + " to ISO string", e);
-                    }
+                    return dataFetcherResult.toString();
                 }
-                else
+                catch (RuntimeException e)
                 {
-                    throw new CoercingSerializeException("Could not convert " + dataFetcherResult + " to ISO string");
+                    throw new CoercingSerializeException("Error converting " + dataFetcherResult + " to ISO string", e);
                 }
             }
-
-
-            @Override
-            public BigDecimal parseValue(Object input) throws CoercingParseValueException
+            else
             {
-                if (!(input instanceof String))
-                {
-                    throw new CoercingParseValueException("Cannot coerce " + input + " to BigDecimal");
-                }
+                throw new CoercingSerializeException("Could not convert " + dataFetcherResult + " to ISO string");
+            }
+        }
 
-                final String stringValue = (String) input;
-                return new BigDecimal(stringValue);
+
+        @Override
+        public BigDecimal parseValue(Object input) throws CoercingParseValueException
+        {
+            if (!(input instanceof String))
+            {
+                throw new CoercingParseValueException("Cannot coerce " + input + " to BigDecimal");
             }
 
+            final String stringValue = (String) input;
+            return new BigDecimal(stringValue);
+        }
 
-            @Override
-            public BigDecimal parseLiteral(Object input) throws CoercingParseLiteralException
+
+        @Override
+        public BigDecimal parseLiteral(Object input) throws CoercingParseLiteralException
+        {
+            if (!(input instanceof StringValue))
             {
-                if (!(input instanceof StringValue))
-                {
-                    throw new CoercingParseValueException("Cannot coerce " + input + " to BigDecimal");
-                }
-                return new BigDecimal(((StringValue) input).getValue());
+                throw new CoercingParseValueException("Cannot coerce " + input + " to BigDecimal");
             }
-        });
+            return new BigDecimal(((StringValue) input).getValue());
+        }
     }
 }

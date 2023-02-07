@@ -7,17 +7,15 @@ import de.quinscape.domainql.config.TargetField;
 import de.quinscape.domainql.generic.DomainObject;
 import de.quinscape.domainql.logicimpl.LogicWithMirrorInput;
 import de.quinscape.domainql.logicimpl.TestLogic;
-import de.quinscape.domainql.scalar.GraphQLTimestampScalar;
 import de.quinscape.domainql.testdomain.Public;
 import de.quinscape.domainql.testdomain.tables.pojos.TargetNine;
 import de.quinscape.domainql.testdomain.tables.pojos.TargetNineCounts;
-import de.quinscape.spring.jsview.util.JSONUtil;
 import graphql.Scalars;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectType;
-import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLNamedType;
 import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import org.junit.Test;
@@ -28,8 +26,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static de.quinscape.domainql.testdomain.Tables.*;
-import static graphql.schema.GraphQLList.*;
-import static graphql.schema.GraphQLNonNull.*;
 import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
@@ -161,7 +157,7 @@ public class DomainQLTest
 
             assertThat(queryTimestamp, is(notNullValue()));
             assertThat(queryTimestamp.getArguments().size(), is(0));
-            assertThat(queryTimestamp.getType(), is(instanceOf(GraphQLTimestampScalar.class)));
+            assertThat(queryTimestamp.getType(), is(instanceOf(GraphQLScalarType.class)));
         }
 
         {

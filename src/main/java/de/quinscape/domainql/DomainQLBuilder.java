@@ -14,7 +14,7 @@ import de.quinscape.domainql.meta.NameFieldProvider;
 import de.quinscape.domainql.param.DataFetchingEnvironmentProviderFactory;
 import de.quinscape.domainql.param.ParameterProviderFactory;
 import de.quinscape.domainql.param.TypeParameterProviderFactory;
-import de.quinscape.domainql.scalar.GraphQLCurrencyScalar;
+import de.quinscape.domainql.scalar.CurrencyScalar;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import de.quinscape.spring.jsview.util.Util;
 import graphql.Directives;
@@ -136,7 +136,7 @@ public class DomainQLBuilder
         parameterProviderFactories.add(new DataFetchingEnvironmentProviderFactory());
         parameterProviderFactories.add(new TypeParameterProviderFactory());
 
-        additionalScalarTypes.put(Long.TYPE, new GraphQLCurrencyScalar());
+        additionalScalarTypes.put(Long.TYPE, CurrencyScalar.newScalar());
 
 
     }
@@ -589,12 +589,12 @@ public class DomainQLBuilder
     /**
      * Adds an additional scalar type
      *
-     * @param cls        Java type for the scalar
-     * @param scalarType scalar type
+     * @param cls           Java type for the scalar
+     * @param scalarType    scalar type to register for the Java Type
      *
      * @return this builder
      */
-    public DomainQLBuilder withAdditionalScalar(Class<?> cls, GraphQLScalarType scalarType)
+    public <I,O> DomainQLBuilder withAdditionalScalar(Class<?> cls, GraphQLScalarType scalarType)
     {
         this.additionalScalarTypes.put(cls, scalarType);
         return this;
