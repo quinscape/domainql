@@ -55,12 +55,6 @@
 
         <!-- DATABASE DEPENDENCIES -->
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.4.1</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>jooq</artifactId>
             <version>3.17.7</version>
