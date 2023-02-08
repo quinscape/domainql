@@ -12,7 +12,7 @@ import org.jooq.TableField;
 import org.svenson.info.JSONClassInfo;
 import org.svenson.info.JSONPropertyInfo;
 
-import javax.persistence.Column;
+import jakarta.persistence.Column;
 import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.Arrays;

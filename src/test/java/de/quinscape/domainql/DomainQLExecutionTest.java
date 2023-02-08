@@ -2083,6 +2083,7 @@ public class DomainQLExecutionTest
                     "{\n" +
                     "    fetch(name: $name)\n" +
                     "}")
+                // we *don't* set the variable $name so it's null and triggers a non-Null-Violation on return
                 .build();
 
             ExecutionResult executionResult = graphQL.execute(executionInput);

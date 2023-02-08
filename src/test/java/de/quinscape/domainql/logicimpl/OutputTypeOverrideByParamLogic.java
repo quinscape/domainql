@@ -7,7 +7,7 @@ import de.quinscape.domainql.beans.Container;
 import de.quinscape.domainql.beans.TargetSeven;
 import graphql.schema.DataFetchingEnvironment;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
 @GraphQLLogic 

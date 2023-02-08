@@ -4,7 +4,7 @@ import de.quinscape.domainql.annotation.GraphQLLogic;
 import de.quinscape.domainql.annotation.GraphQLQuery;
 import de.quinscape.domainql.beans.SumPerMonth;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 @GraphQLLogic
 public class SumPerMonthLogic

@@ -15,8 +15,8 @@ import org.jooq.tools.StringUtils;
 import org.svenson.info.JSONClassInfo;
 import org.svenson.info.JSONPropertyInfo;
 
-import javax.persistence.Column;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Column;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;

@@ -1,8 +1,8 @@
 package de.quinscape.domainql.beans;
 
-import javax.persistence.Column;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 @Table(name = "sum_per_month")
 public class SumPerMonth

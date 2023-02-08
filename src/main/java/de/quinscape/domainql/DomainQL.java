@@ -65,8 +65,8 @@ import org.svenson.info.JSONClassInfo;
 import org.svenson.info.JSONPropertyInfo;
 import org.svenson.info.JavaObjectPropertyInfo;
 
-import javax.persistence.Column;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Column;
+import jakarta.validation.constraints.NotNull;
 import java.beans.Introspector;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -1268,7 +1268,7 @@ public class DomainQL
 
             final String typeName = pojoType.getSimpleName();
 
-            final javax.persistence.Table tableAnno = pojoType.getAnnotation(javax.persistence.Table.class);
+            final jakarta.persistence.Table tableAnno = pojoType.getAnnotation(jakarta.persistence.Table.class);
             final String defaultDescription = tableAnno != null ?
                 "Generated from " + tableAnno.schema() + "." + table.getName() : null;
 
