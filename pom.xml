@@ -50,7 +50,7 @@
         <dependency>
             <groupId>com.google.code.svenson</groupId>
             <artifactId>svenson</artifactId>
-            <version>1.6.0</version>
+            <version>1.6.1</version>
         </dependency>
 
         <!-- DATABASE DEPENDENCIES -->
@@ -286,8 +286,6 @@
                         <arg>java.compiler</arg>
                         <arg>--add-modules</arg>
                         <arg>java.sql</arg>
-                        <arg>--add-modules</arg>
-                        <arg>java.desktop</arg>
                     </compilerArgs>
                 </configuration>
                 <executions>

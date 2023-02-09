@@ -5,15 +5,15 @@ import de.quinscape.domainql.config.RelationModel;
 import de.quinscape.domainql.config.SourceField;
 import de.quinscape.domainql.config.TargetField;
 import de.quinscape.spring.jsview.util.JSONUtil;
+import jakarta.persistence.Column;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.svenson.info.JSONClassInfo;
 import org.svenson.info.JSONPropertyInfo;
+import org.svenson.util.IntrospectionUtil;
 
-import jakarta.persistence.Column;
-import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -287,7 +287,7 @@ public class RelationBuilder
             }
             else if (targetField != TargetField.NONE)
             {
-                final String otherName = Introspector.decapitalize(sourcePojo.getSimpleName());
+                final String otherName = IntrospectionUtil.decapitalize(sourcePojo.getSimpleName());
                 rightSideObjectName = targetField == TargetField.ONE ? otherName : options.getPluralizationFunction().apply(otherName);
             }
             else
@@ -345,7 +345,7 @@ public class RelationBuilder
             }
             else if (targetField != TargetField.NONE)
             {
-                final String otherName = Introspector.decapitalize(sourcePojo.getSimpleName());
+                final String otherName = IntrospectionUtil.decapitalize(sourcePojo.getSimpleName());
                 rightSideObjectName = targetField == TargetField.ONE ? otherName : options.getPluralizationFunction().apply(otherName);
             }
             else

@@ -51,6 +51,8 @@ import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import graphql.schema.GraphQLTypeReference;
+import jakarta.persistence.Column;
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -64,10 +66,8 @@ import org.svenson.JSONProperty;
 import org.svenson.info.JSONClassInfo;
 import org.svenson.info.JSONPropertyInfo;
 import org.svenson.info.JavaObjectPropertyInfo;
+import org.svenson.util.IntrospectionUtil;
 
-import jakarta.persistence.Column;
-import jakarta.validation.constraints.NotNull;
-import java.beans.Introspector;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -1935,7 +1935,7 @@ public class DomainQL
             throw new IllegalStateException("Parametrized getter name must start with 'get' or 'is'");
         }
 
-        return Introspector.decapitalize(m.getName().substring(isGetter ? 3 : 2));
+        return IntrospectionUtil.decapitalize(m.getName().substring(isGetter ? 3 : 2));
     }
 
 
