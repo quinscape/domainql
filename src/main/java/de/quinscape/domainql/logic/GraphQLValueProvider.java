@@ -174,25 +174,29 @@ public class GraphQLValueProvider
                 {
                     Class<?> nextType = DegenerificationUtil.getElementType(inputType, getterMethod);
 
-                    List<?> origList = (List) orig;
-                    List<Object> convertedList = new ArrayList<>(origList.size());
-
-                    final InputType fieldType = typeRegistry.lookupInput(
-                        new TypeContext(inputType.getTypeContext(), nextType));
-
-                    for (Object elementValue : origList)
+                    List<Object> convertedList = null;
+                    if (orig != null)
                     {
-                        Object convertedValue;
-                        if (fieldType != null && !fieldType.isEnum())
-                        {
-                            convertedValue = convert(environment, fieldType, (Map<String, Object>) elementValue);
-                        }
-                        else
-                        {
-                            convertedValue = elementValue;
-                        }
-                        convertedList.add(convertedValue);
+                        List<?> origList = (List) orig;
+                        convertedList = new ArrayList<>(origList.size());
 
+                        final InputType fieldType = typeRegistry.lookupInput(
+                            new TypeContext(inputType.getTypeContext(), nextType));
+
+                        for (Object elementValue : origList)
+                        {
+                            Object convertedValue;
+                            if (fieldType != null && !fieldType.isEnum())
+                            {
+                                convertedValue = convert(environment, fieldType, (Map<String, Object>) elementValue);
+                            }
+                            else
+                            {
+                                convertedValue = elementValue;
+                            }
+                            convertedList.add(convertedValue);
+
+                        }
                     }
                     JSONUtil.DEFAULT_UTIL.setProperty(pojoInstance, name, convertedList);
                 }
@@ -209,6 +213,14 @@ public class GraphQLValueProvider
                     {
                         converted = orig;
                     }
+
+                    if (converted == null && propertyInfo.getType().isPrimitive())
+                    {
+                        throw new InputObjectConversionException(
+                            "Cannot set primitive property " + pojoClass.getName() + "#" + name + " to null"
+                        );
+                    }
+
                     JSONUtil.DEFAULT_UTIL.setProperty(pojoInstance, name, converted);
                 }
             }

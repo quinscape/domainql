@@ -6,13 +6,10 @@ import de.quinscape.domainql.annotation.GraphQLQuery;
 import de.quinscape.domainql.annotation.GraphQLTypeParam;
 import de.quinscape.domainql.beans.DocumentedBean;
 import de.quinscape.domainql.beans.DocumentedEnum;
-import de.quinscape.domainql.beans.SourceOne;
-import de.quinscape.domainql.docs.TypeDoc;
 import de.quinscape.domainql.testdomain.tables.pojos.Foo;
 import de.quinscape.domainql.util.Paged;
 import graphql.schema.DataFetchingEnvironment;
 
-import javax.validation.constraints.NotNull;
 import java.util.Collections;
 
 /**

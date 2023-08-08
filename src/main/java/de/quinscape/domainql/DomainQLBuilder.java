@@ -41,7 +41,7 @@ import org.svenson.info.JSONClassInfo;
 import org.svenson.info.JSONPropertyInfo;
 import org.svenson.tokenize.InputStreamSource;
 
-import javax.persistence.Column;
+import jakarta.persistence.Column;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -460,11 +460,11 @@ public class DomainQLBuilder
     /**
      * Adds a custom SQL type based on a sql table-like name and a POJO class.
      * <p>
-     * The POJO must have a {@link javax.persistence.Table} annotation defining the table-like and
-     * {@link javax.persistence.Table}
+     * The POJO must have a {@link jakarta.persistence.Table} annotation defining the table-like and
+     * {@link jakarta.persistence.Table}
      * annotations on the properties defining the column names.
      * <p>
-     * {@link javax.validation.constraints.NotNull} annotations can be used to mark non-null fields.
+     * {@link jakarta.validation.constraints.NotNull} annotations can be used to mark non-null fields.
      *
      * @param cls POJO type.
      *
@@ -472,7 +472,7 @@ public class DomainQLBuilder
      */
     public DomainQLBuilder objectType(Class<?> cls)
     {
-        final javax.persistence.Table anno = cls.getAnnotation(javax.persistence.Table.class);
+        final jakarta.persistence.Table anno = cls.getAnnotation(jakarta.persistence.Table.class);
         if (anno == null)
         {
             throw new DomainQLTypeException(

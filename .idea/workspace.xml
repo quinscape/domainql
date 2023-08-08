@@ -5,16 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="10e81f3e-9475-49dc-a250-d341e7899a2c" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQLBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQLBuilder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/preload/PreloadedGraphQLQueryProvider.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/preload/PreloadedQueries.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/preload/PreloadedQueriesConverter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/preload/PreloadedQuery.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/preload/PreloadedQueryException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/preload/package-info.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,20 +42,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/home/sven/ideaprojects/domainql",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "project.structure.last.edited": "Artifacts",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "spring.configuration.checksum": "88149c672798294491aeda0cd96e2195"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/sven/ideaprojects/pomver&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Artifacts&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;spring.configuration.checksum&quot;: &quot;88149c672798294491aeda0cd96e2195&quot;
   }
-}]]></component>
+}</component>
   <component name="PsiViewer.ProjectComponent">
     <option name="HIGHLIGHT" value="false" />
     <option name="FILTER_WHITESPACE" value="false" />
@@ -304,6 +296,14 @@
       <workItem from="1675452131854" duration="5502000" />
       <workItem from="1675535694258" duration="9296000" />
       <workItem from="1675702576887" duration="985000" />
+      <workItem from="1675951404539" duration="8000" />
+      <workItem from="1675964535093" duration="733000" />
+      <workItem from="1675968534725" duration="2557000" />
+      <workItem from="1676034605084" duration="2341000" />
+      <workItem from="1676586746863" duration="599000" />
+      <workItem from="1676677527805" duration="680000" />
+      <workItem from="1676687681307" duration="468000" />
+      <workItem from="1676915470213" duration="5599000" />
     </task>
     <servers />
   </component>

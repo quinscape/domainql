@@ -4,7 +4,7 @@ import de.quinscape.domainql.fetcher.FetcherContext;
 import de.quinscape.spring.jsview.util.JSONUtil;
 import org.svenson.JSONProperty;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.Set;
 
 /**

@@ -6,7 +6,7 @@ import org.jooq.Table;
 import org.jooq.TableField;
 import org.svenson.JSONProperty;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
 

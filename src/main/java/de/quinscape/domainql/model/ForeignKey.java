@@ -3,7 +3,7 @@ package de.quinscape.domainql.model;
 import org.svenson.JSONParameter;
 import org.svenson.JSONProperty;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 

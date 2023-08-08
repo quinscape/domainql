@@ -1,6 +1,6 @@
 package de.quinscape.domainql.beans;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Generic container test bean for direct inclusion of the generic T

@@ -6,7 +6,7 @@ import de.quinscape.domainql.beans.ComplexInput;
 import de.quinscape.domainql.beans.MyEnum;
 import de.quinscape.domainql.generic.DomainObject;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 @GraphQLLogic

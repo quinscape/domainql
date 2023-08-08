@@ -4,7 +4,7 @@
 
     <groupId>de.quinscape.domainql</groupId>
     <artifactId>domainql</artifactId>
-    <version>0.2.16-SNAPSHOT</version>
+    <version>0.3.1-SNAPSHOT</version>
 
     <name>DomainQL</name>
     <description>
@@ -50,26 +50,20 @@
         <dependency>
             <groupId>com.google.code.svenson</groupId>
             <artifactId>svenson</artifactId>
-            <version>1.5.12</version>
+            <version>1.6.1</version>
         </dependency>
 
         <!-- DATABASE DEPENDENCIES -->
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.4.1</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>jooq</artifactId>
-            <version>3.10.6</version>
+            <version>3.17.7</version>
         </dependency>
 
         <dependency>
             <groupId>org.jooq</groupId>
             <artifactId>jooq-codegen</artifactId>
-            <version>3.10.6</version>
+            <version>3.17.7</version>
         </dependency>
 
         <dependency>
@@ -77,19 +71,6 @@
             <artifactId>graphql-java</artifactId>
             <version>20.0</version>
         </dependency>
-
-        <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-            <version>2.0.1.Final</version>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.persistence</groupId>
-            <artifactId>javax.persistence-api</artifactId>
-            <version>2.2</version>
-        </dependency>
-
 
         <dependency>
             <groupId>org.atteo</groupId>
@@ -133,7 +114,7 @@
         <dependency>
             <groupId>de.quinscape</groupId>
             <artifactId>spring-jsview</artifactId>
-            <version>0.6</version>
+            <version>0.11</version>
         </dependency>
 
         <dependency>
@@ -182,7 +163,18 @@
             <artifactId>jcommander</artifactId>
             <version>1.72</version>
         </dependency>
-        
+
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
     </dependencies>
 
     <distributionManagement>
@@ -209,7 +201,7 @@
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.8</version>
+                <version>1.6.13</version>
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh-qs</serverId>
@@ -221,7 +213,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>3.2.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -235,7 +227,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.1</version>
+                <version>3.4.1</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -249,7 +241,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.6</version>
+                <version>3.0.1</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
@@ -273,7 +265,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.5</version>
+                <version>3.0.0-M7</version>
                 <configuration>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <useReleaseProfile>false</useReleaseProfile>
@@ -284,12 +276,16 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
+                <version>3.10.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
                     <compilerArgs>
                         <arg>-parameters</arg>
+                        <arg>--add-modules</arg>
+                        <arg>java.compiler</arg>
+                        <arg>--add-modules</arg>
+                        <arg>java.sql</arg>
                     </compilerArgs>
                 </configuration>
                 <executions>
@@ -300,8 +296,8 @@
                             <goal>testCompile</goal>
                         </goals>
                         <configuration>
-                            <source>1.8</source>
-                            <target>1.8</target>
+                            <source>${maven.compiler.source}</source>
+                            <target>${maven.compiler.target}</target>
                             <compilerArgs>
                                 <arg>-parameters</arg>
                             </compilerArgs>
@@ -323,7 +319,7 @@
                            Import the others manually from your distribution -->
                 <groupId>org.jooq</groupId>
                 <artifactId>jooq-codegen-maven</artifactId>
-                <version>3.10.6</version>
+                <version>3.17.7</version>
 
                 <!--
                     The generated classes are only used in tests.
@@ -350,7 +346,7 @@
                     <dependency>
                         <groupId>org.postgresql</groupId>
                         <artifactId>postgresql</artifactId>
-                        <version>42.4.1</version>
+                        <version>42.5.3</version>
                     </dependency>
                 </dependencies>
 
@@ -369,7 +365,7 @@
                     <!-- Generator parameters -->
                     <generator>
                         <database>
-                            <name>org.jooq.util.postgres.PostgresDatabase</name>
+                            <name>org.jooq.meta.postgres.PostgresDatabase</name>
                             <includes>.*</includes>
                             <excludes />
                             <!-- In case your database supports catalogs, e.g. SQL Server:
@@ -388,6 +384,7 @@
                             <validationAnnotations>true</validationAnnotations>
                             <jpaAnnotations>true</jpaAnnotations>
                             <springAnnotations>true</springAnnotations>
+                            <javaTimeTypes>false</javaTimeTypes>
                         </generate>
                         <strategy>
                             <name>

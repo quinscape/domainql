@@ -22,33 +22,33 @@ import java.util.Objects;
  * Postgresql jsonb binding for JOOQ
  */
 public final class PGJSONBinding
-    implements Binding<Object, JSONB>
+    implements Binding<org.jooq.JSONB, JSONB>
 {
 
     // The converter does all the work
     @Override
-    public Converter<Object, JSONB> converter()
+    public Converter<org.jooq.JSONB, JSONB> converter()
     {
-        return new Converter<Object, JSONB>()
+        return new Converter<org.jooq.JSONB, JSONB>()
         {
             @Override
-            public JSONB from(Object t)
+            public JSONB from(org.jooq.JSONB t)
             {
-                return JSONB.forValue((String) t);
+                return JSONB.forValue(t.data());
             }
 
 
             @Override
-            public Object to(JSONB u)
+            public org.jooq.JSONB to(JSONB u)
             {
-                return u.toJSON();
+                return org.jooq.JSONB.valueOf(u.toJSON());
             }
 
 
             @Override
-            public Class<Object> fromType()
+            public Class<org.jooq.JSONB> fromType()
             {
-                return Object.class;
+                return org.jooq.JSONB.class;
             }
 
 
@@ -98,7 +98,7 @@ public final class PGJSONBinding
     @Override
     public void get(BindingGetResultSetContext<JSONB> ctx) throws SQLException
     {
-        ctx.convert(converter()).value(ctx.resultSet().getString(ctx.index()));
+        ctx.convert(converter()).value(org.jooq.JSONB.valueOf(ctx.resultSet().getString(ctx.index())));
     }
 
 
@@ -106,7 +106,7 @@ public final class PGJSONBinding
     @Override
     public void get(BindingGetStatementContext<JSONB> ctx) throws SQLException
     {
-        ctx.convert(converter()).value(ctx.statement().getString(ctx.index()));
+        ctx.convert(converter()).value(org.jooq.JSONB.valueOf(ctx.statement().getString(ctx.index())));
     }
 
 

@@ -23,8 +23,8 @@ import org.apache.commons.io.FileUtils;
 import org.svenson.JSON;
 import org.svenson.JSONParser;
 import org.svenson.tokenize.InputStreamSource;
+import org.svenson.util.IntrospectionUtil;
 
-import java.beans.Introspector;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -178,17 +178,17 @@ public class DocsExtractor
                     final String methodJavaDoc = cleanDescription(javadoc.get().getDescription().toText());
                     if (methodName.startsWith("get") && params.size() == 0)
                     {
-                        final String propertyName = Introspector.decapitalize(methodName.substring(3));
+                        final String propertyName = IntrospectionUtil.decapitalize(methodName.substring(3));
                         fieldMap.put(propertyName, methodJavaDoc);
                     }
                     else if (methodName.startsWith("is") && params.size() == 0)
                     {
-                        final String propertyName = Introspector.decapitalize(methodName.substring(2));
+                        final String propertyName = IntrospectionUtil.decapitalize(methodName.substring(2));
                         fieldMap.put(propertyName, methodJavaDoc);
                     }
                     else if (methodName.startsWith("set") && method.getType().isVoidType())
                     {
-                        final String propertyName = Introspector.decapitalize(methodName.substring(3));
+                        final String propertyName = IntrospectionUtil.decapitalize(methodName.substring(3));
                         fieldMap.put(propertyName, methodJavaDoc);
                     }
                     else
