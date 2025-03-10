@@ -91,7 +91,7 @@ public class TimestampScalar
 
     public static String toISO8601(Timestamp dataFetcherResult)
     {
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         return df.format(dataFetcherResult);
     }
 
