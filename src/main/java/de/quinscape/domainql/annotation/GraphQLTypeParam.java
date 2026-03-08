@@ -30,4 +30,9 @@ public @interface GraphQLTypeParam
      */
     String namePattern() default "";
 
+    /**
+     * Pattern to create the concrete GraphQL types for this type parameter,
+     * @return name or empty
+     */
+    String typeNamePattern() default "";
 }

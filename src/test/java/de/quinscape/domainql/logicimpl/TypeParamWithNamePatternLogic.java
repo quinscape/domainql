@@ -4,6 +4,7 @@ import de.quinscape.domainql.annotation.GraphQLLogic;
 import de.quinscape.domainql.annotation.GraphQLQuery;
 import de.quinscape.domainql.annotation.GraphQLTypeParam;
 import de.quinscape.domainql.beans.ComplexInput;
+import de.quinscape.domainql.util.Paged;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,24 @@ public class TypeParamWithNamePatternLogic
         return null;
     }
 
+
+    @GraphQLQuery
+    public <T> Paged<T> q2(
+        @GraphQLTypeParam( types = { TypeA.class, TypeB.class }, typeNamePattern = "*Document") Class<T> cls,
+        String name
+    ) throws IllegalAccessException, InstantiationException
+    {
+        return null;
+    }
+
+    @GraphQLQuery
+    public <T> Paged<T> q3(
+        @GraphQLTypeParam( types = { TypeA.class, TypeB.class }, namePattern = "Q3*") Class<T> cls,
+        String name
+    ) throws IllegalAccessException, InstantiationException
+    {
+        return null;
+    }
 
     public final static class TypeA
     {

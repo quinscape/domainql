@@ -1009,17 +1009,42 @@ public class AnotherDomainQLTest
         final GraphQLSchema schema = domainQL
             .getGraphQLSchema();
 
-        //log.info(domainQL.getFieldLookup().toString());
+        log.info(new SchemaPrinter().print(schema));
 
         final GraphQLObjectType queryType = schema.getQueryType();
 
-        GraphQLFieldDefinition queryA = queryType.getFieldDefinition("TypeAQuery");
-        assertThat(queryA,is(notNullValue()));
-        assertThat(((GraphQLNamedType)queryA.getType()).getName(), is("TypeA"));
+        // named query based on input
+        {
 
-        GraphQLFieldDefinition queryB = queryType.getFieldDefinition("TypeBQuery");
-        assertThat(queryB,is(notNullValue()));
-        assertThat(((GraphQLNamedType)queryB.getType()).getName(), is("TypeB"));
+            GraphQLFieldDefinition queryA = queryType.getFieldDefinition("TypeAQuery");
+            assertThat(queryA, is(notNullValue()));
+            assertThat(((GraphQLNamedType) queryA.getType()).getName(), is("TypeA"));
+
+            GraphQLFieldDefinition queryB = queryType.getFieldDefinition("TypeBQuery");
+            assertThat(queryB, is(notNullValue()));
+            assertThat(((GraphQLNamedType) queryB.getType()).getName(), is("TypeB"));
+        }
+        // named output type
+        {
+
+            GraphQLFieldDefinition queryA = queryType.getFieldDefinition("q2TypeA");
+            assertThat(queryA, is(notNullValue()));
+            assertThat(((GraphQLNamedType) queryA.getType()).getName(), is("TypeADocument"));
+
+            GraphQLFieldDefinition queryB = queryType.getFieldDefinition("q2TypeB");
+            assertThat(queryB, is(notNullValue()));
+            assertThat(((GraphQLNamedType) queryB.getType()).getName(), is("TypeBDocument"));
+        }
+        // named output query
+        {
+            GraphQLFieldDefinition queryA = queryType.getFieldDefinition("Q3TypeA");
+            assertThat(queryA, is(notNullValue()));
+            assertThat(((GraphQLNamedType) queryA.getType()).getName(), is("PagedTypeA"));
+
+            GraphQLFieldDefinition queryB = queryType.getFieldDefinition("Q3TypeB");
+            assertThat(queryB, is(notNullValue()));
+            assertThat(((GraphQLNamedType) queryB.getType()).getName(), is("PagedTypeB"));
+        }
     }
 
 

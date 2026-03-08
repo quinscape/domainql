@@ -190,6 +190,11 @@ class LogicBeanAnalyzer
             {
                 throw new IllegalStateException(locationInfo + ": @GraphQLTypeParam: namePattern must contain a '*' wildcard");
             }
+            final String typeNamePattern = typeParamAnno.typeNamePattern();
+            if (!typeNamePattern.isEmpty() && !namePattern.contains(NAME_PATTERN_WILDCARD))
+            {
+                throw new IllegalStateException(locationInfo + ": @GraphQLTypeParam: namePattern must contain a '*' wildcard");
+            }
 
             for (Class typeParam : typeParamAnno.types())
             {
@@ -198,7 +203,7 @@ class LogicBeanAnalyzer
                 Map<String, Class<?>> map = new LinkedHashMap<>();
                 map.put(varName, typeParam);
 
-                final TypeContext newContext = new TypeContext(null, method.getReturnType(), map);
+                final TypeContext newContext = new TypeContext(null, method.getReturnType(), map, typeNamePattern);
                 final GraphQLOutputType outputType = getGraphQLOutputType(
                     locationInfo,
                     method.getReturnType(),
@@ -306,10 +311,15 @@ class LogicBeanAnalyzer
 
             final List<Mutation> list = new ArrayList<>();
 
-            final String namePattern = typeParamAnno.namePattern().length() == 0 ? methodName + NAME_PATTERN_WILDCARD : typeParamAnno.namePattern();
-            if (!namePattern.contains(NAME_PATTERN_WILDCARD))
+            final String queryNamePattern = typeParamAnno.namePattern().length() == 0 ? methodName + NAME_PATTERN_WILDCARD : typeParamAnno.namePattern();
+            if (!queryNamePattern.contains(NAME_PATTERN_WILDCARD))
             {
-                throw new IllegalStateException(locationInfo + ": @GraphQLTypeParam: namePattern must contain a '*' wildcard");
+                throw new IllegalStateException(locationInfo + ": @GraphQLTypeParam: namePattern() must contain a '*' wildcard");
+            }
+            final String typeNamePattern = typeParamAnno.typeNamePattern();
+            if (!typeNamePattern.isEmpty() && !typeNamePattern.contains(NAME_PATTERN_WILDCARD))
+            {
+                throw new IllegalStateException(locationInfo + ": @GraphQLTypeParam: typeNamePattern() must contain a '*' wildcard");
             }
 
             for (Class typeParam : typeParamAnno.types())
@@ -318,7 +328,7 @@ class LogicBeanAnalyzer
                 Map<String, Class<?>> map = new LinkedHashMap<>();
                 map.put(varName, typeParam);
 
-                final TypeContext newContext = new TypeContext(null, method.getReturnType(), map);
+                final TypeContext newContext = new TypeContext(null, method.getReturnType(), map, typeNamePattern);
                 final GraphQLOutputType outputType = getGraphQLOutputType(
                     locationInfo,
                     method.getReturnType(),
@@ -328,7 +338,7 @@ class LogicBeanAnalyzer
                 list.add(
                     new Mutation(
                         domainQL,
-                        namePattern.replace(NAME_PATTERN_WILDCARD, typeParam.getSimpleName()),
+                        queryNamePattern.replace(NAME_PATTERN_WILDCARD, typeParam.getSimpleName()),
                         mutationAnno.description(),
                         mutationAnno.full(),
                         logicBean,

@@ -1,6 +1,5 @@
 package de.quinscape.domainql;
 
-import com.google.common.collect.Maps;
 import de.quinscape.domainql.annotation.ResolvedGenericType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,11 +45,11 @@ public final class TypeContext
         this.parent = parent;
         this.type = type;
         typeMap = Collections.emptyMap();
-        typeName = buildTypeName(false);
+        typeName = buildTypeName(false, "");
     }
 
 
-    public TypeContext(TypeContext parent, Class<?> type, Map<String, Class<?>> typeMap)
+    public TypeContext(TypeContext parent, Class<?> type, Map<String, Class<?>> typeMap, String typeNamePattern)
     {
         this.parent = parent;
         this.typeMap = typeMap;
@@ -69,12 +68,12 @@ public final class TypeContext
             }
 
             this.type = typeMap.values().iterator().next();
-            typeName = buildTypeName(false);
+            typeName = buildTypeName(false, "");
         }
         else
         {
             this.type = type;
-            typeName = buildTypeName(true);
+            typeName = buildTypeName(true, typeNamePattern);
         }
 
     }
@@ -135,7 +134,7 @@ public final class TypeContext
         }
         else
         {
-            this.typeName = buildTypeName(degenerifyName);
+            this.typeName = buildTypeName(degenerifyName, "");
         }
     }
 
@@ -182,7 +181,7 @@ public final class TypeContext
     }
 
 
-    private String buildTypeName(boolean degenerifyName)
+    private String buildTypeName(boolean degenerifyName, String typeNamePattern)
     {
         if (!degenerifyName)
         {
@@ -190,14 +189,17 @@ public final class TypeContext
         }
 
         StringBuilder sb = new StringBuilder();
-        final String baseName = type.getSimpleName();
-        sb.append(baseName);
-
         for (Class<?> cls : typeMap.values())
         {
             sb.append(cls.getSimpleName());
         }
-        return sb.toString();
+
+        final String baseName = type.getSimpleName();
+        if (typeNamePattern.isEmpty())
+        {
+            return baseName + sb;
+        }
+        return typeNamePattern.replace("*", sb);
     }
 
     @Override
