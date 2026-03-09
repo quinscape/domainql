@@ -27,7 +27,7 @@ public final class JSONBScalar
         return GraphQLScalarType.newScalar()
             .name("JSONB")
             .description("Postgresql jsonb type equivalent")
-            .coercing(new BigIntegerScalar.Coercing())
+            .coercing(new Coercing())
             .build();
     }
 
