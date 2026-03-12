@@ -14,6 +14,7 @@ import de.quinscape.domainql.param.ParameterProviderFactory;
 import graphql.Scalars;
 import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLList;
+import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLTypeReference;
@@ -103,6 +104,7 @@ class LogicBeanAnalyzer
             final Class<?>[] parameterTypes = method.getParameterTypes();
 
             final GraphQLQuery queryAnno = method.getDeclaredAnnotation(GraphQLQuery.class);
+            final boolean isNotNull = method.getDeclaredAnnotation(NotNull.class) != null;
 
             final String locationInfo = logicBean.getClass().getName() + ":" + methodName;
             if (queryAnno != null)
@@ -115,7 +117,8 @@ class LogicBeanAnalyzer
                         methodName,
                         parameterTypes,
                         queryAnno,
-                        locationInfo
+                        locationInfo,
+                        isNotNull
                     )
                 );
             }
@@ -147,7 +150,8 @@ class LogicBeanAnalyzer
         String methodName,
         Class<?>[] parameterTypes,
         GraphQLQuery queryAnno,
-        String locationInfo
+        String locationInfo,
+        boolean isNotNull
     )
     {
         final String name = queryAnno.value().length() > 0 ? queryAnno.value() : methodName;
@@ -210,6 +214,11 @@ class LogicBeanAnalyzer
                     null,
                     newContext
                 );
+                GraphQLOutputType modifiedType = queryAnno.full() ? Scalars.GraphQLBoolean : outputType;
+                if (isNotNull)
+                {
+                    modifiedType = new GraphQLNonNull(modifiedType);
+                }
                 list.add(
                     new Query(
                         domainQL,
@@ -220,7 +229,7 @@ class LogicBeanAnalyzer
                         methodAccess,
                         methodIndex,
                         parameterProviders,
-                        queryAnno.full() ? Scalars.GraphQLBoolean : outputType,
+                        modifiedType,
                         newContext,
                         methodName
                     )

@@ -34,6 +34,7 @@ import de.quinscape.domainql.logicimpl.LogicWithWrongInjection;
 import de.quinscape.domainql.logicimpl.LogicWithWrongInjection2;
 import de.quinscape.domainql.logicimpl.MinimalLogic;
 import de.quinscape.domainql.logicimpl.NoMirrorLogic;
+import de.quinscape.domainql.logicimpl.NotNullQueryLogic;
 import de.quinscape.domainql.logicimpl.OutputTypeOverrideByParamLogic;
 import de.quinscape.domainql.logicimpl.SumPerMonthLogic;
 import de.quinscape.domainql.logicimpl.TestLogic;
@@ -1009,7 +1010,7 @@ public class AnotherDomainQLTest
         final GraphQLSchema schema = domainQL
             .getGraphQLSchema();
 
-        log.info(new SchemaPrinter().print(schema));
+        //log.info(new SchemaPrinter().print(schema));
 
         final GraphQLObjectType queryType = schema.getQueryType();
 
@@ -1045,6 +1046,30 @@ public class AnotherDomainQLTest
             assertThat(queryB, is(notNullValue()));
             assertThat(((GraphQLNamedType) queryB.getType()).getName(), is("PagedTypeB"));
         }
+    }
+
+    @Test
+    public void testNotNullQuery()
+    {
+        final DomainQL domainQL = DomainQL.newDomainQL(null)
+            .objectTypes(Public.PUBLIC)
+            .logicBeans(Collections.singleton(new NotNullQueryLogic()))
+            .build();
+        final GraphQLSchema schema = domainQL
+            .getGraphQLSchema();
+
+        //log.info(new SchemaPrinter().print(schema));
+
+        final GraphQLObjectType queryType = schema.getQueryType();
+
+        GraphQLFieldDefinition queryA = queryType.getFieldDefinition("queryTypeA");
+        assertThat(queryA, is(notNullValue()));
+        assertThat(GraphQLTypeUtil.isNonNull(queryA.getType()), is(true));
+        assertThat((((GraphQLNamedType)GraphQLTypeUtil.unwrapNonNull(queryA.getType()))).getName(), is("TypeADocument"));
+
+        GraphQLFieldDefinition queryB = queryType.getFieldDefinition("queryTypeB");
+        assertThat(GraphQLTypeUtil.isNonNull(queryB.getType()), is(true));
+        assertThat((((GraphQLNamedType)GraphQLTypeUtil.unwrapNonNull(queryB.getType()))).getName(), is("TypeBDocument"));
     }
 
 
