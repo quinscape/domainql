@@ -5,8 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="10e81f3e-9475-49dc-a250-d341e7899a2c" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/LogicBeanAnalyzer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/LogicBeanAnalyzer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/docs/DocsExtractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/docs/DocsExtractor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/logic/DomainQLDataFetchingEnvironment.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/de/quinscape/domainql/logic/DomainQLDataFetchingEnvironment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/AnotherDomainQLTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/AnotherDomainQLTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/docs/DocsExtractorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/docs/DocsExtractorTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/logicimpl/NotNullQueryLogic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/de/quinscape/domainql/logicimpl/NotNullQueryLogic.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,27 +39,44 @@
       <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
     </file-type-list>
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$MAVEN_REPOSITORY$/org/jooq/jooq/3.17.7/jooq-3.17.7-sources.jar!/org/jooq/Binding.java" root0="SKIP_INSPECTION" />
+  </component>
+  <component name="MacroExpansionManager">
+    <option name="directoryName" value="QkQNKG62" />
+  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
   <component name="ProjectId" id="1TI7qk0jnO2D7FtCM6mdOeZNhk1" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;JUnit.All in domainql.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AnotherDomainQLTest.testNotNullQuery.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AnotherDomainQLTest.testTypeParameterWithPattern.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/sven/ideaprojects/pomver&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/sven/ideaprojects/domainql&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon&quot;: &quot;&quot;,
     &quot;project.structure.last.edited&quot;: &quot;Artifacts&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;spring.configuration.checksum&quot;: &quot;88149c672798294491aeda0cd96e2195&quot;
+    &quot;spring.configuration.checksum&quot;: &quot;88149c672798294491aeda0cd96e2195&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
   <component name="PsiViewer.ProjectComponent">
@@ -95,14 +118,14 @@
       <recent name="de.quinscape.domainql.meta" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="de.quinscape.domainql.logicimpl" />
       <recent name="de.quinscape.domainql.scalar" />
       <recent name="de.quinscape.domainql.beans" />
-      <recent name="de.quinscape.domainql.logicimpl" />
       <recent name="de.quinscape.domainql.annotation" />
       <recent name="de.quinscape.specrunner.runtime" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.All in domainql">
+  <component name="RunManager" selected="JUnit.AnotherDomainQLTest.testNotNullQuery">
     <configuration default="true" type="Applet">
       <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
       <method v="2">
@@ -112,6 +135,15 @@
     <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
       <Host>localhost</Host>
       <Port>5050</Port>
+    </configuration>
+    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType">
+      <module name="" />
+      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
+      <option name="PROGRAM_PARAMETERS" />
+      <predefined_log_file enabled="true" id="idea.log" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
@@ -123,6 +155,26 @@
       <module name="domainql" />
       <option name="PACKAGE_NAME" value="" />
       <option name="TEST_OBJECT" value="package" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="moduleWithDependencies" />
+      </option>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="AnotherDomainQLTest.testNotNullQuery" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="domainql" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="de.quinscape.domainql.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="de.quinscape.domainql" />
+      <option name="MAIN_CLASS_NAME" value="de.quinscape.domainql.AnotherDomainQLTest" />
+      <option name="METHOD_NAME" value="testNotNullQuery" />
+      <option name="TEST_OBJECT" value="method" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="TEST_SEARCH_SCOPE">
         <value defaultName="moduleWithDependencies" />
@@ -145,11 +197,18 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="DomainQLMetaTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="AnotherDomainQLTest.testTypeParameterWithPattern" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="domainql" />
-      <option name="PACKAGE_NAME" value="de.quinscape.domainql.meta" />
-      <option name="MAIN_CLASS_NAME" value="de.quinscape.domainql.meta.DomainQLMetaTest" />
-      <option name="TEST_OBJECT" value="class" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="de.quinscape.domainql.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="de.quinscape.domainql" />
+      <option name="MAIN_CLASS_NAME" value="de.quinscape.domainql.AnotherDomainQLTest" />
+      <option name="METHOD_NAME" value="testTypeParameterWithPattern" />
+      <option name="TEST_OBJECT" value="method" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="TEST_SEARCH_SCOPE">
         <value defaultName="moduleWithDependencies" />
@@ -163,20 +222,6 @@
       <option name="PACKAGE_NAME" value="de.quinscape.domainql.schema" />
       <option name="MAIN_CLASS_NAME" value="de.quinscape.domainql.schema.SchemaDataProviderTest" />
       <option name="TEST_OBJECT" value="class" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="moduleWithDependencies" />
-      </option>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="SchemaDataProviderTest.testSchemaProviding" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="domainql" />
-      <option name="PACKAGE_NAME" value="de.quinscape.domainql.schema" />
-      <option name="MAIN_CLASS_NAME" value="de.quinscape.domainql.schema.SchemaDataProviderTest" />
-      <option name="METHOD_NAME" value="testSchemaProviding" />
-      <option name="TEST_OBJECT" value="method" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="TEST_SEARCH_SCOPE">
         <value defaultName="moduleWithDependencies" />
@@ -207,31 +252,30 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType">
-      <module name="" />
-      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
-      <option name="PROGRAM_PARAMETERS" />
-      <predefined_log_file enabled="true" id="idea.log" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <list>
-      <item itemvalue="JUnit.DomainQLMetaTest" />
+      <item itemvalue="JUnit.AnotherDomainQLTest.testNotNullQuery" />
+      <item itemvalue="JUnit.AnotherDomainQLTest.testTypeParameterWithPattern" />
       <item itemvalue="JUnit.All in domainql" />
       <item itemvalue="JUnit.SchemaDataProviderTest" />
-      <item itemvalue="JUnit.SchemaDataProviderTest.testSchemaProviding" />
       <item itemvalue="JUnit.AnotherDomainQLTest.testOutputTypeOverride" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.AnotherDomainQLTest.testNotNullQuery" />
         <item itemvalue="JUnit.All in domainql" />
+        <item itemvalue="JUnit.AnotherDomainQLTest.testTypeParameterWithPattern" />
         <item itemvalue="JUnit.AnotherDomainQLTest.testOutputTypeOverride" />
         <item itemvalue="JUnit.SchemaDataProviderTest" />
-        <item itemvalue="JUnit.SchemaDataProviderTest.testSchemaProviding" />
-        <item itemvalue="JUnit.DomainQLMetaTest" />
       </list>
     </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.29188.72" />
+        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-IU-251.29188.72" />
+      </set>
+    </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="project-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
@@ -304,6 +348,29 @@
       <workItem from="1676677527805" duration="680000" />
       <workItem from="1676687681307" duration="468000" />
       <workItem from="1676915470213" duration="5599000" />
+      <workItem from="1679228395564" duration="22000" />
+      <workItem from="1680697621081" duration="640000" />
+      <workItem from="1738349196684" duration="1034000" />
+      <workItem from="1738406880098" duration="8000" />
+      <workItem from="1738590752176" duration="54000" />
+      <workItem from="1738590847623" duration="1189000" />
+      <workItem from="1772990807341" duration="5502000" />
+      <workItem from="1772999197622" duration="64000" />
+      <workItem from="1773065236589" duration="1012000" />
+      <workItem from="1773068633738" duration="647000" />
+      <workItem from="1773179028302" duration="716000" />
+      <workItem from="1773283483365" duration="491000" />
+      <workItem from="1773318932801" duration="617000" />
+      <workItem from="1773323699562" duration="15000" />
+      <workItem from="1773323841537" duration="655000" />
+      <workItem from="1773328794306" duration="2727000" />
+      <workItem from="1773342253901" duration="20000" />
+      <workItem from="1774963400842" duration="773000" />
+      <workItem from="1775567145375" duration="8000" />
+      <workItem from="1776416678430" duration="102000" />
+      <workItem from="1788181872602" duration="5809000" />
+      <workItem from="1788295412531" duration="412000" />
+      <workItem from="1788545687247" duration="75000" />
     </task>
     <servers />
   </component>
@@ -356,13 +423,8 @@
           <option name="timeStamp" value="12" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/DomainQL.java</url>
-          <line>462</line>
-          <option name="timeStamp" value="15" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/TypeContext.java</url>
-          <line>184</line>
+          <line>183</line>
           <option name="timeStamp" value="22" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -382,7 +444,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/de/quinscape/domainql/LogicBeanAnalyzer.java</url>
-          <line>387</line>
+          <line>424</line>
           <option name="timeStamp" value="38" />
         </line-breakpoint>
       </breakpoints>
