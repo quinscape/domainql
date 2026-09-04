@@ -244,7 +244,7 @@ public class DomainQLDataFetchingEnvironment
         return env.getVariables();
     }
 
-    /// DOMAINQL SPECIFIC METHODS
+    // DOMAINQL SPECIFIC METHODS
 
 
     public DomainQL getDomainQL()

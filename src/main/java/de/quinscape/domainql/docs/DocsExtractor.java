@@ -530,7 +530,7 @@ public class DocsExtractor
     }
 
 
-    /// COMMAND LINE USAGE
+    // COMMAND LINE USAGE
     @com.beust.jcommander.Parameter(names = {"-s", "--sourceRoot"}, description = "Source root directory", required =
         true)
     public String sourceRoot;
