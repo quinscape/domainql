@@ -1,9 +1,10 @@
 package de.quinscape.domainql.logicimpl;
 
 import de.quinscape.domainql.annotation.GraphQLLogic;
+import de.quinscape.domainql.annotation.GraphQLMutation;
 import de.quinscape.domainql.annotation.GraphQLQuery;
 import de.quinscape.domainql.annotation.GraphQLTypeParam;
-import de.quinscape.domainql.beans.ComplexInput;
+import de.quinscape.domainql.beans.Payload;
 import de.quinscape.domainql.util.Paged;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
@@ -24,6 +25,30 @@ public class NotNullQueryLogic
         return new Paged<>();
     }
 
+    @GraphQLQuery
+    public <T> @NotNull Payload q2(
+        String name
+    )
+    {
+        return new Payload();
+    }
+
+    @GraphQLMutation
+    public <T> @NotNull Paged<T> mutation(
+        @GraphQLTypeParam( types = { TypeA.class, TypeB.class }, typeNamePattern = "*Document") Class<T> cls,
+        String name
+    ) throws IllegalAccessException, InstantiationException
+    {
+        return new Paged<>();
+    }
+
+    @GraphQLMutation
+    public <T> @NotNull Payload m2(
+        String name
+    )
+    {
+        return new Payload();
+    }
 
     public final static class TypeA
     {

@@ -1058,9 +1058,10 @@ public class AnotherDomainQLTest
         final GraphQLSchema schema = domainQL
             .getGraphQLSchema();
 
-        //log.info(new SchemaPrinter().print(schema));
+        log.info(new SchemaPrinter().print(schema));
 
         final GraphQLObjectType queryType = schema.getQueryType();
+        final GraphQLObjectType mutationType = schema.getMutationType();
 
         GraphQLFieldDefinition queryA = queryType.getFieldDefinition("queryTypeA");
         assertThat(queryA, is(notNullValue()));
@@ -1070,6 +1071,24 @@ public class AnotherDomainQLTest
         GraphQLFieldDefinition queryB = queryType.getFieldDefinition("queryTypeB");
         assertThat(GraphQLTypeUtil.isNonNull(queryB.getType()), is(true));
         assertThat((((GraphQLNamedType)GraphQLTypeUtil.unwrapNonNull(queryB.getType()))).getName(), is("TypeBDocument"));
+
+        GraphQLFieldDefinition mutationA = mutationType.getFieldDefinition("mutationTypeA");
+        assertThat(mutationA, is(notNullValue()));
+        assertThat(GraphQLTypeUtil.isNonNull(mutationA.getType()), is(true));
+        assertThat((((GraphQLNamedType)GraphQLTypeUtil.unwrapNonNull(mutationA.getType()))).getName(), is("TypeADocument"));
+
+        GraphQLFieldDefinition mutationB = mutationType.getFieldDefinition("mutationTypeB");
+        assertThat(GraphQLTypeUtil.isNonNull(mutationB.getType()), is(true));
+        assertThat((((GraphQLNamedType)GraphQLTypeUtil.unwrapNonNull(mutationB.getType()))).getName(), is("TypeBDocument"));
+
+        GraphQLFieldDefinition q2 = queryType.getFieldDefinition("q2");
+        assertThat(q2, is(notNullValue()));
+        assertThat(GraphQLTypeUtil.isNonNull(queryA.getType()), is(true));
+
+        GraphQLFieldDefinition m2 = mutationType.getFieldDefinition("m2");
+        assertThat(m2, is(notNullValue()));
+        assertThat(GraphQLTypeUtil.isNonNull(queryA.getType()), is(true));
+
     }
 
 

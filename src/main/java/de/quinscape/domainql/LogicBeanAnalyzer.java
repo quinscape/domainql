@@ -104,7 +104,7 @@ class LogicBeanAnalyzer
             final Class<?>[] parameterTypes = method.getParameterTypes();
 
             final GraphQLQuery queryAnno = method.getDeclaredAnnotation(GraphQLQuery.class);
-            final boolean isNotNull = method.getDeclaredAnnotation(NotNull.class) != null;
+            final boolean isNotNullQuery = method.getDeclaredAnnotation(NotNull.class) != null;
 
             final String locationInfo = logicBean.getClass().getName() + ":" + methodName;
             if (queryAnno != null)
@@ -118,12 +118,13 @@ class LogicBeanAnalyzer
                         parameterTypes,
                         queryAnno,
                         locationInfo,
-                        isNotNull
+                        isNotNullQuery
                     )
                 );
             }
 
             final GraphQLMutation mutationAnno = method.getDeclaredAnnotation(GraphQLMutation.class);
+            final boolean isNotNullMutation = method.getAnnotation(NotNull.class) != null;
             if (mutationAnno != null)
             {
                 mutations.addAll(
@@ -134,7 +135,8 @@ class LogicBeanAnalyzer
                         methodName,
                         parameterTypes,
                         locationInfo,
-                        mutationAnno
+                        mutationAnno,
+                        isNotNullMutation
                     )
                 );
             }
@@ -239,7 +241,11 @@ class LogicBeanAnalyzer
         }
         else
         {
-            final GraphQLOutputType resultType = getGraphQLOutputType(locationInfo, method);
+            GraphQLOutputType modifiedType  = queryAnno.full() ? Scalars.GraphQLBoolean : getGraphQLOutputType(locationInfo, method);
+            if (isNotNull)
+            {
+                modifiedType = new GraphQLNonNull(modifiedType);
+            }
 
             return Collections.singletonList(
                 new Query(
@@ -251,7 +257,7 @@ class LogicBeanAnalyzer
                     methodAccess,
                     methodIndex,
                     parameterProviders,
-                    queryAnno.full() ? Scalars.GraphQLBoolean : resultType,
+                    modifiedType,
                     null,
                     null
                 )
@@ -282,7 +288,8 @@ class LogicBeanAnalyzer
         String methodName,
         Class<?>[] parameterTypes,
         String locationInfo,
-        GraphQLMutation mutationAnno
+        GraphQLMutation mutationAnno,
+        boolean isNotNull
     )
     {
         final String name = mutationAnno.value().length() > 0 ? mutationAnno.value() : methodName;
@@ -344,6 +351,11 @@ class LogicBeanAnalyzer
                     null,
                     newContext
                 );
+                GraphQLOutputType modifiedType = mutationAnno.full() ? Scalars.GraphQLBoolean : outputType;
+                if (isNotNull)
+                {
+                    modifiedType = new GraphQLNonNull(modifiedType);
+                }
                 list.add(
                     new Mutation(
                         domainQL,
@@ -354,7 +366,7 @@ class LogicBeanAnalyzer
                         methodAccess,
                         methodIndex,
                         parameterProviders,
-                        mutationAnno.full() ? Scalars.GraphQLBoolean : outputType,
+                        modifiedType,
                         newContext,
                         methodName
                     )
@@ -366,6 +378,12 @@ class LogicBeanAnalyzer
         {
             final GraphQLOutputType resultType = getGraphQLOutputType(locationInfo, method);
 
+            GraphQLOutputType modifiedType = mutationAnno.full() ? Scalars.GraphQLBoolean : resultType;
+            if (isNotNull)
+            {
+                modifiedType = new GraphQLNonNull(modifiedType);
+            }
+
             return Collections.singletonList(
                 new Mutation(
                     domainQL,
@@ -376,7 +394,7 @@ class LogicBeanAnalyzer
                     methodAccess,
                     methodIndex,
                     parameterProviders,
-                    mutationAnno.full() ? Scalars.GraphQLBoolean : resultType,
+                    modifiedType,
                     null,
                     null
                 )
