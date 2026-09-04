@@ -14,7 +14,7 @@ public enum DocumentedEnum
      */
     BBB,
     /**
-     * Option C
+     * Option C, see {@link DocumentedBean}
      */
     CCC
 }

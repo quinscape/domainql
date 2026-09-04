@@ -154,7 +154,9 @@ public class DocsExtractor
             {
                 if (decl.getJavadoc().isPresent())
                 {
-                    final String description = decl.getJavadoc().get().getDescription().toText();
+                    final String description = cleanDescription(
+                        decl.getJavadoc().get().getDescription().toText()
+                    );
 
                     fieldDocs.add(
                         new FieldDoc(decl.getName().getIdentifier(), description)

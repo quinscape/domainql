@@ -76,7 +76,8 @@ public class DomainQLTypeDocTest
 
         assertThat(enumType.getValue("AAA").getDescription(), is("Option A"));
         assertThat(enumType.getValue("BBB").getDescription(), is("Option B"));
-        assertThat(enumType.getValue("CCC").getDescription(), is("Option C"));
+        // {@link ... } are stripped from enum value descriptions, too
+        assertThat(enumType.getValue("CCC").getDescription(), is("Option C, see DocumentedBean"));
 
         // test optional JOOQ documentation by JSON data
         final GraphQLObjectType jooqType = (GraphQLObjectType) graphQLSchema.getType("SourceFour");
